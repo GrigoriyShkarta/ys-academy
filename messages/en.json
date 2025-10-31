@@ -1,0 +1,123 @@
+{
+  "Auth": {
+    "login": "Login",
+    "enter_credentials": "Enter your credentials",
+    "email": "Email",
+    "password": "Password",
+    "sign_in": "Sign In",
+    "logging_in": "Signing in...",
+    "professional_vocal_education": "Professional vocal education",
+    "all_rights_reserved": "All rights reserved",
+
+    "validation": {
+      "invalid_email_or_password": "Invalid email or password",
+      "required_field": "Required field",
+      "invalid_email": "Invalid email address"
+    }
+  },
+
+  "SideBar": {
+    "students_database": "Students database",
+    "my_courses": "My courses",
+    "my_materials": "My materials",
+    "change_theme": "Change theme",
+    "logout": "Logout",
+    "audio_bank": "Audio bank",
+    "photo_bank": "Photo bank",
+    "video_bank": "Video bank",
+    "text_bank": "Text bank",
+    "lessons": "Lessons",
+    "modules": "Modules"
+  },
+
+  "Students": {
+    "create_student": "Create student",
+    "creating_student": "Creating student",
+    "fill_student_info": "Fill in the student information to add to the database.",
+    "name": "First and Last Name",
+    "email": "Email",
+    "password": "Password",
+    "generate": "Generate",
+    "cancel": "Cancel",
+    "create": "Create"
+  },
+
+  "Materials": {
+    "addAudio": "Add audio",
+    "editAudio": "Edit audio",
+    "addAudioFile": "Add audio file",
+    "title": "Title",
+    "enterTitle": "Enter title",
+    "file": "File",
+    "dragOrClick": "Drag and drop your audio file here or click to select",
+    "add": "Add",
+    "cancel": "Cancel",
+    "uploading": "Uploading",
+    "submeeting": "Submeeting",
+    "mp3_or_wav": "MP3 or WAV",
+    "edit": "Edit",
+    "addPhoto": "Add image",
+    "editPhoto": "Edit image",
+    "jpeg_or_png": "JPEG or PNG",
+    "addVideo": "Add video",
+    "edit_video": "Edit video",
+    "url": "YouTube link",
+    "enterUrl": "Enter YouTube link",
+    "audio": "Audio",
+    "addText": "Add text",
+    "editText": "Edit text",
+    "text": "Text",
+    "createLesson": "Create lesson",
+    "save": "Save",
+    "addBlock": "Add block",
+    "take_from_text_bank": "Take from text bank",
+    "add_text": "Add text",
+    "take_from_audio_bank": "Take from audio bank",
+    "add_audio_from_device": "Add audio from device",
+    "take_from_photo_bank": "Take from photo bank",
+    "add_photo_from_device": "Add photo from device",
+    "take_from_video_bank": "Take from video bank",
+    "add_video_from_device": "Add video from device",
+    "preview": "Preview",
+    "close_preview": "Close preview",
+    "lesson_title": "Lesson title",
+    "back": "Back",
+    "delete": "Delete",
+    "my_lessons": "My lessons",
+    "my_modules": "My modules",
+    "create_module": "Create module",
+    "module_title": "Module title",
+    "wrapper": "Wrapper",
+    "lessons_list": "Lessons list",
+    "name": "Name",
+    "enter_name": "Enter name",
+    "add_lesson": "Add lesson",
+    "edit_module": "Edit module",
+    "lessons": "Lessons",
+    "no_lessons_yet": "No lessons yet"
+  },
+
+  "Validation": {
+    "invalid_email_or_password": "Invalid email or password",
+    "invalid_file_type": "Invalid file type",
+    "required_field": "Required field",
+    "invalid_email": "Invalid email address",
+    "invalid_youtube_url": "Invalid YouTube URL",
+    "video_not_found": "Video not found"
+  },
+
+  "Common": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm_action": "Confirm action",
+    "send": "Send",
+    "cancel": "Cancel",
+    "sending": "Sending",
+    "search": "Search...",
+    "select_all": "Select all",
+    "back": "Back",
+    "page": "Page",
+    "of": "of",
+    "forward": "Forward"
+  }
+}

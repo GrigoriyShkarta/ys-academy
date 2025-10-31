@@ -1,0 +1,128 @@
+{
+  "Auth": {
+    "login": "Вхід в систему",
+    "enter_credentials": "Введіть ваші облікові дані",
+    "email": "Електронна пошта",
+    "password": "Пароль",
+    "sign_in": "Увійти",
+    "logging_in": "Вхід...",
+    "professional_vocal_education": "Професійна вокальна освіта",
+    "all_rights_reserved": "Усі права захищені",
+
+    "validation": {
+      "invalid_email_or_password": "Невірний email або пароль",
+      "required_field": "Обов’язкове поле",
+      "invalid_email": "Некоректна адреса електронної пошти"
+    }
+  },
+
+  "SideBar": {
+    "students_database": "База учнів",
+    "my_courses": "Мої курси",
+    "my_materials": "Мої матеріали",
+    "change_theme": "Змінити тему",
+    "logout": "Вийти",
+    "audio_bank": "Аудіо банк",
+    "photo_bank": "Фото банк",
+    "video_bank": "Відео банк",
+    "text_bank": "Текстовий банк",
+    "lessons": "Уроки",
+    "modules": "Модулі"
+  },
+
+  "Students": {
+    "create_student": "Створити учня",
+    "creating_student": "Створення учня",
+    "fill_student_info": "Заповніть інформацію про учня для додавання до бази.",
+    "name": "Ім’я та Прізвище",
+    "email": "Електронна пошта",
+    "password": "Пароль",
+    "generate": "Згенерувати",
+    "cancel": "Скасувати",
+    "create": "Створити",
+
+    "validation": {
+      "required_field": "Обов’язкове поле",
+      "invalid_email": "Некоректна адреса електронної пошти"
+    }
+  },
+
+  "Materials": {
+    "addAudio": "Додати аудіо",
+    "editAudio": "Редагувати аудіо",
+    "addAudioFile": "Додати аудіофайл",
+    "title": "Назва",
+    "enterTitle": "Введіть назву",
+    "file": "Файл",
+    "dragOrClick": "Перетягніть аудіофайл сюди або натисніть, щоб вибрати",
+    "add": "Додати",
+    "cancel": "Скасувати",
+    "uploading": "Завантаження",
+    "submeeting": "Відправка",
+    "mp3_or_wav": "MP3 або WAV",
+    "edit": "Редагувати",
+    "addPhoto": "Додати зображення",
+    "editPhoto": "Редагувати зображення",
+    "jpeg_or_png": "JPEG або PNG",
+    "addVideo": "Додати відео",
+    "edit_video": "Редагувати відео",
+    "url": "Посилання на YouTube",
+    "enterUrl": "Введіть посилання на YouTube",
+    "audio": "Аудіо",
+    "addText": "Додати текст",
+    "editText": "Редагувати текст",
+    "text": "Текст",
+    "createLesson": "Створити урок",
+    "save": "Зберегти",
+    "addBlock": "Додати блок",
+    "take_from_text_bank": "Взяти з текстового банку",
+    "add_text": "Додати текст",
+    "take_from_audio_bank": "Взяти з аудіобанку",
+    "add_audio_from_device": "Додати аудіо з пристрою",
+    "take_from_photo_bank": "Взяти з фотобанку",
+    "add_photo_from_device": "Додати фото з пристрою",
+    "take_from_video_bank": "Взяти з відеобанку",
+    "add_video_from_device": "Додати відео з пристрою",
+    "preview": "Прев’ю",
+    "close_preview": "Закрити прев’ю",
+    "lesson_title": "Назва уроку",
+    "back": "Назад",
+    "delete": "Видалити",
+    "my_lessons": "Мої уроки",
+    "my_modules": "Мої модулі",
+    "create_module": "Створити модуль",
+    "module_title": "Назва модуля",
+    "wrapper": "Обгортка",
+    "lessons_list": "Список уроків",
+    "name": "Назва",
+    "enter_name": "Введіть назву",
+    "add_lesson": "Додати урок",
+    "edit_module": "Редагувати модуль",
+    "lessons": "Уроки",
+    "no_lessons_yet": "Поки немає уроків"
+  },
+
+  "Validation": {
+    "invalid_email_or_password": "Невірний email або пароль",
+    "invalid_file_type": "Недопустимий тип файлу",
+    "required_field": "Обов’язкове поле",
+    "invalid_email": "Некоректна адреса електронної пошти",
+    "invalid_youtube_url": "Недійсне посилання YouTube",
+    "video_not_found": "Відео не знайдено"
+  },
+
+  "Common": {
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "confirm_action": "Підтвердіть дію",
+    "send": "Відправити",
+    "cancel": "Скасувати",
+    "sending": "Відправка",
+    "search": "Пошук...",
+    "select_all": "Вибрати все",
+    "back": "Назад",
+    "page": "Сторінка",
+    "of": "з",
+    "forward": "Вперед"
+  }
+}
