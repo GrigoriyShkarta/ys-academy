@@ -14,7 +14,7 @@ export default function ModuleList({ modules }: Props) {
           key={module.id}
           className="rounded-lg overflow-hidden border hover:shadow-md transition"
         >
-          <Image src={module?.img ?? logo} height={48} alt={module.title} className="w-full" />
+          <Image src={module?.url ?? logo} height={48} alt={module.title} className="w-full" />
         </div>
       ))}
     </div>
