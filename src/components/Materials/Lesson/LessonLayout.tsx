@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteLesson, getLesson, updateLesson } from '@/components/Materials/Lesson/action';
 import Loader from '@/common/Loader';
-import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
+import type { Layout } from 'react-grid-layout';
+import dynamic from 'next/dynamic';
 import { BlockItem } from '@/components/Materials/Lesson/components/BlockItem';
 import { LessonBlockType, LessonItem } from '@/components/Materials/utils/interfaces';
 import { ChevronLeft } from 'lucide-react';
@@ -14,7 +15,10 @@ import { Button } from '@/components/ui/button';
 import { LessonBlock } from '@/components/Materials/Lesson/components/LessonBlock';
 import { Input } from '@/components/ui/input';
 
-const ResponsiveGridLayout = WidthProvider(Responsive);
+const ResponsiveGridLayout = dynamic(
+  () => import('react-grid-layout').then(mod => mod.WidthProvider(mod.Responsive)),
+  { ssr: false }
+);
 
 interface LayoutsByBlockId {
   [key: number]: Layout[];

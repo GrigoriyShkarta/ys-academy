@@ -1,7 +1,10 @@
+'use client';
+
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
+import dynamic from 'next/dynamic';
 import {
   Dialog,
   DialogContent,
@@ -20,8 +23,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+// Загружаем стили редактора только на клиенте
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - динамический импорт стилей
+  import('react-quill-new/dist/quill.snow.css');
+}
 import { FormFooter } from '@/common/ModalFooter';
 import { ContentFormValues, contentSchema } from '@/components/Materials/utils/materialSchemas';
 import { IText } from '@/components/Materials/utils/interfaces';

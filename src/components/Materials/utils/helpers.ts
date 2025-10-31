@@ -33,6 +33,11 @@ export const getVideoDimensions = (url: string): Promise<{ width: number; height
       return;
     }
 
+    if (typeof document === 'undefined') {
+      // SSR: возвращаем дефолтные размеры 16:9
+      resolve({ width: 1280, height: 720 });
+      return;
+    }
     const video = document.createElement('video');
     video.src = url;
     video.crossOrigin = 'anonymous';
@@ -74,6 +79,11 @@ export const getVideoDimensionsFromFile = (
   file: File
 ): Promise<{ width: number; height: number }> => {
   return new Promise((resolve, reject) => {
+    if (typeof document === 'undefined') {
+      // SSR: невозможно считать метаданные файла — возвращаем разумные значения
+      resolve({ width: 1280, height: 720 });
+      return;
+    }
     const video = document.createElement('video');
     const objectUrl = URL.createObjectURL(file);
     video.src = objectUrl;
