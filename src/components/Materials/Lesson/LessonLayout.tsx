@@ -128,7 +128,7 @@ export default function LessonLayout({ id }: { id: number }) {
                 h: Number(parsedLayout?.h ?? (item.type === 'text' ? 10 : 4)),
                 minH: item.type === 'text' ? 10 : 2,
               };
-            } catch (error) {
+            } catch (_error) {
               // В случае ошибки возвращаем Layout с значениями по умолчанию
               return {
                 i: String(item.id),
