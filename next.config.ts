@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname, '.'), // @ → ./
+      '@': path.resolve(__dirname, 'src'), // Если src/ — корень для @
     };
     return config;
   },
