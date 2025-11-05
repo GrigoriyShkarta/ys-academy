@@ -32,7 +32,9 @@ interface MediaGalleryProps {
   linkUrl?: string;
   hiddenClickAll?: boolean;
   hiddenCheckbox?: boolean;
+  showFromDevice?: boolean;
   queryKey?: string;
+  handleClickFromDevice?: () => void;
 }
 
 export default function MediaGallery({
@@ -47,6 +49,8 @@ export default function MediaGallery({
   linkUrl,
   handleDelete,
   queryKey,
+  handleClickFromDevice,
+  showFromDevice = false,
   isPhoto = true,
   isOneSelectItem = false,
   isLink = false,
@@ -110,7 +114,7 @@ export default function MediaGallery({
   if (!data) return <Loader />;
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex flex-col gap-4 w-full min-h-[100px]">
       {/* Поиск и массовое удаление */}
 
       <div className="flex flex-col gap-3">
@@ -128,6 +132,12 @@ export default function MediaGallery({
               onClick={() => setOpenConfirm(true)}
             >
               <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+
+          {showFromDevice && handleClickFromDevice && (
+            <Button className="bg-accent hover:bg-accent/80" onClick={handleClickFromDevice}>
+              {t('from_device')}
             </Button>
           )}
         </div>
@@ -225,9 +235,9 @@ export default function MediaGallery({
         ))}
       </div>
 
-      {currentPage && totalPages && onPageChange && (
+      {currentPage && totalPages && onPageChange && data.length > 0 ? (
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
-      )}
+      ) : null}
       {previewUrl && (
         <PreviewModal
           open={!!previewUrl}

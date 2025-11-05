@@ -51,6 +51,9 @@ export const Dropzone = ({
       if (value.type.startsWith('audio/')) {
         return <audio src={URL.createObjectURL(value)} controls className="w-full mt-2" />;
       }
+      if (value.type.startsWith('video/')) {
+        return <video src={URL.createObjectURL(value)} controls className="w-full mt-2" />;
+      }
       return (
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 mt-2">
           <FileIcon className="w-5 h-5" /> {value.name}

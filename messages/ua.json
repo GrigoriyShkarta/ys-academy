@@ -54,7 +54,7 @@
     "title": "Назва",
     "enterTitle": "Введіть назву",
     "file": "Файл",
-    "dragOrClick": "Перетягніть аудіофайл сюди або натисніть, щоб вибрати",
+    "dragOrClick": "Перетягніть файл сюди або натисніть, щоб вибрати",
     "add": "Додати",
     "cancel": "Скасувати",
     "uploading": "Завантаження",
@@ -77,12 +77,9 @@
     "addBlock": "Додати блок",
     "take_from_text_bank": "Взяти з текстового банку",
     "add_text": "Додати текст",
-    "take_from_audio_bank": "Взяти з аудіобанку",
-    "add_audio_from_device": "Додати аудіо з пристрою",
-    "take_from_photo_bank": "Взяти з фотобанку",
-    "add_photo_from_device": "Додати фото з пристрою",
-    "take_from_video_bank": "Взяти з відеобанку",
-    "add_video_from_device": "Додати відео з пристрою",
+    "add_audio": "Додати аудіо",
+    "add_video": "Додати відео",
+    "add_photo": "Додати фото",
     "preview": "Прев’ю",
     "close_preview": "Закрити прев’ю",
     "lesson_title": "Назва уроку",
@@ -99,7 +96,8 @@
     "add_lesson": "Додати урок",
     "edit_module": "Редагувати модуль",
     "lessons": "Уроки",
-    "no_lessons_yet": "Поки немає уроків"
+    "no_lessons_yet": "Поки немає уроків",
+    "or": "або"
   },
 
   "Validation": {
@@ -123,6 +121,7 @@
     "back": "Назад",
     "page": "Сторінка",
     "of": "з",
-    "forward": "Вперед"
+    "forward": "Вперед",
+    "from_device": "Додати з пристрою"
   }
 }

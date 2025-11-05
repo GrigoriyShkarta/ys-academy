@@ -49,7 +49,7 @@
     "title": "Title",
     "enterTitle": "Enter title",
     "file": "File",
-    "dragOrClick": "Drag and drop your audio file here or click to select",
+    "dragOrClick": "Drag and drop your file here or click to select",
     "add": "Add",
     "cancel": "Cancel",
     "uploading": "Uploading",
@@ -72,12 +72,9 @@
     "addBlock": "Add block",
     "take_from_text_bank": "Take from text bank",
     "add_text": "Add text",
-    "take_from_audio_bank": "Take from audio bank",
-    "add_audio_from_device": "Add audio from device",
-    "take_from_photo_bank": "Take from photo bank",
-    "add_photo_from_device": "Add photo from device",
-    "take_from_video_bank": "Take from video bank",
-    "add_video_from_device": "Add video from device",
+    "add_audio": "Add audio",
+    "add_video": "Add video",
+    "add_photo": "Add photo",
     "preview": "Preview",
     "close_preview": "Close preview",
     "lesson_title": "Lesson title",
@@ -94,7 +91,8 @@
     "add_lesson": "Add lesson",
     "edit_module": "Edit module",
     "lessons": "Lessons",
-    "no_lessons_yet": "No lessons yet"
+    "no_lessons_yet": "No lessons yet",
+    "or": "or"
   },
 
   "Validation": {
@@ -118,6 +116,7 @@
     "back": "Back",
     "page": "Page",
     "of": "of",
-    "forward": "Forward"
+    "forward": "Forward",
+    "from_device": "Add from device"
   }
 }

@@ -7,6 +7,7 @@ import { IFile, LessonItemType } from '@/components/Materials/utils/interfaces';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import MediaGallery from '@/common/MediaGallery';
+import VideoModal from '@/components/Materials/Video/VideoModal';
 
 interface Props {
   open: boolean;
@@ -24,28 +25,32 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
   });
 
   return (
-    <Dialog open={open} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-[1024px] max-h-[90vh] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
-        <DialogTitle>
-          <VisuallyHidden />
-        </DialogTitle>
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <MediaGallery
-            data={videos.data}
-            onSearchChange={newSearch => {
-              setSearch(newSearch);
-            }}
-            handleClickItem={(item: IFile) => {
-              handleAdd('video', item.url, item.id);
-              closeModal();
-            }}
-            isPhoto={false}
-            isOneSelectItem
-          />
-        )}
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={closeModal}>
+        <DialogContent className="sm:max-w-[1024px] max-h-[90vh] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
+          <DialogTitle>
+            <VisuallyHidden />
+          </DialogTitle>
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <MediaGallery
+              data={videos.data}
+              onSearchChange={newSearch => {
+                setSearch(newSearch);
+              }}
+              handleClickItem={(item: IFile) => {
+                handleAdd('video', item.url, item.id);
+                closeModal();
+              }}
+              isPhoto={false}
+              isOneSelectItem
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <VideoModal hideTrigger />
+    </>
   );
 }

@@ -50,13 +50,11 @@ export default function LessonPreviewLayout({ name, blocks, layoutsByBlockId = {
                 xxl: 12,
                 xl: 12,
                 lg: 12,
-                md: 8,
-                sm: 6,
-                xs: 4,
+                md: 3,
+                sm: 1,
+                xs: 1,
               }}
               rowHeight={1}
-              margin={[16, 16]}
-              containerPadding={[16, 16]}
               isDraggable={false}
               isResizable={false}
               useCSSTransforms={true}

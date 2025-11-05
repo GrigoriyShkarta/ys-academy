@@ -24,7 +24,7 @@ export default function VideoLayout() {
 
   return (
     <div className="flex flex-col gap-4">
-      <VideoModal photo={selectedFile} setSelectedFile={setSelectedFile} />
+      <VideoModal video={selectedFile} setSelectedFile={setSelectedFile} mode={selectedFile ? 'single' : 'multi'} />
 
       {videos.data && (
         <MediaGallery

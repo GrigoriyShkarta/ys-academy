@@ -8,6 +8,9 @@ import { useTranslations } from 'next-intl';
 import DataTable from '@/common/Table';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import AudioModal from '@/components/Materials/Audio/AudioModal';
+import DrugOverlay from '@/common/MaterialsCommon/DrugOverlay';
+import useDragAndDropMaterial from '@/common/MaterialsCommon/useDragAndDropMaterial';
 
 interface Props {
   open: boolean;
@@ -17,6 +20,8 @@ interface Props {
 
 export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props) {
   const [search, setSearch] = useState('');
+  const [openModal, setOpenModal] = useState(false);
+  const { dragActive, onDragOver, onDragLeave, onDrop, file, setFile } = useDragAndDropMaterial();
   const t = useTranslations('Materials');
 
   const { data: audios, isLoading } = useQuery({
@@ -45,16 +50,26 @@ export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props)
   return (
     <>
       <Dialog open={open} onOpenChange={closeModal}>
-        <DialogContent className="sm:max-w-[1024px] max-h-[90vh] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
+        <DialogContent
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          className="sm:max-w-[1024px] max-h-[90vh] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]"
+        >
           <DialogTitle>
             <VisuallyHidden />
           </DialogTitle>
+
+          <DrugOverlay dragActive={dragActive} />
+
           {isLoading ? (
             <Loader />
           ) : (
             <DataTable
               data={audios.data}
               columns={columns}
+              showFromDevice
+              handleClickFromDevice={() => setOpenModal(true)}
               onSearchChange={newSearch => {
                 setSearch(newSearch);
               }}
@@ -66,6 +81,14 @@ export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props)
           )}
         </DialogContent>
       </Dialog>
+
+      <AudioModal
+        openModal={openModal}
+        closeModal={setOpenModal}
+        fileFromDevice={file}
+        setSelectedFile={f => setFile(f as File | null)}
+        hideTrigger
+      />
     </>
   );
 }

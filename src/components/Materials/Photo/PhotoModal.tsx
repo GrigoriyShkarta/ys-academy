@@ -28,11 +28,22 @@ import { ContentFormValues, contentSchema } from '@/components/Materials/utils/m
 import { IFile } from '@/components/Materials/utils/interfaces';
 
 interface Props {
-  photo: IFile | null;
+  openModal?: boolean;
+  closeModal?: Dispatch<SetStateAction<boolean>>;
+  hideTrigger?: boolean;
+  photo?: IFile | null;
+  fileFromDevice?: File | null;
   setSelectedFile: Dispatch<SetStateAction<IFile | null>>;
 }
 
-export default function PhotoModal({ photo, setSelectedFile }: Props) {
+export default function PhotoModal({
+  photo,
+  setSelectedFile,
+  openModal,
+  closeModal,
+  hideTrigger,
+  fileFromDevice,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations('Materials');
@@ -54,6 +65,13 @@ export default function PhotoModal({ photo, setSelectedFile }: Props) {
         content: photo.url,
         title: photo.title,
       });
+    } else if (fileFromDevice) {
+      setOpen(true);
+      form.reset({
+        id: undefined,
+        content: fileFromDevice,
+        title: fileFromDevice.name,
+      });
     } else {
       form.reset({
         id: undefined,
@@ -61,7 +79,7 @@ export default function PhotoModal({ photo, setSelectedFile }: Props) {
         title: '',
       });
     }
-  }, [photo]);
+  }, [photo, fileFromDevice]);
 
   const onSubmit = async (data: ContentFormValues) => {
     setIsLoading(true);
@@ -72,22 +90,34 @@ export default function PhotoModal({ photo, setSelectedFile }: Props) {
     }
     await queryClient.invalidateQueries({ queryKey: ['photos'] });
     setOpen(false);
+    if (closeModal) {
+      closeModal(false);
+    }
+    if (setSelectedFile) {
+      setSelectedFile(null);
+    }
     form.reset();
     setIsLoading(false);
   };
 
+  const handleClose = () => {
+    form.reset();
+    setOpen(false);
+    if (setSelectedFile) {
+      setSelectedFile(null);
+    }
+    if (closeModal) {
+      closeModal(false);
+    }
+  };
+
   return (
-    <Dialog
-      open={open}
-      onOpenChange={value => {
-        setOpen(value);
-        setSelectedFile(null);
-        form.reset();
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button className="bg-accent w-[240px] mx-auto">{t('addPhoto')}</Button>
-      </DialogTrigger>
+    <Dialog open={open || openModal} onOpenChange={handleClose}>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          <Button className="bg-accent w-[240px] mx-auto">{t('addPhoto')}</Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>
@@ -136,7 +166,7 @@ export default function PhotoModal({ photo, setSelectedFile }: Props) {
               <FormFooter
                 isLoading={isLoading}
                 isValid={form.formState.isValid}
-                onCancel={() => setOpen(false)}
+                onCancel={handleClose}
                 onSubmitText={t('add')}
                 onCancelText={t('cancel')}
                 loadingText={t('uploading')}

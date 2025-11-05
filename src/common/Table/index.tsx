@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -25,12 +25,15 @@ interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
   showDeleteIcon?: boolean;
+  accept?: string;
   totalPages?: number;
   currentPage?: number;
+  showFromDevice?: boolean;
   onPageChange?: (page: number) => void;
   onSearchChange?: (search: string) => void;
   handleDelete?: () => void;
   handleClickRow?: (item: T) => void;
+  handleClickFromDevice?: () => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,17 +42,19 @@ export default function DataTable<T extends Record<string, any>>({
   columns,
   currentPage,
   totalPages,
+  showDeleteIcon,
+  showFromDevice,
   onPageChange,
   onSearchChange,
   handleDelete,
-  showDeleteIcon,
   handleClickRow,
+  handleClickFromDevice,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('');
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const t = useTranslations('Common');
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
 
@@ -67,7 +72,6 @@ export default function DataTable<T extends Record<string, any>>({
 
   return (
     <div className="space-y-4 w-full">
-      {/* Поиск */}
       <div className="flex items-center gap-4">
         <Input
           placeholder={t('search')}
@@ -78,6 +82,11 @@ export default function DataTable<T extends Record<string, any>>({
         {showDeleteIcon && (
           <Button className="bg-destructive hover:bg-destructive/80" onClick={handleDelete}>
             <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+        {showFromDevice && handleClickFromDevice && (
+          <Button className="bg-accent hover:bg-accent/80" onClick={handleClickFromDevice}>
+            {t('from_device')}
           </Button>
         )}
       </div>
@@ -93,26 +102,27 @@ export default function DataTable<T extends Record<string, any>>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map(item => (
-              <TableRow
-                onClick={() => (handleClickRow ? handleClickRow(item) : undefined)}
-                key={item.id || JSON.stringify(item)}
-                className={`${handleClickRow ? 'cursor-pointer' : ''}`}
-              >
-                {columns.map(col => (
-                  <TableCell key={col.key}>
-                    {col.render ? col.render(item) : item[col.key]}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+            {data.length > 0 &&
+              data.map(item => (
+                <TableRow
+                  onClick={() => (handleClickRow ? handleClickRow(item) : undefined)}
+                  key={item.id || JSON.stringify(item)}
+                  className={`${handleClickRow ? 'cursor-pointer' : ''}`}
+                >
+                  {columns.map(col => (
+                    <TableCell key={col.key}>
+                      {col.render ? col.render(item) : item[col.key]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>
 
-      {currentPage && totalPages && onPageChange && (
+      {currentPage && totalPages && onPageChange && data.length > 0 ? (
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
-      )}
+      ) : null}
     </div>
   );
 }

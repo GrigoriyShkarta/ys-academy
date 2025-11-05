@@ -5,7 +5,6 @@ import logo from '../../../public/assets/logo.png';
 
 export function Auth() {
   const t = useTranslations('Auth');
-  console.log('API:', process.env.NEXT_PUBLIC_API_URL);
 
   return (
     <div className="flex flex-col items-center justify-center max-sm:justify-start min-h-screen w-full bg-gradient-to-b from-gray-900 to-gray-800 px-4 py-8">

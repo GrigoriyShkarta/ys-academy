@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,6 @@ import RedactorModal from '@/common/RedactorModal';
 import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal';
 import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
 import ChooseVideoModal from '@/common/MaterialsCommon/ChooseVideoModal';
-import HiddenInputs from '@/components/Materials/Lesson/components/HiddenInputs';
 import { BadgePlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -25,64 +24,32 @@ type ModalKey = 'text' | 'text-bank' | 'audio-bank' | 'photo-bank' | 'video-bank
 export default function PopupMenu({ handleAdd }: Props) {
   const [openModal, setOpenModal] = useState<ModalKey>('');
   const t = useTranslations('Materials');
-  const audioInputRef = useRef<HTMLInputElement>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = useCallback(
-    (event: ChangeEvent<HTMLInputElement>, type: LessonItemType) => {
-      const file = event.target.files?.[0];
-      if (file) handleAdd(type, file);
-      event.target.value = '';
-      setOpenModal('');
-    },
-    [handleAdd]
-  );
-
-  const clickInput = useCallback((ref: React.RefObject<HTMLInputElement | null>) => {
-    if (ref.current) ref.current.click();
-  }, []);
 
   const menuItems: {
     key: ModalKey | 'device-audio' | 'device-photo' | 'device-video';
     label: string;
     onClick?: () => void;
   }[] = [
+    { key: 'text', label: t('add_text'), onClick: () => setOpenModal('text') },
     {
       key: 'text-bank',
       label: t('take_from_text_bank'),
       onClick: () => setOpenModal('text-bank'),
     },
-    { key: 'text', label: t('add_text'), onClick: () => setOpenModal('text') },
     {
       key: 'audio-bank',
-      label: t('take_from_audio_bank'),
+      label: t('add_audio'),
       onClick: () => setOpenModal('audio-bank'),
     },
     {
-      key: 'device-audio',
-      label: t('add_audio_from_device'),
-      onClick: () => clickInput(audioInputRef),
-    },
-    {
       key: 'photo-bank',
-      label: t('take_from_photo_bank'),
+      label: t('add_photo'),
       onClick: () => setOpenModal('photo-bank'),
     },
     {
-      key: 'device-photo',
-      label: t('add_photo_from_device'),
-      onClick: () => clickInput(photoInputRef),
-    },
-    {
       key: 'video-bank',
-      label: t('take_from_video_bank'),
+      label: t('add_video'),
       onClick: () => setOpenModal('video-bank'),
-    },
-    {
-      key: 'device-video',
-      label: t('add_video_from_device'),
-      onClick: () => clickInput(videoInputRef),
     },
   ];
 
@@ -102,13 +69,6 @@ export default function PopupMenu({ handleAdd }: Props) {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <HiddenInputs
-        audioInputRef={audioInputRef}
-        photoInputRef={photoInputRef}
-        videoInputRef={videoInputRef}
-        handleFileSelect={handleFileSelect}
-      />
 
       <ChooseTextModal
         open={openModal === 'text-bank'}

@@ -59,10 +59,7 @@ export function BlockItem({ item }: { item: LessonItem }) {
   switch (item.type) {
     case 'text':
       return (
-        <div
-          className="ql-editor overflow-y-hidden!"
-          dangerouslySetInnerHTML={{ __html: item.content }}
-        />
+        <div className="ql-editor min-h-auto!" dangerouslySetInnerHTML={{ __html: item.content }} />
       );
 
     case 'image':

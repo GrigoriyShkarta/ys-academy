@@ -30,11 +30,22 @@ import { Dropzone } from '@/common/Dropzone';
 import { FormFooter } from '@/common/ModalFooter';
 
 interface Props {
-  audio: IFile | null;
-  setSelectedFile: Dispatch<SetStateAction<IFile | null>>;
+  openModal?: boolean;
+  closeModal?: Dispatch<SetStateAction<boolean>>;
+  hideTrigger?: boolean;
+  audio?: IFile | null;
+  fileFromDevice?: File | null;
+  setSelectedFile?: Dispatch<SetStateAction<IFile | File | null>>;
 }
 
-export default function AudioModal({ audio, setSelectedFile }: Props) {
+export default function AudioModal({
+  openModal,
+  closeModal,
+  hideTrigger,
+  audio,
+  fileFromDevice,
+  setSelectedFile,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations('Materials');
@@ -56,6 +67,13 @@ export default function AudioModal({ audio, setSelectedFile }: Props) {
         content: audio.url,
         title: audio.title,
       });
+    } else if (fileFromDevice) {
+      setOpen(true);
+      form.reset({
+        id: undefined,
+        content: fileFromDevice,
+        title: fileFromDevice.name,
+      });
     } else {
       form.reset({
         id: undefined,
@@ -63,7 +81,7 @@ export default function AudioModal({ audio, setSelectedFile }: Props) {
         title: '',
       });
     }
-  }, [audio]);
+  }, [audio, fileFromDevice]);
 
   const onSubmit = async (data: ContentFormValues) => {
     setIsLoading(true);
@@ -74,22 +92,34 @@ export default function AudioModal({ audio, setSelectedFile }: Props) {
     }
     await queryClient.invalidateQueries({ queryKey: ['audios'] });
     setOpen(false);
+    if (closeModal) {
+      closeModal(false);
+    }
+    if (setSelectedFile) {
+      setSelectedFile(null);
+    }
     form.reset();
     setIsLoading(false);
   };
 
+  const handleClose = () => {
+    form.reset();
+    setOpen(false);
+    if (setSelectedFile) {
+      setSelectedFile(null);
+    }
+    if (closeModal) {
+      closeModal(false);
+    }
+  };
+
   return (
-    <Dialog
-      open={open}
-      onOpenChange={value => {
-        setOpen(value);
-        setSelectedFile(null);
-        form.reset();
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button className="bg-accent w-[240px] mx-auto">{t('addAudio')}</Button>
-      </DialogTrigger>
+    <Dialog open={open || openModal} onOpenChange={handleClose}>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          <Button className="bg-accent w-[240px] mx-auto">{t('addAudio')}</Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>
@@ -136,7 +166,7 @@ export default function AudioModal({ audio, setSelectedFile }: Props) {
               <FormFooter
                 isLoading={isLoading}
                 isValid={form.formState.isValid}
-                onCancel={() => setOpen(false)}
+                onCancel={handleClose}
                 onSubmitText={t(audio ? 'edit' : 'add')}
                 onCancelText={t('cancel')}
                 loadingText={t('uploading')}

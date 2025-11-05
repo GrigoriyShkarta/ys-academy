@@ -264,8 +264,22 @@ export default function LessonLayout({ id }: { id: number }) {
               <ResponsiveGridLayout
                 className="layout"
                 layouts={layouts}
-                breakpoints={{ lg: 1200, sm: 768 }}
-                cols={{ lg: 12, sm: 2 }}
+                breakpoints={{
+                  xxl: 1400,
+                  xl: 1200,
+                  lg: 992,
+                  md: 768,
+                  sm: 576,
+                  xs: 0,
+                }}
+                cols={{
+                  xxl: 12,
+                  xl: 12,
+                  lg: 12,
+                  md: 3,
+                  sm: 1,
+                  xs: 1,
+                }}
                 rowHeight={1}
                 isDraggable={false}
                 isResizable={false}
