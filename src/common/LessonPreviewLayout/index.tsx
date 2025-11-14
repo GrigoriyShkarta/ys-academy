@@ -4,7 +4,7 @@ import React from 'react';
 import type { Layout } from 'react-grid-layout';
 import dynamic from 'next/dynamic';
 import { LessonBlockType } from '@/components/Materials/utils/interfaces';
-import { BlockItem } from '@/components/Materials/Lesson/components/BlockItem';
+// import { BlockItem } from '@/components/Materials/Lesson/components/BlockItem';
 
 if (typeof window !== 'undefined') {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -75,7 +75,7 @@ export default function LessonPreviewLayout({ name, blocks, layoutsByBlockId = {
                   }
                   className="p-2 bg-transparent overflow-hidden"
                 >
-                  <BlockItem item={item} />
+                  {/*<BlockItem item={item} />*/}
                 </div>
               ))}
             </ResponsiveGridLayout>

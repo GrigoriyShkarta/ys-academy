@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import AudioModal from '@/components/Materials/Audio/AudioModal';
 import DrugOverlay from '@/common/MaterialsCommon/DrugOverlay';
-import useDragAndDropMaterial from '@/common/MaterialsCommon/useDragAndDropMaterial';
+import useDragAndDropMaterial from '@/hooks/useDragAndDropMaterial';
 
 interface Props {
   open: boolean;
@@ -21,7 +21,11 @@ interface Props {
 export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props) {
   const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState(false);
-  const { dragActive, onDragOver, onDragLeave, onDrop, file, setFile } = useDragAndDropMaterial();
+  const [addFiles, setAddFiles] = useState<File[] | null>(null);
+  const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
+    accept: ['audio/*'],
+    onFiles: files => setAddFiles(files),
+  });
   const t = useTranslations('Materials');
 
   const { data: audios, isLoading } = useQuery({
@@ -85,8 +89,8 @@ export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props)
       <AudioModal
         openModal={openModal}
         closeModal={setOpenModal}
-        fileFromDevice={file}
-        setSelectedFile={f => setFile(f as File | null)}
+        uploadedFiles={addFiles}
+        setUploadedFiles={setAddFiles}
         hideTrigger
       />
     </>

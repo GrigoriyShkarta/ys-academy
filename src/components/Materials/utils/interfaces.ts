@@ -1,9 +1,11 @@
 import { Layout } from 'react-grid-layout';
+import { Block } from '@blocknote/core';
 
 export interface IFile {
   id: number;
   title: string;
   url: string;
+  createdAt?: string;
 }
 
 export interface IText {
@@ -15,6 +17,8 @@ export interface IText {
 export interface GetMaterialParams {
   page?: number | 'all';
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type BlockSource = 'custom' | 'bank';
@@ -25,7 +29,7 @@ export interface LessonItem {
   id?: string;
   type: LessonItemType;
   content: string | File;
-  source: BlockSource;
+  source?: BlockSource;
   bankId?: number;
   audioPublicId?: string;
   videoPublicId?: string;
@@ -53,4 +57,9 @@ export interface Module {
     title: string;
     index?: number;
   }[];
+}
+
+export interface LessonDocItem {
+  blockId: number;
+  content: Block[];
 }

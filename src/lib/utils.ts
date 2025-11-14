@@ -2,16 +2,73 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { RefObject } from 'react';
 import type AvatarEditor from 'react-avatar-editor';
+import axios from 'axios';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export const getYouTubeId = (url: string) => {
-  const regExp =
-    /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
-  const match = url.match(regExp);
-  return match ? match[1] : null;
+  // допускаем, что пользователь мог вставить просто id
+
+  const idOnlyMatch = url.match(/^[A-Za-z0-9_-]{11}$/);
+  if (idOnlyMatch) return url;
+
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+
+    // короткий формат youtu.be/ID
+    if (host === 'youtu.be' || host.endsWith('.youtu.be')) {
+      const id = parsed.pathname.replace(/^\//, '');
+      return id.length === 11 ? id : null;
+    }
+
+    // обычный youtube.com
+    if (host.includes('youtube.com') || host.endsWith('.youtube.com')) {
+      // ?v=ID
+      const v = parsed.searchParams.get('v');
+      if (v && v.length === 11 && /^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+      // /embed/ID
+      const embedMatch = parsed.pathname.match(/\/embed\/([A-Za-z0-9_-]{11})/);
+      if (embedMatch) return embedMatch[1];
+      return null;
+    }
+
+    // fallback: попытка регулярки, но требуем строго 11 символов
+    const regExp = /(?:v=|\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{11})/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+  } catch (e) {
+    // не URL — пробуем регексп на чистый id
+    const match = url.match(/^[A-Za-z0-9_-]{11}$/);
+    return match ? url : null;
+  }
+};
+
+export const fetchYouTubeOembed = async (id: string) => {
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(
+      'https://www.youtube.com/watch?v=' + id
+    )}&format=json`;
+    const res = await fetch(oembedUrl);
+    if (!res.ok) return { ok: false };
+    const data = await res.json();
+    return { ok: true, title: data?.title };
+  } catch {
+    return { ok: false };
+  }
+};
+
+export const checkYouTubeVideoExists = async (videoUrl: string): Promise<boolean> => {
+  try {
+    const response = await axios.get('https://www.youtube.com/oembed', {
+      params: { url: videoUrl, format: 'json' },
+    });
+    return response.status === 200;
+  } catch {
+    return false;
+  }
 };
 
 export const cropImage = async (
@@ -140,7 +197,6 @@ export const quillFormats = [
   'blockquote',
   'code-block',
   'list',
-  'bullet',
   'indent',
   'link',
   'image',

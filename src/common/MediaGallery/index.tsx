@@ -1,3 +1,4 @@
+// typescript
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -113,6 +114,8 @@ export default function MediaGallery({
 
   if (!data) return <Loader />;
 
+  const isVideoFileUrl = (url?: string) => !!url && /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+
   return (
     <div className="flex flex-col gap-4 w-full min-h-[100px]">
       {/* Поиск и массовое удаление */}
@@ -142,7 +145,7 @@ export default function MediaGallery({
           )}
         </div>
 
-        {!isOneSelectItem && !hiddenClickAll && (
+        {!isOneSelectItem && !hiddenClickAll && data.length > 0 && (
           <div className="flex gap-2">
             <Checkbox
               checked={selectedIds.length === data.length && data.length > 0}
@@ -162,9 +165,8 @@ export default function MediaGallery({
               selectedIds.includes(item.id) ? 'ring-2 ring-orange-500' : ''
             }`}
           >
-            {/* Видео или фото */}
+            {/* Видео, YouTube или фото */}
             {isLink ? (
-              // если isLink, делаем только превью ссылкой на модуль
               <Link href={`${linkUrl}/${item.id}`} className="block">
                 <img
                   src={item?.url ? item.url : logo.src}
@@ -178,6 +180,13 @@ export default function MediaGallery({
                 src={`https://www.youtube.com/embed/${getYouTubeId(item.url)}`}
                 title={item.title}
                 allowFullScreen
+                onClick={() => setPreviewUrl(item.url)}
+              />
+            ) : !isPhoto || isVideoFileUrl(item.url) ? (
+              <video
+                src={item.url}
+                controls
+                className="w-full h-48 object-cover cursor-pointer"
                 onClick={() => setPreviewUrl(item.url)}
               />
             ) : (

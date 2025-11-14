@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { keepPreviousData } from '@tanstack/query-core';
 import { Button } from '@/components/ui/button';
 import EditPlace from '@/components/Materials/Lesson/EditPlace';
 import { useQuery } from '@tanstack/react-query';
-import { getUnassignedLessons } from '@/components/Materials/Lesson/action';
+import { keepPreviousData } from '@tanstack/query-core';
+import { Loader } from 'lucide-react';
 import LessonList from '@/components/Materials/Lesson/components/LessonList';
-import Loader from '@/common/Loader';
+import { getUnassignedLessons } from '@/components/Materials/Lesson/action';
 
 export default function LessonsLayout() {
   const [isEditPlace, setIsEditPlace] = useState(false);

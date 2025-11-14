@@ -7,7 +7,7 @@ import { IFile, LessonItemType } from '@/components/Materials/utils/interfaces';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import MediaGallery from '@/common/MediaGallery';
-import useDragAndDropMaterial from '@/common/MaterialsCommon/useDragAndDropMaterial';
+import useDragAndDropMaterial from '@/hooks/useDragAndDropMaterial';
 import DrugOverlay from '@/common/MaterialsCommon/DrugOverlay';
 import PhotoModal from '@/components/Materials/Photo/PhotoModal';
 
@@ -20,8 +20,10 @@ interface Props {
 export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props) {
   const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState(false);
-  const { dragActive, onDragOver, onDragLeave, onDrop, file, setFile } = useDragAndDropMaterial({
+  const [addFiles, setAddFiles] = useState<File[] | null>(null);
+  const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
     accept: 'image/*',
+    onFiles: files => setAddFiles(files),
   });
 
   const { data: photos, isLoading } = useQuery({
@@ -29,8 +31,6 @@ export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props)
     queryFn: () => getPhotos({ search, page: 'all' }),
     placeholderData: keepPreviousData,
   });
-
-  console.log('dragActive', dragActive);
 
   return (
     <>
@@ -68,8 +68,8 @@ export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props)
       <PhotoModal
         openModal={openModal}
         closeModal={setOpenModal}
-        fileFromDevice={file}
-        setSelectedFile={f => setFile(f as File | null)}
+        uploadedFiles={addFiles}
+        setUploadedFiles={setAddFiles}
         hideTrigger
       />
     </>

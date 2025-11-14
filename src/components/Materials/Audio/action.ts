@@ -4,7 +4,7 @@ import { GetMaterialParams } from '@/components/Materials/utils/interfaces';
 
 export const uploadAudio = async (form: ContentFormValues) => {
   const formData = new FormData();
-  formData.append('title', form.title);
+  formData.append('title', form?.title ?? '');
   if (form.content) {
     formData.append('file', form.content);
   }
@@ -15,9 +15,9 @@ export const uploadAudio = async (form: ContentFormValues) => {
   return data;
 };
 
-export const getAudios = async ({ page, search = '' }: GetMaterialParams) => {
+export const getAudios = async ({ page, search = '', sortBy, sortOrder }: GetMaterialParams) => {
   const { data } = await axiosInstance.get('/audio', {
-    params: { page, search },
+    params: { page, search, sortBy, sortOrder },
   });
   return data;
 };

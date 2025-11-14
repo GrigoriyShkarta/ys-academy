@@ -1,6 +1,7 @@
 'use client';
 
 import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -28,6 +29,7 @@ interface DataTableProps<T> {
   accept?: string;
   totalPages?: number;
   currentPage?: number;
+  selectedIds?: number[];
   showFromDevice?: boolean;
   onPageChange?: (page: number) => void;
   onSearchChange?: (search: string) => void;
@@ -44,6 +46,7 @@ export default function DataTable<T extends Record<string, any>>({
   totalPages,
   showDeleteIcon,
   showFromDevice,
+  selectedIds,
   onPageChange,
   onSearchChange,
   handleDelete,
@@ -107,7 +110,13 @@ export default function DataTable<T extends Record<string, any>>({
                 <TableRow
                   onClick={() => (handleClickRow ? handleClickRow(item) : undefined)}
                   key={item.id || JSON.stringify(item)}
-                  className={`${handleClickRow ? 'cursor-pointer' : ''}`}
+                  aria-selected={selectedIds?.includes(item.id)}
+                  data-selected={selectedIds?.includes(item.id) ? 'true' : 'false'}
+                  className={cn(
+                    handleClickRow ? 'cursor-pointer' : '',
+                    'transition-shadow duration-150 ease-in-out',
+                    selectedIds?.includes(item.id) ? 'bg-muted' : ''
+                  )}
                 >
                   {columns.map(col => (
                     <TableCell key={col.key}>

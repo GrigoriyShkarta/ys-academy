@@ -1,3 +1,3 @@
 export default function MaterialsLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <div className="p-8 w-full h-full max-h-screen overflow-auto">{children}</div>;
+  return <div className="relative p-8 w-full h-screen max-h-screen overflow-auto">{children}</div>;
 }

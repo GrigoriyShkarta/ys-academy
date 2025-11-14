@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const contentSchema = (t: (key: string) => string) =>
   z.object({
     id: z.number().optional(),
-    title: z.string().min(1, t('required_field')),
+    title: z.string().optional(),
     content: z
       .union([
         z.instanceof(File),

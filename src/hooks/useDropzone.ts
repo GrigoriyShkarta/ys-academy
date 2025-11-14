@@ -1,29 +1,51 @@
 import { DragEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-export const useDropzone = (onFileSelect: (file: File | null) => void, accept?: string[]) => {
+interface UseDropzoneOptions {
+  onFileSelect?: (file: File | null) => void;
+  onFilesSelect?: (files: File[]) => void;
+  accept?: string[];
+  multiple?: boolean;
+  maxFiles?: number;
+}
+
+export const useDropzone = ({
+  onFileSelect,
+  onFilesSelect,
+  accept,
+  multiple = false,
+  maxFiles,
+}: UseDropzoneOptions) => {
   const [isDragActive, setIsDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations('Validation');
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>, onChange: (file: File | null) => void) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
 
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
+    const fileList = Array.from(e.dataTransfer.files || []);
+    if (fileList.length === 0) return;
 
-    const fileType = file.type;
+    const filtered = accept
+      ? fileList.filter(f => accept.some(type => f.type.startsWith(type)))
+      : fileList;
 
-    if (accept && !accept.some(type => fileType.startsWith(type))) {
+    if (filtered.length === 0) {
       setError(t('invalid_file_type'));
-      onFileSelect(null);
+      onFileSelect?.(null);
       return;
     }
 
+    const limited = typeof maxFiles === 'number' ? filtered.slice(0, maxFiles) : filtered;
+
     setError(null);
-    onFileSelect(file);
+    if (multiple) {
+      onFilesSelect?.(limited);
+    } else {
+      onFileSelect?.(limited[0] ?? null);
+    }
   };
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {

@@ -17,7 +17,7 @@ export const uploadPhoto = async (form: ContentFormValues) => {
       finalFile = form.content; // fallback
     }
   }
-  formData.append('title', form.title);
+  formData.append('title', form?.title ?? '');
   if (form.content) {
     formData.append('file', finalFile);
   }
@@ -35,12 +35,9 @@ export const getPhotos = async ({ page, search }: GetMaterialParams) => {
   return data;
 };
 
-export const editPhoto = async (
-  id: number,
-  form: { title: string; content: File | string | null }
-) => {
+export const editPhoto = async (id: number, form: ContentFormValues) => {
   const formData = new FormData();
-  formData.append('title', form.title);
+  formData.append('title', form?.title ?? '');
   if (form.content) {
     formData.append('file', form.content);
   }

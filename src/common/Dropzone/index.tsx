@@ -9,28 +9,45 @@ import Image from 'next/image';
 
 interface DropzoneProps {
   value?: File | string | null;
-  onChange: (file: File | null) => void;
+  onChange?: (file: File | null) => void;
+  // режим множественного выбора
+  multiple?: boolean;
+  values?: File[];
+  onChangeMany?: (files: File[]) => void;
+  maxFiles?: number;
   label: string;
   dragLabel: string;
   accept: string[];
+  disabled?: boolean;
 }
 
 export const Dropzone = ({
   value,
   onChange,
+  multiple = false,
+  onChangeMany,
+  maxFiles,
   label,
   dragLabel,
   accept = ['image/', 'audio/'],
+  disabled = false,
 }: DropzoneProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { isDragActive, handleDrop, handleDragOver, handleDragLeave, error } = useDropzone(
-    onChange,
-    accept
-  );
+  const { isDragActive, handleDrop, handleDragOver, handleDragLeave, error } = useDropzone({
+    onFileSelect: file => onChange?.(file),
+    onFilesSelect: files => onChangeMany?.(files),
+    accept,
+    multiple,
+    maxFiles,
+  });
 
   const handleRemove = (e: MouseEvent) => {
     e.stopPropagation();
-    onChange(null);
+    if (multiple) {
+      onChangeMany?.([]);
+    } else {
+      onChange?.(null);
+    }
   };
 
   const renderPreview = () => {
@@ -78,19 +95,39 @@ export const Dropzone = ({
 
   return (
     <div
-      onClick={() => inputRef.current?.click()}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={e => handleDrop(e, onChange)}
+      onClick={() => {
+        if (disabled) return;
+        inputRef.current?.click();
+      }}
+      onDragOver={e => {
+        if (disabled) {
+          e.preventDefault();
+          return;
+        }
+        handleDragOver(e);
+      }}
+      onDragLeave={e => {
+        if (disabled) return;
+        handleDragLeave(e);
+      }}
+      onDrop={e => {
+        if (disabled) return;
+        handleDrop(e);
+      }}
       className={cn(
-        'flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors relative',
-        isDragActive
+        'flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 text-center transition-colors relative',
+        disabled
+          ? 'cursor-not-allowed opacity-60 bg-gray-50 dark:bg-gray-800 border-gray-200'
+          : 'cursor-pointer',
+        isDragActive && !disabled
           ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
-          : 'border-gray-300 hover:border-blue-400',
-        value && 'border-green-500 bg-green-50 dark:bg-green-950'
+          : !disabled
+          ? 'border-gray-300 hover:border-blue-400'
+          : '',
+        value && !multiple && 'border-green-500 bg-green-50 dark:bg-green-950'
       )}
     >
-      {value && (
+      {value && !multiple && (
         <Button
           type="button"
           variant="destructive"
@@ -109,18 +146,26 @@ export const Dropzone = ({
       <input
         ref={inputRef}
         type="file"
-        accept={accept.map(a => `${a}*`).join(',')}
+        accept={accept.join(',')}
         className="hidden"
+        multiple={multiple}
+        disabled={disabled}
         onClick={e => e.stopPropagation()}
         onChange={e => {
-          const file = e.target.files?.[0] ?? null;
-          if (file) onChange(file);
+          const list = Array.from(e.target.files ?? []);
+          if (multiple) {
+            const limited = typeof maxFiles === 'number' ? list.slice(0, maxFiles) : list;
+            onChangeMany?.(limited);
+          } else {
+            const file = list[0] ?? null;
+            if (file) onChange?.(file);
+          }
         }}
       />
 
       {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
 
-      {value && <div className="mt-3 w-full">{renderPreview()}</div>}
+      {value && !multiple && <div className="mt-3 w-full">{renderPreview()}</div>}
     </div>
   );
 };

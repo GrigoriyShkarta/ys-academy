@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import MediaGallery from '@/common/MediaGallery';
 import VideoModal from '@/components/Materials/Video/VideoModal';
+import useDragAndDropMaterial from '@/hooks/useDragAndDropMaterial';
+import DrugOverlay from '@/common/MaterialsCommon/DrugOverlay';
 
 interface Props {
   open: boolean;
@@ -17,6 +19,12 @@ interface Props {
 
 export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props) {
   const [search, setSearch] = useState('');
+  const [openModal, setOpenModal] = useState(false);
+  const [addFiles, setAddFiles] = useState<File[] | null>(null);
+  const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
+    accept: ['video/*'],
+    onFiles: files => setAddFiles(files),
+  });
 
   const { data: videos, isLoading } = useQuery({
     queryKey: ['videos', search],
@@ -27,10 +35,16 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
   return (
     <>
       <Dialog open={open} onOpenChange={closeModal}>
-        <DialogContent className="sm:max-w-[1024px] max-h-[90vh] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
+        <DialogContent
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          className="sm:max-w-[1024px] max-h-[90vh] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]"
+        >
           <DialogTitle>
             <VisuallyHidden />
           </DialogTitle>
+          <DrugOverlay dragActive={dragActive} />
           {isLoading ? (
             <Loader />
           ) : (
@@ -39,18 +53,26 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
               onSearchChange={newSearch => {
                 setSearch(newSearch);
               }}
+              handleClickFromDevice={() => setOpenModal(true)}
               handleClickItem={(item: IFile) => {
                 handleAdd('video', item.url, item.id);
                 closeModal();
               }}
               isPhoto={false}
               isOneSelectItem
+              showFromDevice
             />
           )}
         </DialogContent>
       </Dialog>
 
-      <VideoModal hideTrigger />
+      <VideoModal
+        openModal={openModal}
+        closeModal={setOpenModal}
+        newFiles={addFiles}
+        setNewFiles={setAddFiles}
+        hideTrigger
+      />
     </>
   );
 }

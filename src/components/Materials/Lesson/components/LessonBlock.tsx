@@ -1,357 +1,187 @@
+import { Block, BlockNoteEditor, filterSuggestionItems } from '@blocknote/core';
+import * as locales from '@blocknote/core/locales';
+import '@blocknote/core/fonts/inter.css';
+import '@blocknote/shadcn/style.css';
+import {
+  DefaultReactSuggestionItem,
+  getDefaultReactSlashMenuItems,
+  SuggestionMenuController,
+  useCreateBlockNote,
+} from '@blocknote/react';
+import { locales as multiColumnLocales, multiColumnDropCursor } from '@blocknote/xl-multi-column';
+import { BlockNoteView } from '@blocknote/shadcn';
 import { useEffect, useState } from 'react';
-import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-import {
-  BlockSource,
-  LessonBlockType,
-  LessonItem,
-  LessonItemType,
-} from '@/components/Materials/utils/interfaces';
-import PopupMenu from '@/components/Materials/Lesson/components/PopupMenu';
-import { BlockItem } from '@/components/Materials/Lesson/components/BlockItem';
-import RedactorModal from '@/common/RedactorModal';
-import {
-  getImageDimensions,
-  getImageDimensionsFromFile,
-  getVideoDimensions,
-  getVideoDimensionsFromFile,
-} from '@/components/Materials/utils/helpers';
-import { nanoid } from 'nanoid';
-import ItemContextMenu from '@/components/Materials/Lesson/components/ItemContextMenu';
-import { Input } from '@/components/ui/input';
-import { Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
+import ChooseVideoModal from '@/common/MaterialsCommon/ChooseVideoModal';
+import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal';
+import { schema } from '@/components/Materials/utils/utils';
 
-const ResponsiveGridLayout = WidthProvider(Responsive);
+interface Props {
+  lesson?: Block[];
+  blockId: number;
+  editable?: boolean;
+  onUpdate?: (blockId: number, content: Block[]) => void;
+}
 
-export function LessonBlock({
-  block,
-  onUpdate,
-  initialLayout,
-  onDeleteBlock,
-}: {
-  block: LessonBlockType;
-  onUpdate: (blockId: number, newItems: LessonItem[], layout?: Layout[], title?: string) => void;
-  onDeleteBlock: (blockId: number) => void;
-  initialLayout?: Layout[];
-}) {
-  const [title, setTitle] = useState<string>(() => block.title ?? '');
-  const [openEditModal, setOpenEditModal] = useState<{
-    id: string;
-    content: string;
-  } | null>(null);
-  const [layout, setLayout] = useState<Layout[]>(() =>
-    initialLayout && initialLayout.length > 0
-      ? initialLayout.filter(
-          l =>
-            l.i &&
-            Number.isFinite(l.x) &&
-            Number.isFinite(l.y) &&
-            Number.isFinite(l.w) &&
-            Number.isFinite(l.h)
-        )
-      : block.items
-          .filter(item => item.id)
-          .map((item, index) => ({
-            i: String(item.id),
-            x: 0,
-            y: index * 8,
-            w: 3,
-            h: item.type === 'text' ? 10 : 8,
-            minH: item.type === 'text' ? 10 : 2,
-          }))
-  );
+export default function LessonBlock({ blockId, onUpdate, lesson, editable = true }: Props) {
+  const [openChoosePhoto, setOpenChoosePhoto] = useState(false);
+  const [openChooseAudio, setOpenChooseAudio] = useState(false);
+  const [openChooseVideo, setOpenChooseVideo] = useState(false);
 
-  useEffect(() => {
-    if (initialLayout && initialLayout.length > 0) {
-      const validLayout = initialLayout.filter(
-        l =>
-          l.i &&
-          Number.isFinite(l.x) &&
-          Number.isFinite(l.y) &&
-          Number.isFinite(l.w) &&
-          Number.isFinite(l.h)
-      );
-      setLayout(validLayout);
-    }
-  }, [initialLayout]);
+  const editor = useCreateBlockNote({
+    // @ts-ignore
+    schema,
+    // @ts-ignore
+    dropCursor: multiColumnDropCursor,
+    dictionary: {
+      ...locales.uk,
+      multi_column: multiColumnLocales.ru,
+    },
+    initialContent: lesson,
+  });
 
-  useEffect(() => {
-    setTitle(block.title ?? '');
-  }, [block.title]);
+  const getCustomSlashMenuItems = (editor: BlockNoteEditor): DefaultReactSuggestionItem[] => {
+    const items = getDefaultReactSlashMenuItems(editor);
 
-  useEffect(() => {
-    const ensureLayoutForItems = (items: LessonItem[], currentLayout: Layout[]): Layout[] => {
-      const map = new Map(currentLayout.map(l => [String(l.i), l]));
-      const newLayout = items
-        .filter(item => item.id)
-        .map((item, index) => {
-          const key = String(item.id);
-          const existing = map.get(key);
-          if (existing && Number.isFinite(existing.x) && Number.isFinite(existing.y)) {
+    return (
+      items
+        // @ts-ignore
+        .filter(item => item.key !== 'file')
+        .map(item => {
+          // @ts-ignore
+          if (item.key === 'image') {
             return {
-              ...existing,
-              x: Number.isFinite(existing.x) ? existing.x : 0,
-              y: Number.isFinite(existing.y) ? existing.y : index * 8,
-              w: Number.isFinite(existing.w) ? existing.w : 3,
-              h: Number.isFinite(existing.h) ? existing.h : item.type === 'text' ? 10 : 8,
-              minH: item.type === 'text' ? 10 : 2,
+              ...item,
+              onItemClick: () => setOpenChoosePhoto(true),
             };
           }
-          return {
-            i: key,
-            x: 0,
-            y: index * 8,
-            w: 3,
-            h: item.type === 'text' ? 10 : 8,
-            minH: item.type === 'text' ? 10 : 2,
-          } as Layout;
-        });
 
-      return newLayout;
-    };
+          // @ts-ignore
+          if (item.key === 'video') {
+            return {
+              ...item,
+              onItemClick: () => setOpenChooseVideo(true),
+            };
+          }
 
-    const next = ensureLayoutForItems(block.items, layout);
-    const sameKeys =
-      next.length === layout.length && next.every((n, i) => String(n.i) === String(layout[i]?.i));
-    if (!sameKeys) {
-      setLayout(next);
-    }
-  }, [block.items]);
+          // @ts-ignore
+          if (item.key === 'audio') {
+            return {
+              ...item,
+              onItemClick: () => setOpenChooseAudio(true),
+            };
+          }
 
-  const handleAddItem = async (type: LessonItemType, content: string | File, bankId?: number) => {
-    const newItem: LessonItem = {
-      id: nanoid(),
+          return item;
+        })
+    );
+  };
+
+  const insertMedia = (type: 'image' | 'video' | 'audio', url: string) => {
+    const cursor = editor.getTextCursorPosition();
+    if (!cursor?.block) return;
+
+    // @ts-ignore
+    const newBlock: any = {
       type,
-      content,
-      source: bankId ? 'bank' : 'custom',
-      bankId,
+      props: { url },
     };
-
-    let width = 4;
-    let height = 6;
-    const cols = 12;
-    const maxWidthPx = 1200;
-    const rowHeightPx = 10;
 
     if (type === 'image' || type === 'video') {
-      try {
-        let mediaDimensions: { width: number; height: number } | undefined;
-
-        if (type === 'image') {
-          mediaDimensions =
-            typeof content === 'string'
-              ? await getImageDimensions(content)
-              : await getImageDimensionsFromFile(content);
-        } else if (type === 'video') {
-          mediaDimensions =
-            typeof content === 'string' &&
-            (content.includes('youtube.com') || content.includes('youtu.be'))
-              ? { width: 1280, height: 720 }
-              : typeof content === 'string'
-              ? await getVideoDimensions(content)
-              : await getVideoDimensionsFromFile(content);
-        }
-
-        if (!mediaDimensions) throw new Error('Media dimensions not found');
-
-        const { width: mediaWidth, height: mediaHeight } = mediaDimensions;
-
-        const SCALE_FACTOR = 0.5;
-        const aspectRatio = mediaWidth / mediaHeight;
-
-        const baseHeightPx = mediaHeight * SCALE_FACTOR;
-        const baseWidthPx = mediaWidth * SCALE_FACTOR;
-
-        const gridUnitWidth = maxWidthPx / cols;
-
-        width = Math.max(2, Math.min(cols, Math.ceil(baseWidthPx / gridUnitWidth)));
-        height = Math.max(2, Math.ceil(baseHeightPx / rowHeightPx));
-
-        const correctedHeight = Math.round((width / aspectRatio) * rowHeightPx);
-        height = Math.max(2, correctedHeight);
-      } catch (error) {
-        console.error(`Error loading ${type} dimensions:`, error);
-        width = 4;
-        height = 6;
-      }
+      newBlock.props.previewWidth = '100%';
+      newBlock.props.caption = '';
     }
 
-    const newLayoutItem: Layout = {
-      i: newItem.id as string,
-      x: 0,
-      y: block.items.length * 8,
-      w: width,
-      h: height,
-      minH: type === 'text' ? 5 : 2,
-      resizeHandles: type === 'audio' ? ['e'] : ['se', 'e', 's'],
+    if (type === 'audio') {
+      newBlock.props.name = decodeURIComponent(url.split('/').pop()?.split('?')[0] || 'Аудіо');
+    }
+
+    editor.insertBlocks([newBlock], cursor.block, 'before');
+  };
+
+  // Обработчики добавления медиа
+  const handleAddPhoto = (url: string) => {
+    insertMedia('image', url);
+    setOpenChoosePhoto(false);
+  };
+
+  const handleAddVideo = (url: string) => {
+    const isYoutubeUrl = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//.test(url);
+    const match = url.match(/(?:youtube\.com\/(?:.*v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    const videoId = match ? match[1] : '';
+    if (isYoutubeUrl) {
+      editor.insertBlocks(
+        [
+          {
+            // @ts-ignore
+            type: 'youtube',
+            props: { url, videoId },
+          },
+        ],
+        editor.getTextCursorPosition()?.block ?? null,
+        'after'
+      );
+    } else {
+      insertMedia('video', url);
+    }
+
+    setOpenChooseVideo(false);
+  };
+
+  const handleAddAudio = (url: string) => {
+    insertMedia('audio', url);
+    setOpenChooseAudio(false);
+  };
+
+  // Обновляем родителя при любом изменении
+  const handleEditorChange = () => {
+    const content = editor.document;
+    if (!onUpdate) return;
+    onUpdate(blockId, content);
+  };
+
+  // Подписываемся на изменения редактора
+  useEffect(() => {
+    editor.onChange(handleEditorChange);
+    return () => {
+      // editor.onChange.removeListener(handleEditorChange);
     };
-
-    const newItems = [...block.items, newItem];
-    const newLayout = [...layout, newLayoutItem];
-
-    onUpdate(block.id, newItems, newLayout);
-    setLayout(newLayout);
-  };
-
-  const handleEditItem = (itemId: string, newContent: string | File) => {
-    const newItems = block.items.map(item =>
-      item.id === itemId ? { ...item, content: newContent, source: 'custom' as BlockSource } : item
-    );
-    onUpdate(block.id, newItems, layout);
-  };
-
-  const handleDeleteItem = (itemId: string) => {
-    const newItems = block.items.filter(item => String(item.id) !== String(itemId));
-
-    // Rebuild layout in the order of newItems to avoid gaps / undefined entries
-    const newLayout = newItems.map((it, idx) => {
-      const existing = layout.find(l => String(l.i) === String(it.id));
-      if (existing) {
-        return {
-          ...existing,
-          x: Number.isFinite(existing.x) ? existing.x : 0,
-          y: idx * 8,
-          w: Number.isFinite(existing.w) ? existing.w : 3,
-          h: Number.isFinite(existing.h) ? existing.h : it.type === 'text' ? 10 : 8,
-          minH: it.type === 'text' ? 10 : 2,
-        };
-      }
-      return {
-        i: String(it.id),
-        x: 0,
-        y: idx * 8,
-        w: 3,
-        h: it.type === 'text' ? 10 : 8,
-        minH: it.type === 'text' ? 10 : 2,
-      };
-    });
-
-    const filtered = newLayout.filter(l => typeof l.x === 'number' && typeof l.y === 'number');
-    setLayout(filtered);
-    onUpdate(block.id, newItems, filtered);
-  };
-
-  const handleLayoutChange = (newLayout: Layout[]) => {
-    const correctedLayout = newLayout
-      .filter(
-        l =>
-          l.i &&
-          Number.isFinite(l.x) &&
-          Number.isFinite(l.y) &&
-          Number.isFinite(l.w) &&
-          Number.isFinite(l.h)
-      )
-      .map((item, index) => {
-        const originalItem = block.items.find(i => String(i.id) === String(item.i));
-        return {
-          i: String(item.i),
-          x: Number.isFinite(item.x) ? item.x : 0,
-          y: Number.isFinite(item.y) ? item.y : index * 8,
-          w: Number.isFinite(item.w) ? item.w : 3,
-          h: Number.isFinite(item.h) ? item.h : originalItem?.type === 'text' ? 10 : 8,
-          minH: originalItem?.type === 'text' ? 10 : 2,
-        };
-      });
-    setLayout(correctedLayout);
-    onUpdate(block.id, block.items, correctedLayout);
-  };
-
-  const getSafeLayoutForItem = (item: LessonItem, index: number) => {
-    const found = layout.find(l => String(l.i) === String(item.id));
-    if (found && Number.isFinite(found.x) && Number.isFinite(found.y)) {
-      return {
-        ...found,
-        i: String(found.i),
-        x: Number.isFinite(found.x) ? found.x : 0,
-        y: Number.isFinite(found.y) ? found.y : index * 8,
-        w: Number.isFinite(found.w) ? found.w : 3,
-        h: Number.isFinite(found.h) ? found.h : item.type === 'text' ? 10 : 8,
-        minH: item.type === 'text' ? 10 : 2,
-      };
-    }
-    return {
-      i: String(item.id),
-      x: 0,
-      y: index * 8,
-      w: 3,
-      h: item.type === 'text' ? 10 : 8,
-      minH: item.type === 'text' ? 10 : 2,
-    } as Layout;
-  };
+  }, [editor]);
 
   return (
     <>
-      <div className="flex gap-2">
-        <Input
-          value={title}
-          placeholder="Заголовок блока"
-          onChange={e => onUpdate(block.id, block.items, layout, e.target.value)}
-          className="mb-2"
+      <BlockNoteView editor={editor} onChange={handleEditorChange} editable={editable}>
+        <SuggestionMenuController
+          triggerCharacter={'/'}
+          getItems={async query => filterSuggestionItems(getCustomSlashMenuItems(editor), query)}
         />
-        <Button variant="destructive" onClick={() => onDeleteBlock(block.id)}>
-          <Trash2 size={14} />
-        </Button>
-      </div>
+      </BlockNoteView>
 
-      <div className="p-4 border rounded-xl space-y-4">
-        <div className="flex justify-between items-center">
-          <PopupMenu handleAdd={handleAddItem} />
-        </div>
+      <ChoosePhotoModal
+        open={openChoosePhoto}
+        closeModal={() => {
+          setOpenChoosePhoto(false);
+        }}
+        handleAdd={(type, content, bankId) => handleAddPhoto(content as string)}
+      />
 
-        <ResponsiveGridLayout
-          className="layout"
-          layouts={{ lg: layout }}
-          breakpoints={{ lg: 1200, sm: 768 }}
-          cols={{ lg: 12, sm: 2 }}
-          draggableHandle={'.drag-handle'}
-          onLayoutChange={handleLayoutChange}
-          rowHeight={1}
-          isResizable={true}
-          isDraggable={true}
-        >
-          {block.items.map((item, idx) => {
-            const safeLayout = getSafeLayoutForItem(item, idx);
-            return (
-              <div
-                key={String(item.id)}
-                data-grid={{
-                  ...safeLayout,
-                  resizeHandles: item.type === 'audio' ? ['e'] : ['se', 'e', 's'],
-                }}
-                className="border rounded-lg shadow-sm relative overflow-visible"
-              >
-                <ItemContextMenu
-                  type={item.type}
-                  editAction={() =>
-                    setOpenEditModal({ id: String(item.id), content: String(item.content) })
-                  }
-                  deleteAction={() => handleDeleteItem(String(item.id))}
-                />
+      <ChooseVideoModal
+        open={openChooseVideo}
+        closeModal={() => {
+          setOpenChooseVideo(false);
+        }}
+        handleAdd={(type, content, bankId) => {
+          handleAddVideo(content as string);
+        }}
+      />
 
-                <BlockItem item={item} />
-              </div>
-            );
-          })}
-        </ResponsiveGridLayout>
-
-        {openEditModal && (
-          <RedactorModal
-            open={!!openEditModal}
-            close={() => {
-              setOpenEditModal(null);
-            }}
-            confirm={content => {
-              handleEditItem(openEditModal.id, content);
-              setOpenEditModal(null);
-            }}
-            content={openEditModal.content}
-          />
-        )}
-      </div>
+      <ChooseAudioModal
+        open={openChooseAudio}
+        closeModal={() => {
+          setOpenChooseAudio(false);
+        }}
+        handleAdd={(type, content, bankId) => handleAddAudio(content as string)}
+      />
     </>
   );
 }
-
-export default LessonBlock;

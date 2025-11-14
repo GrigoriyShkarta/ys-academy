@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ReactQuill from 'react-quill-new';
 import { Button } from '@/components/ui/button';
 import { quillFormats, quillModules } from '@/lib/utils';

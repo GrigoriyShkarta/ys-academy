@@ -49,6 +49,7 @@
     "title": "Title",
     "enterTitle": "Enter title",
     "file": "File",
+    "files": "Files",
     "dragOrClick": "Drag and drop your file here or click to select",
     "add": "Add",
     "cancel": "Cancel",
@@ -69,7 +70,7 @@
     "text": "Text",
     "createLesson": "Create lesson",
     "save": "Save",
-    "addBlock": "Add block",
+    "add_section": "Add section",
     "take_from_text_bank": "Take from text bank",
     "add_text": "Add text",
     "add_audio": "Add audio",
@@ -92,7 +93,11 @@
     "edit_module": "Edit module",
     "lessons": "Lessons",
     "no_lessons_yet": "No lessons yet",
-    "or": "or"
+    "or": "or",
+    "one_per_line": "The link is not valid",
+    "each_url_new_line": "Each URL on a new line",
+    "video_file": "MP4 or Webm",
+    "downloaded": "Downloaded"
   },
 
   "Validation": {
@@ -117,6 +122,7 @@
     "page": "Page",
     "of": "of",
     "forward": "Forward",
-    "from_device": "Add from device"
+    "from_device": "Add from device",
+    "drug_drop_here": "Drag and drop your file here"
   }
 }
