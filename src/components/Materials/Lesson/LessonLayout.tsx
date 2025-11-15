@@ -31,7 +31,6 @@ export default function LessonLayout({ id }: { id: number }) {
   useEffect(() => {
     if (lesson) {
       setLessonTitle(lesson.title);
-      console.log('lesson', lesson);
       const doc = (lesson.content || []).map((item: any) => ({
         blockId: item.blockId,
         content: item.content ?? [],

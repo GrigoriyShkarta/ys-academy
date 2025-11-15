@@ -200,7 +200,7 @@ export default function VideoAddModal({
               placeholder={`${t('url')} — ${t('one_per_line')}`}
               value={urlsText}
               onChange={e => setUrlsText(e.target.value)}
-              ref={textareaRef}
+              // ref={textareaRef}
               onKeyDown={handleTextareaKeyDown}
               aria-invalid={hasValidationError}
             />
