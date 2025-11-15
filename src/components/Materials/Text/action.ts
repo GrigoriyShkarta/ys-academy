@@ -4,7 +4,7 @@ import { GetMaterialParams } from '@/components/Materials/utils/interfaces';
 
 export const uploadText = async (form: ContentFormValues) => {
   const formData = new FormData();
-  formData.append('title', form.title);
+  formData.append('title', form?.title ?? '');
   if (form.content) {
     formData.append('content', form.content);
   }

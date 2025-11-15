@@ -23,6 +23,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { FormFooter } from '@/common/ModalFooter';
+import { ContentFormValues, contentSchema } from '@/components/Materials/utils/materialSchemas';
+import { IText } from '@/components/Materials/utils/interfaces';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { editText, uploadText } from '@/components/Materials/Text/action';
+import { quillFormats, quillModules } from '@/lib/utils';
+
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 // Загружаем стили редактора только на клиенте
 if (typeof window !== 'undefined') {
@@ -30,12 +37,6 @@ if (typeof window !== 'undefined') {
   // @ts-ignore - динамический импорт стилей
   import('react-quill-new/dist/quill.snow.css');
 }
-import { FormFooter } from '@/common/ModalFooter';
-import { ContentFormValues, contentSchema } from '@/components/Materials/utils/materialSchemas';
-import { IText } from '@/components/Materials/utils/interfaces';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { editText, uploadText } from '@/components/Materials/Text/action';
-import { quillFormats, quillModules } from '@/lib/utils';
 
 interface Props {
   text: IText | null;
@@ -76,7 +77,7 @@ export default function TextModal({ text, setSelectedText }: Props) {
   const onSubmit = async (data: ContentFormValues) => {
     setIsLoading(true);
     if (data.id) {
-      await editText(data.id, data);
+      // await editText(data.id, data);
     } else {
       await uploadText(data);
     }
