@@ -34,7 +34,7 @@ export default function LessonLayout({ id }: { id: number }) {
       console.log('lesson', lesson);
       const doc = (lesson.content || []).map((item: any) => ({
         blockId: item.blockId,
-        content: item.content ?? [], // ← массив Block[]
+        content: item.content ?? [],
       }));
       setLessonDoc(doc);
     }
