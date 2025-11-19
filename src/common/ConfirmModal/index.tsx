@@ -43,7 +43,7 @@ export default function ConfirmModal({
                   {t('sending')}
                 </>
               ) : (
-                t('send')
+                t('confirm')
               )}
             </Button>
           </div>

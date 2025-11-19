@@ -1,20 +1,31 @@
 import axiosInstance from '@/services/axios';
 import { GetMaterialParams, LessonDocItem } from '@/components/Materials/utils/interfaces';
 
-export const createLesson = async (lessons: LessonDocItem[], lessonTitle: string) => {
+export const createLesson = async (
+  lessons: LessonDocItem[],
+  lessonTitle: string,
+  cover?: string
+) => {
   const formatedLesson = {
     title: lessonTitle,
     blocks: lessons,
+    cover,
   };
   const { data } = await axiosInstance.post('/lesson/create', formatedLesson);
 
   return data;
 };
 
-export const updateLesson = async (id: number, lessons: LessonDocItem[], lessonTitle: string) => {
+export const updateLesson = async (
+  id: number,
+  lessons: LessonDocItem[],
+  lessonTitle: string,
+  cover?: string
+) => {
   const formatedLesson = {
     title: lessonTitle,
     blocks: lessons,
+    cover,
   };
 
   const { data } = await axiosInstance.post(`/lesson/update/${id}`, formatedLesson);

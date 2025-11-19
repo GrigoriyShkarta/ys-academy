@@ -8,22 +8,31 @@ import {
   SuggestionMenuController,
   useCreateBlockNote,
 } from '@blocknote/react';
-import { locales as multiColumnLocales, multiColumnDropCursor } from '@blocknote/xl-multi-column';
+import { multiColumnDropCursor } from '@blocknote/xl-multi-column';
 import { BlockNoteView } from '@blocknote/shadcn';
 import { useEffect, useState } from 'react';
 import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
 import ChooseVideoModal from '@/common/MaterialsCommon/ChooseVideoModal';
 import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal';
 import { schema } from '@/components/Materials/utils/utils';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
 
 interface Props {
   lesson?: Block[];
   blockId: number;
   editable?: boolean;
   onUpdate?: (blockId: number, content: Block[]) => void;
+  deleteSection?: (blockId: number) => void;
 }
 
-export default function LessonBlock({ blockId, onUpdate, lesson, editable = true }: Props) {
+export default function LessonBlock({
+  blockId,
+  onUpdate,
+  lesson,
+  editable = true,
+  deleteSection,
+}: Props) {
   const [openChoosePhoto, setOpenChoosePhoto] = useState(false);
   const [openChooseAudio, setOpenChooseAudio] = useState(false);
   const [openChooseVideo, setOpenChooseVideo] = useState(false);
@@ -35,7 +44,6 @@ export default function LessonBlock({ blockId, onUpdate, lesson, editable = true
     dropCursor: multiColumnDropCursor,
     dictionary: {
       ...locales.uk,
-      multi_column: multiColumnLocales.ru,
     },
     initialContent: lesson,
   });
@@ -77,26 +85,37 @@ export default function LessonBlock({ blockId, onUpdate, lesson, editable = true
     );
   };
 
+  const resolveInsertTarget = (block: Block | null) => {
+    if (!block) return null;
+    const maybeId = (block as unknown as { id?: string }).id;
+    return maybeId ?? block;
+  };
+
   const insertMedia = (type: 'image' | 'video' | 'audio', url: string) => {
     const cursor = editor.getTextCursorPosition();
     if (!cursor?.block) return;
 
     // @ts-ignore
-    const newBlock: any = {
+    const newBlock: Partial<BNBlock> = {
       type,
       props: { url },
     };
 
     if (type === 'image' || type === 'video') {
-      newBlock.props.previewWidth = '100%';
-      newBlock.props.caption = '';
+      newBlock.props = { ...(newBlock.props ?? {}), previewWidth: '100%', caption: '' };
     }
 
     if (type === 'audio') {
-      newBlock.props.name = decodeURIComponent(url.split('/').pop()?.split('?')[0] || 'Аудіо');
+      newBlock.props = {
+        ...(newBlock.props ?? {}),
+        name: decodeURIComponent(url.split('/').pop()?.split('?')[0] || 'Аудіо'),
+      };
     }
 
-    editor.insertBlocks([newBlock], cursor.block, 'before');
+    const target = resolveInsertTarget(cursor.block);
+    if (target) {
+      editor.insertBlocks([newBlock as Block], target, 'before');
+    }
   };
 
   // Обработчики добавления медиа
@@ -150,6 +169,18 @@ export default function LessonBlock({ blockId, onUpdate, lesson, editable = true
 
   return (
     <>
+      {editable && (
+        <div className="flex w-full justify-end">
+          <Button
+            variant="destructive"
+            className="cursor-pointer"
+            onClick={() => deleteSection && deleteSection(blockId)}
+          >
+            <Trash2 />
+          </Button>
+        </div>
+      )}
+
       <BlockNoteView editor={editor} onChange={handleEditorChange} editable={editable}>
         <SuggestionMenuController
           triggerCharacter={'/'}

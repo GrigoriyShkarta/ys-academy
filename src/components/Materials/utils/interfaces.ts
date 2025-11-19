@@ -45,6 +45,7 @@ export interface LessonBlockType {
 
 export interface Lesson {
   title: string;
+  cover?: string;
   blocks: LessonBlockType[];
 }
 

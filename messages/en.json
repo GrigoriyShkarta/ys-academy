@@ -97,7 +97,10 @@
     "one_per_line": "The link is not valid",
     "each_url_new_line": "Each URL on a new line",
     "video_file": "MP4 or Webm",
-    "downloaded": "Downloaded"
+    "downloaded": "Downloaded",
+    "change_cover": "Change cover",
+    "add_cover": "Add cover",
+    "confirm_lesson": "Are you sure you want to leave the page? All entered information will not be saved."
   },
 
   "Validation": {
@@ -123,6 +126,7 @@
     "of": "of",
     "forward": "Forward",
     "from_device": "Add from device",
-    "drug_drop_here": "Drag and drop your file here"
+    "drug_drop_here": "Drag and drop your file here",
+    "confirm": "Confirm"
   }
 }

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +15,7 @@ import {
   GraduationCap,
   Image,
   LogOut,
+  Menu,
   Moon,
   Music,
   PanelLeftClose,
@@ -23,20 +23,20 @@ import {
   Sun,
   Users,
   Video,
+  X,
 } from 'lucide-react';
 import { YS_TOKEN } from '@/lib/consts';
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(false); // десктоп: свернуть/развернуть
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // мобильное меню
   const [openMaterials, setOpenMaterials] = useState(false);
   const { theme, setTheme } = useTheme();
   const t = useTranslations('SideBar');
 
   useEffect(() => {
     const token = localStorage.getItem(YS_TOKEN);
-    if (!token) {
-      window.location.href = '/';
-    }
+    if (!token) window.location.href = '/';
   }, []);
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
@@ -66,116 +66,219 @@ export default function Sidebar() {
     },
   ];
 
-  const handleClickLogout = () => {
+  const handleLogout = () => {
     localStorage.removeItem(YS_TOKEN);
     window.location.href = '/';
   };
 
-  return (
-    <motion.aside
-      animate={{ width: collapsed ? 80 : 240 }}
-      transition={{ duration: 0.25 }}
-      className="h-screen border-r bg-gradient-to-b from-gray-900 to-gray-800 text-white flex flex-col justify-between shadow-sm"
-    >
-      {/* Header */}
-      <div>
-        <div
-          className={`flex items-center ${
-            collapsed ? 'justify-center' : 'justify-between'
-          } p-4 border-b`}
-        >
-          {!collapsed && (
-            <span className="font-bold text-lg whitespace-nowrap transition-opacity">Панель</span>
-          )}
-          <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? (
-              <PanelLeftOpen className="h-5 w-5" />
-            ) : (
-              <PanelLeftClose className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
+  // Общий контент меню — используем и в сайдбаре, и в мобильном меню
+  const MenuContent = () => (
+    <>
+      {menuItems.map(item => (
+        <div key={item.name}>
+          {!item.submenu ? (
+            <Link
+              href={item.href!}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-white/10 transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {item.icon}
+              <span>{t(item.name)}</span>
+            </Link>
+          ) : (
+            <>
+              <button
+                onClick={() => setOpenMaterials(v => !v)}
+                className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-white/10 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  {item.icon}
+                  <span>{t(item.name)}</span>
+                </div>
+                {openMaterials ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
 
-        {/* Навигация */}
-        <nav className="p-2 space-y-1">
-          {menuItems.map(item => (
-            <div key={item.name}>
-              {/* Если нет подменю — ссылка */}
-              {!item.submenu ? (
-                <Link
-                  href={item.href!}
-                  className={`inline-flex items-center w-full gap-3 rounded-md text-sm font-medium
-      ${collapsed ? 'justify-center' : 'justify-start'} hover:bg-muted transition`}
-                >
-                  <Button
-                    variant="ghost"
-                    className={`w-full gap-3 ${collapsed ? 'justify-center' : 'justify-start'}`}
+              {/* Подменю с плавным раскрытием через max-h + transition */}
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  openMaterials ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="ml-10 mt-1 space-y-1 pb-2">
+                  {item.submenu.map(sub => (
+                    <Link
+                      key={sub.name}
+                      href={sub.href}
+                      className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm hover:bg-white/10 transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {sub.icon}
+                      <span>{t(sub.name)}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+
+      <div className="border-t border-white/10 pt-4 mt-4 space-y-2">
+        <button
+          onClick={toggleTheme}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm hover:bg-white/10 transition-colors"
+        >
+          {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          <span>{t('change_theme')}</span>
+        </button>
+
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-400 hover:bg-red-900/20 transition-colors"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>{t('logout')}</span>
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* ДЕСКТОПНАЯ САЙДБАР */}
+      <aside
+        className={`hidden md:flex h-screen flex-col justify-between border-r bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300 ${
+          collapsed ? 'w-20' : 'w-64'
+        }`}
+      >
+        {/* Заголовок */}
+        <div>
+          <div className="flex items-center justify-between p-4 border-b border-white/10">
+            {!collapsed && <span className="font-bold text-lg">Панель</span>}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(!collapsed)}
+              className="text-white hover:bg-white/10"
+            >
+              {collapsed ? (
+                <PanelLeftOpen className="h-5 w-5" />
+              ) : (
+                <PanelLeftClose className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
+
+          <nav className="p-3 space-y-1">
+            {menuItems.map(item => (
+              <div key={item.name}>
+                {!item.submenu ? (
+                  <Link
+                    href={item.href!}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-white/10 transition-colors ${
+                      collapsed ? 'justify-center' : ''
+                    }`}
                   >
                     {item.icon}
                     {!collapsed && <span>{t(item.name)}</span>}
-                  </Button>
-                </Link>
-              ) : (
-                // Если есть подменю — кнопка без ссылки
-                <Button
-                  variant="ghost"
-                  className={`w-full ${collapsed ? 'justify-center' : 'justify-start'} gap-3`}
-                  onClick={() => setOpenMaterials(!openMaterials)}
-                >
-                  {item.icon}
-                  {!collapsed && <span>{t(item.name)}</span>}
-                  {!collapsed &&
-                    (openMaterials ? (
-                      <ChevronUp className="w-4 h-4 ml-auto" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 ml-auto" />
-                    ))}
-                </Button>
-              )}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => !collapsed && setOpenMaterials(v => !v)}
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-white/10 transition-colors ${
+                      collapsed ? 'justify-center' : 'justify-between'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {item.icon}
+                      {!collapsed && <span>{t(item.name)}</span>}
+                    </div>
+                    {!collapsed &&
+                      (openMaterials ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      ))}
+                  </button>
+                )}
 
-              {/* Подменю */}
-              {item.submenu && (
-                <AnimatePresence>
-                  {openMaterials && !collapsed && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="flex flex-col ml-6 overflow-hidden"
-                    >
+                {/* Подменю для десктопа */}
+                {item.submenu && !collapsed && (
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      openMaterials ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="ml-10 mt-1 space-y-1 pb-2">
                       {item.submenu.map(sub => (
-                        <Link key={sub.name} href={sub.href}>
-                          <Button variant="ghost" className="justify-start gap-2 w-full text-sm">
-                            {sub.icon}
-                            {t(sub.name)}
-                          </Button>
+                        <Link
+                          key={sub.name}
+                          href={sub.href}
+                          className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm hover:bg-white/10 transition-colors block"
+                        >
+                          {sub.icon}
+                          <span>{t(sub.name)}</span>
                         </Link>
                       ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              )}
-            </div>
-          ))}
-        </nav>
-      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
+        </div>
 
-      {/* Нижние кнопки */}
-      <div className="p-2 border-t space-y-2">
-        <Button variant="ghost" className="w-full justify-start gap-3" onClick={toggleTheme}>
-          {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-          {!collapsed && <span>{t('change_theme')}</span>}
-        </Button>
+        {/* Нижние кнопки (только если не свернуто) */}
+        {!collapsed && (
+          <div className="p-4 border-t border-white/10 space-y-2">
+            <Button variant="ghost" className="w-full justify-start gap-3" onClick={toggleTheme}>
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              <span>{t('change_theme')}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-red-400"
+              onClick={handleLogout}
+            >
+              <LogOut className="w-5 h-5" />
+              <span>{t('logout')}</span>
+            </Button>
+          </div>
+        )}
+      </aside>
 
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-red-600 hover:text-red-700"
-          onClick={handleClickLogout}
+      {/* МОБИЛЬНЫЙ ХЕДЕР + ВЫПАДАЮЩЕЕ МЕНЮ */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-gray-900 to-gray-800 text-white shadow-lg">
+        <div className="flex items-center justify-between p-4">
+          <span className="font-bold text-lg">Панель</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(v => !v)}
+            className="text-white"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
+        </div>
+
+        {/* Выпадающее меню */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-800/95 backdrop-blur border-t border-white/10 ${
+            mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+          }`}
         >
-          <LogOut className="w-5 h-5" />
-          {!collapsed && <span>{t('logout')}</span>}
-        </Button>
-      </div>
-    </motion.aside>
+          <nav className="p-4 pb-6 space-y-3">
+            <MenuContent />
+          </nav>
+        </div>
+      </header>
+
+      {/* Отступ под фиксированный мобильный хедер */}
+      <div className="md:hidden h-16" />
+    </>
   );
 }

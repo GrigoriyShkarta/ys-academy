@@ -8,6 +8,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react';
 import LessonBlock from '@/components/Materials/Lesson/components/LessonBlock';
 import { Block } from '@blocknote/core';
+import Cover from '@/components/Materials/Lesson/components/Cover';
+import ConfirmModal from '@/common/ConfirmModal';
 
 interface Props {
   setIsEditPlace: Dispatch<SetStateAction<boolean>>;
@@ -15,6 +17,8 @@ interface Props {
 
 export default function EditPlace({ setIsEditPlace }: Props) {
   const [lessonTitle, setLessonTitle] = useState('');
+  const [cover, setCover] = useState<string>('');
+  const [open, setOpen] = useState(false);
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
@@ -45,7 +49,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
 
   const saveLesson = async () => {
     try {
-      await createLesson(lessonDoc, lessonTitle);
+      await createLesson(lessonDoc, lessonTitle, cover);
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
       setIsEditPlace(false);
     } catch (error) {
@@ -58,7 +62,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
       <div className="flex justify-between items-center">
         <button
           type="button"
-          onClick={() => setIsEditPlace(false)}
+          onClick={() => setOpen(true)}
           className="flex items-center"
           aria-label="Назад"
         >
@@ -73,6 +77,8 @@ export default function EditPlace({ setIsEditPlace }: Props) {
         </div>
       </div>
 
+      <Cover updateCover={setCover} cover={cover} isEdit />
+
       <div className="w-full flex">
         <Input
           placeholder={t('lesson_title')}
@@ -83,12 +89,24 @@ export default function EditPlace({ setIsEditPlace }: Props) {
       </div>
 
       {lessonDoc.map(block => (
-        <LessonBlock key={block.blockId} blockId={block.blockId} onUpdate={updateBlock} />
+        <LessonBlock
+          key={block.blockId}
+          blockId={block.blockId}
+          onUpdate={updateBlock}
+          deleteSection={handleDeleteBlock}
+        />
       ))}
 
       <Button variant="outline" className="w-full h-[50px]" onClick={addBlock}>
         {t('add_section')}
       </Button>
+
+      <ConfirmModal
+        open={open}
+        setOnClose={() => setOpen(false)}
+        confirmAction={() => setIsEditPlace(false)}
+        textContent={t('confirm_lesson')}
+      />
     </div>
   );
 }

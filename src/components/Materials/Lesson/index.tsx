@@ -35,7 +35,7 @@ export default function LessonsLayout() {
       )}
 
       {isEditPlace && <EditPlace setIsEditPlace={setIsEditPlace} />}
-      {!isEditPlace && lessons.length > 0 && (
+      {!isEditPlace && lessons?.length > 0 && (
         <LessonList lessons={lessons} search={search} setSearch={setSearch} />
       )}
     </div>
