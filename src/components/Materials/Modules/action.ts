@@ -1,22 +1,14 @@
 import axiosInstance from '@/services/axios';
-import { Module } from '@/components/Materials/utils/interfaces';
+import { Module, ModuleDTO } from '@/components/Materials/utils/interfaces';
 
-export const createModule = async (formData: FormData) => {
-  const { data } = await axiosInstance.post('/module/create', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+export const createModule = async (form: ModuleDTO) => {
+  const { data } = await axiosInstance.post('/module/create', form);
 
   return data;
 };
 
-export const updateModule = async (formData: FormData, id: number) => {
-  const { data } = await axiosInstance.post(`/module/update/${id}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+export const updateModule = async (form: ModuleDTO, id: number) => {
+  const { data } = await axiosInstance.post(`/module/update/${id}`, form);
 
   return data;
 };

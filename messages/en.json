@@ -100,7 +100,9 @@
     "downloaded": "Downloaded",
     "change_cover": "Change cover",
     "add_cover": "Add cover",
-    "confirm_lesson": "Are you sure you want to leave the page? All entered information will not be saved."
+    "confirm_lesson": "Are you sure you want to leave the page? All entered information will not be saved.",
+    "add_photo_from_device": "Add from device",
+    "take_from_photo_bank": "Add from photobank"
   },
 
   "Validation": {

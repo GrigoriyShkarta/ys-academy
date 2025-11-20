@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import AvatarEditor from 'react-avatar-editor';
-import { LessonItemType, Module } from '@/components/Materials/utils/interfaces';
+import { LessonItemType, Module, ModuleDTO } from '@/components/Materials/utils/interfaces';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -27,7 +27,6 @@ import ChooseLessonModal from '@/common/MaterialsCommon/ChooseLessonModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createModule, updateModule } from '@/components/Materials/Modules/action';
 import SortableLesson from '@/components/Materials/Modules/ModuleModal/SortableLesson';
-import { cropImage } from '@/lib/utils';
 
 interface Props {
   open: boolean;
@@ -40,9 +39,8 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
   const queryClient = useQueryClient();
   const editorRef = useRef<AvatarEditor | null>(null);
 
-  const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState<string>('');
-  const [lessons, setLessons] = useState<{ id: number; title: string; index?: number }[]>([]);
+  const [lessons, setLessons] = useState<{ id: number; title: string; index: number }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
   const [openLessonModal, setOpenLessonModal] = useState<boolean>(false);
   const [openPhotoBank, setOpenPhotoBank] = useState<boolean>(false);
@@ -90,11 +88,11 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
   };
 
   const mutation = useMutation({
-    mutationFn: async (formData: FormData) => {
+    mutationFn: async (form: ModuleDTO) => {
       if (module) {
-        await updateModule(formData, module.id);
+        await updateModule(form, module.id);
       } else {
-        await createModule(formData);
+        await createModule(form);
       }
     },
     onSuccess: () => {
@@ -109,7 +107,6 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
       alert(t('save_error'));
     },
     onSettled: () => {
-      setFile(null);
       setName('');
       setLessons([]);
       setImageSrc('');
@@ -119,27 +116,13 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('title', name);
+    const data = {
+      title: name,
+      url: imageSrc ?? '',
+      lessons: lessons.map(l => ({ id: l.id, index: l.index })),
+    };
 
-    let croppedFile: File | null = null;
-
-    croppedFile = await cropImage(editorRef);
-
-    if (croppedFile) {
-      formData.append('image', croppedFile);
-    } else if (imageSrc) {
-      formData.append('url', imageSrc);
-    } else {
-      formData.append('url', '');
-    }
-
-    lessons.forEach(l => {
-      formData.append('lessonsId[]', String(l.id));
-      formData.append('lessonsIndex[]', String(l.index ?? 0));
-    });
-
-    mutation.mutate(formData);
+    mutation.mutate(data);
   };
 
   const addLesson = (newLessons: { id: number; title: string }[]) => {
@@ -156,7 +139,6 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
   };
 
   const handleClose = () => {
-    setFile(null);
     setName('');
     setLessons([]);
     setImageSrc('');
@@ -176,8 +158,6 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
               setImage={setImageSrc}
               externalImage={imageSrc}
               onOpenPhotoBank={() => setOpenPhotoBank(true)}
-              file={file}
-              setFile={setFile}
               editorRef={editorRef}
             />
 

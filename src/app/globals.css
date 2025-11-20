@@ -179,7 +179,7 @@ button {
     }
 }
 
-.bn-inline-content {
+p {
     color: rgb(var(--primary)) !important;
 }
 

@@ -58,7 +58,9 @@ export default function ModuleLayout({ id }: { id: number }) {
             className="object-cover"
           />
           <div className="flex justify-center gap-4">
-            <Button variant="destructive">{t('delete')}</Button>
+            <Button variant="destructive" onClick={() => setOpenDeleteModal(true)}>
+              {t('delete')}
+            </Button>
             <Button className="bg-accent" onClick={() => setOpenEditModal(true)}>
               {t('edit')}
             </Button>

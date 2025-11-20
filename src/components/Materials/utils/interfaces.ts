@@ -43,10 +43,13 @@ export interface LessonBlockType {
   title: string;
 }
 
-export interface Lesson {
+export interface ModuleDTO {
   title: string;
-  cover?: string;
-  blocks: LessonBlockType[];
+  url?: string;
+  lessons?: {
+    id: number;
+    index: number;
+  }[];
 }
 
 export interface Module {
