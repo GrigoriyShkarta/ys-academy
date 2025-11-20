@@ -158,90 +158,91 @@ export default function MediaGallery({
 
       {/* Сетка медиа */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 w-full box-border">
-        {data.map((item: IFile) => (
-          <div
-            key={item.id}
-            className={`relative group rounded-lg overflow-hidden border hover:shadow-md transition ${
-              selectedIds.includes(item.id) ? 'ring-2 ring-orange-500' : ''
-            }`}
-          >
-            {/* Видео, YouTube или фото */}
-            {isLink ? (
-              <Link href={`${linkUrl}/${item.id}`} className="block">
+        {data &&
+          data?.map((item: IFile) => (
+            <div
+              key={item.id}
+              className={`relative group rounded-lg overflow-hidden border hover:shadow-md transition ${
+                selectedIds.includes(item.id) ? 'ring-2 ring-orange-500' : ''
+              }`}
+            >
+              {/* Видео, YouTube или фото */}
+              {isLink ? (
+                <Link href={`${linkUrl}/${item.id}`} className="block">
+                  <img
+                    src={item?.url ? item.url : logo.src}
+                    alt={item.title}
+                    className="w-full h-48 object-cover cursor-pointer"
+                  />
+                </Link>
+              ) : getYouTubeId(item.url) ? (
+                <iframe
+                  className="w-full h-48 object-cover cursor-pointer"
+                  src={`https://www.youtube.com/embed/${getYouTubeId(item.url)}`}
+                  title={item.title}
+                  allowFullScreen
+                  onClick={() => setPreviewUrl(item.url)}
+                />
+              ) : !isPhoto || isVideoFileUrl(item.url) ? (
+                <video
+                  src={item.url}
+                  controls
+                  className="w-full h-48 object-cover cursor-pointer"
+                  onClick={() => setPreviewUrl(item.url)}
+                />
+              ) : (
                 <img
-                  src={item?.url ? item.url : logo.src}
+                  src={item.url}
                   alt={item.title}
                   className="w-full h-48 object-cover cursor-pointer"
+                  onClick={() => setPreviewUrl(item.url)}
                 />
-              </Link>
-            ) : getYouTubeId(item.url) ? (
-              <iframe
-                className="w-full h-48 object-cover cursor-pointer"
-                src={`https://www.youtube.com/embed/${getYouTubeId(item.url)}`}
+              )}
+
+              {/* Чекбокс выбора */}
+              {!hiddenCheckbox && (
+                <Checkbox
+                  checked={selectedIds.includes(item.id)}
+                  onCheckedChange={() => toggleSelect(item.id)}
+                  className="absolute top-2 left-2 bg-accent/80! w-6 h-6 rounded-sm"
+                />
+              )}
+
+              {/* Кнопки редактирования и удаления */}
+              {handleEdit && (
+                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleEdit(item);
+                    }}
+                    className="bg-accent/80 p-1 rounded-sm shadow hover:bg-accent text-white"
+                    type="button"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setSelectedId(item.id);
+                      setOpenConfirm(true);
+                    }}
+                    className="bg-destructive/80 p-1 rounded-sm shadow hover:bg-destructive text-white"
+                    type="button"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              )}
+
+              <div
+                className="p-2 text-center text-sm font-medium text-muted-foreground truncate"
                 title={item.title}
-                allowFullScreen
-                onClick={() => setPreviewUrl(item.url)}
-              />
-            ) : !isPhoto || isVideoFileUrl(item.url) ? (
-              <video
-                src={item.url}
-                controls
-                className="w-full h-48 object-cover cursor-pointer"
-                onClick={() => setPreviewUrl(item.url)}
-              />
-            ) : (
-              <img
-                src={item.url}
-                alt={item.title}
-                className="w-full h-48 object-cover cursor-pointer"
-                onClick={() => setPreviewUrl(item.url)}
-              />
-            )}
-
-            {/* Чекбокс выбора */}
-            {!hiddenCheckbox && (
-              <Checkbox
-                checked={selectedIds.includes(item.id)}
-                onCheckedChange={() => toggleSelect(item.id)}
-                className="absolute top-2 left-2 bg-accent/80! w-6 h-6 rounded-sm"
-              />
-            )}
-
-            {/* Кнопки редактирования и удаления */}
-            {handleEdit && (
-              <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    handleEdit(item);
-                  }}
-                  className="bg-accent/80 p-1 rounded-sm shadow hover:bg-accent text-white"
-                  type="button"
-                >
-                  <Edit size={16} />
-                </button>
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    setSelectedId(item.id);
-                    setOpenConfirm(true);
-                  }}
-                  className="bg-destructive/80 p-1 rounded-sm shadow hover:bg-destructive text-white"
-                  type="button"
-                >
-                  <Trash2 size={16} />
-                </button>
+              >
+                {item.title}
               </div>
-            )}
-
-            <div
-              className="p-2 text-center text-sm font-medium text-muted-foreground truncate"
-              title={item.title}
-            >
-              {item.title}
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       {currentPage && totalPages && onPageChange && data.length > 0 ? (
