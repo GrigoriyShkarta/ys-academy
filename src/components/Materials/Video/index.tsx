@@ -52,7 +52,7 @@ export default function VideoLayout() {
           <DrugOverflow dragActive={dragActive} />
 
           <MediaGallery
-            data={videos.data}
+            data={videos?.data}
             totalPages={videos.meta.totalPages}
             currentPage={videos.meta.currentPage}
             handleDelete={deleteVideos}

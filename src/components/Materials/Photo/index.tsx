@@ -52,7 +52,7 @@ export default function PhotoLayout() {
           <DrugOverflow dragActive={dragActive} />
 
           <MediaGallery
-            data={photos.data}
+            data={photos?.data}
             totalPages={photos.meta.totalPages}
             currentPage={photos.meta.currentPage}
             onPageChange={newPage => setPage(newPage)}
