@@ -55,10 +55,7 @@ export const getLesson = async (id: number) => {
   return data;
 };
 
-export const assignLesson = async (
-  userIds: number[],
-  lessonIds?: { id: number; blocks?: number[] }[]
-) => {
+export const assignLesson = async (userIds: number[], lessonIds?: number | number[]) => {
   const { data } = await axiosInstance.post('/lesson/assign', {
     lessonIds,
     userIds,

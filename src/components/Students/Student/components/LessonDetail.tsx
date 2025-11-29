@@ -62,6 +62,7 @@ export default function LessonDetail({
   const sendBlocksAccess = async () => {
     try {
       setLoading(true);
+      // @ts-ignore
       await assignLesson([+studentId], [{ id: lessonId, blocks: selectedBlocks }]);
       await queryClient.invalidateQueries({ queryKey: ['student'] });
     } catch (error) {

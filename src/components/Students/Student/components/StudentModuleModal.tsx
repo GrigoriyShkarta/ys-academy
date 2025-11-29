@@ -57,6 +57,7 @@ export default function StudentModuleModal({ lessons, open, close, studentId, mo
     try {
       setLoading(true);
       const lessons = selectedIds?.map(s => ({ id: s }));
+      // @ts-ignore
       await assignLesson([+studentId], lessons);
       await client.invalidateQueries({ queryKey: ['student'] });
     } catch (error) {

@@ -123,9 +123,6 @@ export default function ChooseStudentModal({
             data={students.data ?? []}
             columns={columns}
             selectedIds={selectedIds}
-            showSendButton
-            handleAddAccept={assignLessons}
-            loading={loading}
             onSearchChange={newSearch => {
               setSearch(newSearch);
             }}
