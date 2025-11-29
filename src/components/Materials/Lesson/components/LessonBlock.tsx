@@ -1,4 +1,5 @@
 import { Block, BlockNoteEditor, filterSuggestionItems } from '@blocknote/core';
+import { useTheme } from 'next-themes';
 import * as locales from '@blocknote/core/locales';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/shadcn/style.css';
@@ -17,11 +18,15 @@ import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal';
 import { schema } from '@/components/Materials/utils/utils';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Props {
   lesson?: Block[];
   blockId: number;
   editable?: boolean;
+  isLessonDetail?: boolean;
+  isSelectBlock?: boolean;
+  selectBlock?: (blockId: number) => void;
   onUpdate?: (blockId: number, content: Block[]) => void;
   deleteSection?: (blockId: number) => void;
 }
@@ -31,11 +36,15 @@ export default function LessonBlock({
   onUpdate,
   lesson,
   editable = true,
+  isLessonDetail = false,
+  selectBlock,
+  isSelectBlock,
   deleteSection,
 }: Props) {
   const [openChoosePhoto, setOpenChoosePhoto] = useState(false);
   const [openChooseAudio, setOpenChooseAudio] = useState(false);
   const [openChooseVideo, setOpenChooseVideo] = useState(false);
+  const { theme } = useTheme();
 
   const editor = useCreateBlockNote({
     // @ts-ignore
@@ -170,7 +179,7 @@ export default function LessonBlock({
   return (
     <>
       {editable && (
-        <div className="flex w-full justify-end">
+        <div className="flex w-full justify-end px-4">
           <Button
             variant="destructive"
             className="cursor-pointer"
@@ -181,7 +190,20 @@ export default function LessonBlock({
         </div>
       )}
 
-      <BlockNoteView editor={editor} onChange={handleEditorChange} editable={editable}>
+      {isLessonDetail && selectBlock && (
+        <Checkbox
+          checked={isSelectBlock}
+          onCheckedChange={() => selectBlock(blockId)}
+          className="w-6 h-6"
+        />
+      )}
+
+      <BlockNoteView
+        editor={editor}
+        onChange={handleEditorChange}
+        editable={editable}
+        theme={theme === 'light' ? 'light' : 'dark'}
+      >
         <SuggestionMenuController
           triggerCharacter={'/'}
           getItems={async query => filterSuggestionItems(getCustomSlashMenuItems(editor), query)}

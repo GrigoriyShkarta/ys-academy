@@ -147,7 +147,7 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[850px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-full sm:max-w-[850px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t(module ? 'edit_module' : 'create_module')}</DialogTitle>
         </DialogHeader>

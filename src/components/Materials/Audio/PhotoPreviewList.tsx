@@ -38,7 +38,7 @@ export default function PhotoPreviewList({ fetchingIdx, uploadedFiles, setUpload
       <p className="text-xs text-muted-foreground">{`${uploadedFiles.length} / 9`}</p>
 
       <div
-        className={`mt-3 grid ${uploadedFiles.length === 1 && 'grid-cols-1'} ${
+        className={`mt-3 max-sm:grid-cols-1 grid ${uploadedFiles.length === 1 && 'grid-cols-1'} ${
           uploadedFiles.length === 2 && 'grid-cols-2'
         } ${uploadedFiles.length > 2 && 'grid-cols-3'} gap-3`}
       >

@@ -47,6 +47,8 @@ export default function AudioModal({
   const [title, setTitle] = useState('');
   const queryClient = useQueryClient();
 
+  console.log('audioFiles', audioFiles);
+
   useEffect(() => {
     if (uploadedFiles) {
       setOpen(true);
@@ -88,9 +90,13 @@ export default function AudioModal({
     } else {
       for (let i = 0; i < audioFiles.length; i++) {
         const item = audioFiles[i];
+        const rawCategories = (item as any).categories ?? [];
+        const categories = rawCategories.map((id: string | number) => Number(id));
+        console.log('categories', categories);
         const formatedFile = {
           content: item,
           title: item.name?.replace(/\.[^/.]+$/, ''),
+          categories,
         };
         setFetchingFileIdx(i);
         await uploadAudio(formatedFile);

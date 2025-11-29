@@ -22,12 +22,13 @@
     "my_materials": "My materials",
     "change_theme": "Change theme",
     "logout": "Logout",
-    "audio_bank": "Audio bank",
-    "photo_bank": "Photo bank",
-    "video_bank": "Video bank",
+    "audio_bank": "Audio",
+    "photo_bank": "Photo",
+    "video_bank": "Video",
     "text_bank": "Text bank",
     "lessons": "Lessons",
-    "modules": "Modules"
+    "modules": "Modules",
+    "categories": "Categories"
   },
 
   "Students": {
@@ -102,7 +103,12 @@
     "add_cover": "Add cover",
     "confirm_lesson": "Are you sure you want to leave the page? All entered information will not be saved.",
     "add_photo_from_device": "Add from device",
-    "take_from_photo_bank": "Add from photobank"
+    "take_from_photo_bank": "Add from photobank",
+    "created": "Created",
+    "creat_category": "Create category",
+    "edit_category": "Edit category",
+    "add_category": "Add category",
+    "remove_color": "Remove color"
   },
 
   "Validation": {
@@ -129,6 +135,16 @@
     "forward": "Forward",
     "from_device": "Add from device",
     "drug_drop_here": "Drag and drop your file here",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "add_access": "Add accept",
+    "title": "Title",
+    "access": "Access",
+    "details": "Details",
+    "lessons": "lessons",
+    "shown": "Shown",
+    "no_lessons_find": "No lessons found",
+    "let_access": "Access",
+    "close": "Close",
+    "select": "Select"
   }
 }

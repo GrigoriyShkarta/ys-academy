@@ -3,7 +3,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import 'react-quill-new/dist/quill.snow.css';
 
 interface Props {
   open: boolean;
@@ -21,14 +20,14 @@ export default function PreviewModal({ open, setOpen, content }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-[750px] w-fit bg-transparent border-none shadow-none p-0 flex items-center justify-center"
+        className="max-w-full sm:max-w-[750px] sm:w-fit bg-transparent border-none shadow-none p-0"
       >
         <DialogTitle>
           <VisuallyHidden>Preview Content</VisuallyHidden>
         </DialogTitle>
 
         <div
-          className={`relative w-fit max-w-3xl max-h-[80vh] h-full flex items-center justify-center overflow-auto rounded-2xl p-4 ${
+          className={`relative w-fit max-w-3xl max-h-[80vh] h-full mx-auto overflow-auto rounded-2xl p-4 ${
             isHtmlContent() ? 'bg-white' : 'bg-transparent'
           }`}
         >

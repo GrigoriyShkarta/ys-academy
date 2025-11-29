@@ -6,6 +6,7 @@ export interface IFile {
   title: string;
   url: string;
   createdAt?: string;
+  color?: string;
 }
 
 export interface IText {

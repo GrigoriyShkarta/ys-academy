@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 interface Props {
   cover?: string;
-  updateCover: (cover: string) => void;
+  updateCover?: (cover: string) => void;
   isEdit?: boolean;
 }
 
@@ -36,14 +36,16 @@ export default function Cover({ cover, updateCover, isEdit }: Props) {
         )}
       </div>
 
-      <ChoosePhotoModal
-        open={open}
-        closeModal={() => setOpen(false)}
-        handleAdd={(type, url) => {
-          updateCover(url as string);
-          setOpen(false);
-        }}
-      />
+      {updateCover && (
+        <ChoosePhotoModal
+          open={open}
+          closeModal={() => setOpen(false)}
+          handleAdd={(type, url) => {
+            updateCover(url as string);
+            setOpen(false);
+          }}
+        />
+      )}
     </>
   );
 }

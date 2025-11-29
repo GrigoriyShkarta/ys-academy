@@ -15,11 +15,17 @@ import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import Pagination from '@/common/Pagination';
 import { useTranslations } from 'next-intl';
+import MultiSelect from '@/common/MultiSelect';
 
 interface Column<T> {
   key: string;
   label: string | ReactNode;
   render?: (item: T) => ReactNode;
+}
+
+interface MultiOption {
+  value: string;
+  label: string;
 }
 
 interface DataTableProps<T> {
@@ -36,6 +42,9 @@ interface DataTableProps<T> {
   handleDelete?: () => void;
   handleClickRow?: (item: T) => void;
   handleClickFromDevice?: () => void;
+  multiSelectOptions?: MultiOption[];
+  selectedMulti?: string[];
+  onMultiSelectChange?: (selected: string[]) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,10 +61,33 @@ export default function DataTable<T extends Record<string, any>>({
   handleDelete,
   handleClickRow,
   handleClickFromDevice,
+  multiSelectOptions = [],
+  selectedMulti = [],
+  onMultiSelectChange,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+  const [localSelected, setLocalSelected] = useState<string[]>([]);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const t = useTranslations('Common');
+
+  useEffect(() => {
+    if (selectedMulti.length > 0) {
+      setLocalSelected(selectedMulti);
+    }
+  }, [selectedMulti]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!dropdownRef.current) return;
+      if (!dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -82,6 +114,22 @@ export default function DataTable<T extends Record<string, any>>({
           onChange={handleSearchChange}
           className="max-w-sm"
         />
+        {multiSelectOptions.length > 0 && (
+          <MultiSelect
+            options={multiSelectOptions}
+            selected={localSelected}
+            onChange={next => {
+              setLocalSelected(prev => {
+                // предотвратить лишний setState, если массив не изменился
+                if (prev.length === next.length && prev.every((v, i) => v === next[i])) return prev;
+                return next;
+              });
+              onMultiSelectChange?.(next);
+            }}
+            placeholder={t('select')}
+            className="relative"
+          />
+        )}
         {showDeleteIcon && (
           <Button className="bg-destructive hover:bg-destructive/80" onClick={handleDelete}>
             <Trash2 className="h-4 w-4" />
@@ -100,7 +148,12 @@ export default function DataTable<T extends Record<string, any>>({
           <TableHeader>
             <TableRow>
               {columns.map(col => (
-                <TableHead key={col.key}>{col.label}</TableHead>
+                <TableHead
+                  key={col.key}
+                  className={`${col.key === 'actions' || col.key === 'checkbox' ? 'w-6' : ''}`}
+                >
+                  {col.label}
+                </TableHead>
               ))}
             </TableRow>
           </TableHeader>
@@ -119,7 +172,7 @@ export default function DataTable<T extends Record<string, any>>({
                   )}
                 >
                   {columns.map(col => (
-                    <TableCell key={col.key}>
+                    <TableCell key={col.key} className="max-w-[50vh]">
                       {col.render ? col.render(item) : item[col.key]}
                     </TableCell>
                   ))}

@@ -6,6 +6,7 @@ import { getStudents } from '@/components/Students/actions';
 import { Student } from '@/components/Students/interface';
 import StudentsTable from '@/components/Students/StudentTable';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 export default function StudentsLayout() {
   const {
@@ -14,7 +15,7 @@ export default function StudentsLayout() {
     isError,
   } = useQuery({
     queryKey: ['students'],
-    queryFn: getStudents,
+    queryFn: () => getStudents(),
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -25,13 +26,13 @@ export default function StudentsLayout() {
       key: 'name',
       label: 'Студент',
       render: (student: Student) => (
-        <div className="flex items-center gap-2">
+        <Link href={`students/${student.id}`} className="flex items-center gap-2">
           <Avatar className="w-8 h-8">
             <AvatarImage src={student?.avatar ?? ''} alt={student.name} />
             <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <span>{student.name}</span>
-        </div>
+        </Link>
       ),
     },
     {

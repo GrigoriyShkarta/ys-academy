@@ -5,6 +5,7 @@ import { GetMaterialParams } from '@/components/Materials/utils/interfaces';
 export const uploadAudio = async (form: ContentFormValues) => {
   const formData = new FormData();
   formData.append('title', form?.title ?? '');
+  formData.append('categories', JSON.stringify(form?.categories?.join('')));
   if (form.content) {
     formData.append('file', form.content);
   }

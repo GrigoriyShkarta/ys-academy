@@ -22,12 +22,13 @@
     "my_materials": "Мої матеріали",
     "change_theme": "Змінити тему",
     "logout": "Вийти",
-    "audio_bank": "Аудіо банк",
-    "photo_bank": "Фото банк",
-    "video_bank": "Відео банк",
+    "audio_bank": "Аудіо",
+    "photo_bank": "Фото",
+    "video_bank": "Відео",
     "text_bank": "Текстовий банк",
     "lessons": "Уроки",
-    "modules": "Модулі"
+    "modules": "Модулі",
+    "categories": "Категорії"
   },
 
   "Students": {
@@ -107,7 +108,12 @@
     "add_cover": "Додати обкладинку",
     "confirm_lesson": "Ви впевнені, що хочете покинути сторінку? Уся введена інформація не буде збережена.",
     "add_photo_from_device": "Загрузити з пристрою",
-    "take_from_photo_bank": "Загрузити з фотобанку"
+    "take_from_photo_bank": "Загрузити з фотобанку",
+    "created": "Створений",
+    "creat_category": "Створити категорію",
+    "edit_category": "Редагувати категорію",
+    "add_category": "Додати категорію",
+    "remove_color": "Прибрати колір"
   },
 
   "Validation": {
@@ -134,6 +140,16 @@
     "forward": "Вперед",
     "from_device": "Додати з пристрою",
     "drug_drop_here": "Перетягніть і відпустіть файл тут",
-    "confirm": "Підтверджую"
+    "confirm": "Підтверджую",
+    "add_access": "Надати доступ",
+    "title": "Назва",
+    "access": "Доступ",
+    "details": "Детальніше",
+    "lessons": "уроків",
+    "shown": "Показано",
+    "no_lessons_find": "Уроки не знайдено",
+    "let_access": "Доступно",
+    "close": "Закрито",
+    "select": "Обрати"
   }
 }

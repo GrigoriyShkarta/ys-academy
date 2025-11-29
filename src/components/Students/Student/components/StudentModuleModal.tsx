@@ -1,0 +1,138 @@
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
+import { StudentLesson } from '@/components/Students/interface';
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import { Loader2, UserLock } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import DataTable from '@/common/Table';
+import { Button } from '@/components/ui/button';
+import { assignLesson } from '@/components/Materials/Lesson/action';
+import Link from 'next/link';
+
+interface Props {
+  lessons?: StudentLesson[];
+  studentId: number;
+  moduleId: number;
+  open: boolean;
+  close: () => void;
+}
+
+export default function StudentModuleModal({ lessons, open, close, studentId, moduleId }: Props) {
+  const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [loading, setLoading] = useState(false);
+  const client = useQueryClient();
+
+  const t = useTranslations('Common');
+
+  useEffect(() => {
+    if (!lessons) return;
+    const acceptedIds = lessons.filter(l => l.access).map(l => l.id);
+
+    setSelectedIds(prev => {
+      // избегаем лишнего обновления, если массивы одинаковы
+      if (prev.length === acceptedIds.length && prev.every((v, i) => v === acceptedIds[i])) {
+        return prev;
+      }
+      return acceptedIds;
+    });
+  }, [lessons, open]);
+
+  const filteredLessons = lessons?.filter(l => l.title.includes(search));
+
+  const toggleSelect = useCallback((id: number) => {
+    setSelectedIds(prev => (prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]));
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    if (!filteredLessons) return;
+    setSelectedIds(prev =>
+      prev.length === filteredLessons.length ? [] : filteredLessons.map((a: StudentLesson) => a.id)
+    );
+  }, [filteredLessons]);
+
+  const handleAddAccess = async () => {
+    try {
+      setLoading(true);
+      const lessons = selectedIds?.map(s => ({ id: s }));
+      await assignLesson([+studentId], lessons);
+      await client.invalidateQueries({ queryKey: ['student'] });
+    } catch (error) {
+      console.log('error: ', error);
+    } finally {
+      setLoading(false);
+      closeModal();
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedIds([]);
+    close();
+  };
+
+  const columns = [
+    {
+      key: 'checkbox',
+      label: (
+        <Checkbox
+          checked={selectedIds.length === filteredLessons?.length && filteredLessons?.length > 0}
+          onCheckedChange={toggleSelectAll}
+        />
+      ),
+      render: (item: StudentLesson) => (
+        <Checkbox
+          checked={selectedIds.includes(item.id)}
+          onCheckedChange={() => toggleSelect(item.id)}
+        />
+      ),
+    },
+    {
+      key: 'title',
+      label: t('title'),
+      render: (item: StudentLesson) => (
+        <p className="max-w-full w-fit overflow-hidden text-ellipsis">{item.title}</p>
+      ),
+    },
+    {
+      key: 'access',
+      label: <p className="text-center">{t('access')}</p>,
+      render: (item: StudentLesson) => <p className="text-center">{item.blocks}</p>,
+    },
+    {
+      key: 'details',
+      label: <p className="text-center">{t('details')}</p>,
+      render: (item: StudentLesson) => (
+        <Link href={`${studentId}/lesson-detail/${item.id}`} className="w-full flex justify-center">
+          <UserLock />
+        </Link>
+      ),
+    },
+  ];
+
+  return (
+    <Dialog open={open} onOpenChange={closeModal}>
+      <DialogContent className="sm:max-w-[1024px] max-h-[90vh] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
+        <DialogTitle>
+          <VisuallyHidden />
+        </DialogTitle>
+
+        <DataTable
+          data={filteredLessons ?? []}
+          columns={columns}
+          selectedIds={selectedIds}
+          onSearchChange={newSearch => {
+            setSearch(newSearch);
+          }}
+        />
+
+        <DialogFooter>
+          <Button className="bg-accent" onClick={handleAddAccess} disabled={loading}>
+            {loading ? <Loader2 className="animate-spin" /> : t('add_access')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

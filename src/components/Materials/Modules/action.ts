@@ -13,7 +13,7 @@ export const updateModule = async (form: ModuleDTO, id: number) => {
   return data;
 };
 
-export const deleteModule = async (id: number) => {
+export const deleteModule = async (id?: number) => {
   const { data } = await axiosInstance.delete(`/module/${id}`);
   return data;
 };
@@ -25,7 +25,7 @@ export const getModules = async ({ search = '' }) => {
   return data;
 };
 
-export const getModule = async (id: number): Promise<Module> => {
+export const getModule = async (id?: number): Promise<Module> => {
   const { data } = await axiosInstance.get(`/module/${id}`);
   return data;
 };

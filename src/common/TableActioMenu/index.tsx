@@ -9,8 +9,8 @@ import {
 import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 
 interface Props {
-  handleEdit: () => void;
-  handleDelete: () => void;
+  handleEdit?: () => void;
+  handleDelete?: () => void;
 }
 
 export default function TableActionMenu({ handleEdit, handleDelete }: Props) {
@@ -24,9 +24,11 @@ export default function TableActionMenu({ handleEdit, handleDelete }: Props) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[150px]">
-        <DropdownMenuItem onClick={handleEdit}>
-          <Edit /> {t('edit')}
-        </DropdownMenuItem>
+        {handleEdit && (
+          <DropdownMenuItem onClick={handleEdit}>
+            <Edit /> {t('edit')}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
           <Trash2 /> {t('delete')}
         </DropdownMenuItem>

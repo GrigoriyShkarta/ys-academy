@@ -7,7 +7,14 @@ const youtubeBlock = createBlockSpec(
     propSchema: {
       url: { default: '' },
       videoId: { default: '' },
-      width: { default: '100%' },
+      align: {
+        default: 'center',
+        values: ['left', 'center', 'right'] as const,
+      },
+      width: {
+        default: '65%',
+        values: ['100%', '85%', '65%', '50%'] as const,
+      },
       height: { default: 315 },
     },
     content: 'none',
@@ -22,6 +29,9 @@ const youtubeBlock = createBlockSpec(
       iframeContainer.className = 'w-full lg:w-[65%]';
 
       const iframe = document.createElement('iframe');
+      iframe.className = 'bn-visual-media';
+      iframe.contentEditable = 'true';
+      iframe.draggable = true;
       iframe.src = `https://www.youtube.com/embed/${block.props.videoId}?rel=0`;
       iframe.className = 'w-full h-[315px] lg:h-[415px] aspect-video rounded-lg shadow-lg';
       iframe.frameBorder = '0';

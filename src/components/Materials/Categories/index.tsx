@@ -2,43 +2,41 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import EditPlace from '@/components/Materials/Lesson/EditPlace';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteCategory, getCategories } from '@/components/Materials/Categories/action';
 import { keepPreviousData } from '@tanstack/query-core';
-import { ArrowDown, ArrowUp, ChevronsUpDownIcon, Loader } from 'lucide-react';
-import { deleteLesson, getAllLessons } from '@/components/Materials/Lesson/action';
-import { Checkbox } from '@/components/ui/checkbox';
 import { IFile } from '@/components/Materials/utils/interfaces';
+import { Checkbox } from '@/components/ui/checkbox';
 import TableActionMenu from '@/common/TableActioMenu';
+import { ArrowDown, ArrowUp, ChevronsUpDownIcon } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils';
 import DataTable from '@/common/Table';
 import ConfirmModal from '@/common/ConfirmModal';
-import Link from 'next/link';
+import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 
-export default function LessonsLayout() {
+export default function CategoriesLayout() {
   const [page, setPage] = useState(1);
-  const [isEditPlace, setIsEditPlace] = useState(false);
+  const [search, setSearch] = useState('');
+  const [selectedFile, setSelectedFile] = useState<IFile>();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectedId, setSelectedId] = useState<number>();
   const [openConfirm, setOpenConfirm] = useState(false);
   const [sortBy, setSortBy] = useState<'title' | 'createdAt' | undefined>(undefined);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
 
-  const [search, setSearch] = useState('');
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
 
-  const { data: lessons, isLoading } = useQuery({
-    queryKey: ['lessons', page, search, sortBy, sortOrder],
-    queryFn: () => getAllLessons({ page, search, sortBy: sortBy ?? undefined, sortOrder }),
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ['categories', page, search, sortBy, sortOrder],
+    queryFn: () => getCategories({ page, search, sortBy: sortBy ?? undefined, sortOrder }),
     placeholderData: keepPreviousData,
   });
 
-  const deleteLessonMutation = useMutation({
-    mutationFn: () => deleteLesson(selectedId || selectedIds),
+  const deleteCategoriesMutation = useMutation({
+    mutationFn: () => deleteCategory(selectedId ? [selectedId] : selectedIds),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['audios'] });
+      await queryClient.invalidateQueries({ queryKey: ['categories'] });
       setSelectedId(undefined);
       setSelectedIds([]);
       setOpenConfirm(false);
@@ -46,7 +44,7 @@ export default function LessonsLayout() {
   });
 
   const handleConfirmDelete = () => {
-    deleteLessonMutation.mutate();
+    deleteCategoriesMutation.mutate();
   };
 
   const toggleSelect = useCallback((id: number) => {
@@ -54,11 +52,11 @@ export default function LessonsLayout() {
   }, []);
 
   const toggleSelectAll = useCallback(() => {
-    if (!lessons) return;
+    if (!categories) return;
     setSelectedIds(prev =>
-      prev.length === lessons.data.length ? [] : lessons.data.map((a: IFile) => a.id)
+      prev.length === categories.data.length ? [] : categories.data.map((a: IFile) => a.id)
     );
-  }, [lessons]);
+  }, [categories]);
 
   const toggleSort = useCallback(
     (field: 'title' | 'createdAt') => {
@@ -74,7 +72,9 @@ export default function LessonsLayout() {
         key: 'checkbox',
         label: (
           <Checkbox
-            checked={selectedIds.length === lessons?.data?.length && lessons?.data?.length > 0}
+            checked={
+              selectedIds.length === categories?.data?.length && categories?.data?.length > 0
+            }
             onCheckedChange={toggleSelectAll}
           />
         ),
@@ -94,6 +94,7 @@ export default function LessonsLayout() {
               setSelectedId(item.id);
               setOpenConfirm(true);
             }}
+            handleEdit={() => setSelectedFile(item)}
           />
         ),
       },
@@ -117,8 +118,13 @@ export default function LessonsLayout() {
             )}
           </button>
         ),
-        render: (lesson: IFile) => (
-          <Link href={`/main/materials/lessons/${lesson.id}`}>{lesson.title}</Link>
+        render: (category: IFile) => (
+          <div
+            className="p-1 rounded-xl w-fit leading-3.5"
+            style={{ backgroundColor: category?.color ?? '' }}
+          >
+            {category.title}
+          </div>
         ),
       },
       {
@@ -129,7 +135,7 @@ export default function LessonsLayout() {
             onClick={() => toggleSort('createdAt')}
             className="flex items-center gap-2"
           >
-            {t('created')}
+            {t('downloaded')}
             {sortBy === 'createdAt' ? (
               sortOrder === 'asc' ? (
                 <ArrowUp size={14} />
@@ -144,25 +150,17 @@ export default function LessonsLayout() {
         render: (item: IFile) => <span>{formatDateTime(item.createdAt)}</span>,
       },
     ],
-    [selectedIds, lessons, toggleSelectAll, toggleSelect, sortBy, sortOrder, t, toggleSort]
+    [selectedIds, categories, toggleSelectAll, toggleSelect, sortBy, sortOrder, t, toggleSort]
   );
-
-  if (isLoading) return <Loader />;
 
   return (
     <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
-      {!isEditPlace && (
-        <Button className="bg-accent w-[240px] mx-auto" onClick={() => setIsEditPlace(true)}>
-          {t('createLesson')}
-        </Button>
-      )}
-
-      {isEditPlace && <EditPlace setIsEditPlace={setIsEditPlace} />}
-      {!isEditPlace && lessons?.data?.length > 0 && (
+      <CategoryModal category={selectedFile} />
+      {categories && (
         <DataTable
-          data={lessons.data}
+          data={categories.data}
           columns={columns}
-          totalPages={lessons?.meta?.totalPages}
+          totalPages={categories.meta.totalPages}
           currentPage={page}
           onPageChange={newPage => setPage(newPage)}
           showDeleteIcon={selectedIds.length > 0}
@@ -179,7 +177,7 @@ export default function LessonsLayout() {
           open={openConfirm}
           confirmAction={handleConfirmDelete}
           setOnClose={() => setOpenConfirm(false)}
-          isLoading={deleteLessonMutation.isPending}
+          isLoading={deleteCategoriesMutation.isPending}
         />
       )}
     </div>

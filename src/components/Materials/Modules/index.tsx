@@ -26,8 +26,7 @@ export default function ModulesLayout() {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-5xl text-center mb-2">{t('my_modules')}</h1>
+    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
       <Button
         className="bg-accent w-[240px] mx-auto"
         onClick={() => {

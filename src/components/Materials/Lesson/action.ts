@@ -33,19 +33,35 @@ export const updateLesson = async (
   return data;
 };
 
-export const deleteLesson = async (id: number) => {
+export const deleteLesson = async (id: number | number[]) => {
   const { data } = await axiosInstance.delete(`/lesson/${id}`);
   return data;
 };
 
-export const getUnassignedLessons = async ({ search, page }: GetMaterialParams) => {
-  const { data } = await axiosInstance.get('/lesson/unassigned', {
-    params: { search, page },
+export const getAllLessons = async ({
+  page,
+  search = '',
+  sortBy,
+  sortOrder,
+}: GetMaterialParams) => {
+  const { data } = await axiosInstance.get('/lesson', {
+    params: { page, search, sortBy, sortOrder },
   });
   return data;
 };
 
 export const getLesson = async (id: number) => {
   const { data } = await axiosInstance.get(`/lesson/${id}`);
+  return data;
+};
+
+export const assignLesson = async (
+  userIds: number[],
+  lessonIds?: { id: number; blocks?: number[] }[]
+) => {
+  const { data } = await axiosInstance.post('/lesson/assign', {
+    lessonIds,
+    userIds,
+  });
   return data;
 };

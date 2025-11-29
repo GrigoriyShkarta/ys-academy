@@ -15,6 +15,8 @@ import TableActionMenu from '@/common/TableActioMenu';
 import ConfirmModal from '@/common/ConfirmModal';
 import { ArrowDown, ArrowUp, ChevronsUpDownIcon } from 'lucide-react';
 import AudioModal from '@/components/Materials/Audio/AudioModal';
+import { formatDateTime } from '@/lib/utils';
+import { getCategories } from '@/components/Materials/Categories/action';
 
 export default function AudioLayout() {
   const [page, setPage] = useState(1);
@@ -54,6 +56,11 @@ export default function AudioLayout() {
     placeholderData: keepPreviousData,
   });
 
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
   useEffect(() => {
     if (audios && audios.meta.totalPages < audios.meta.currentPage) {
       setPage(audios.meta.totalPages);
@@ -78,16 +85,6 @@ export default function AudioLayout() {
     },
     [sortBy]
   );
-
-  const formatDateTime = useCallback((value?: string | Date | null) => {
-    if (!value) return '';
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return String(value);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
-      d.getHours()
-    )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }, []);
 
   const columns = useMemo(
     () => [
@@ -173,23 +170,13 @@ export default function AudioLayout() {
         render: (item: IFile) => <span>{formatDateTime(item.createdAt)}</span>,
       },
     ],
-    [
-      selectedIds,
-      audios,
-      toggleSelectAll,
-      toggleSelect,
-      formatDateTime,
-      sortBy,
-      sortOrder,
-      t,
-      toggleSort,
-    ]
+    [selectedIds, audios, toggleSelectAll, toggleSelect, sortBy, sortOrder, t, toggleSort]
   );
 
   if (isLoading) return <Loader />;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
       <AudioModal
         audio={selectedFile}
         setSelectedFile={setSelectedFile}

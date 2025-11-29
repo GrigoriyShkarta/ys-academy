@@ -3,6 +3,9 @@ import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader, Trash2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getCategories } from '@/components/Materials/Categories/action';
+import MultiSelect from '@/common/MultiSelect';
 
 interface Props {
   fetchingIdx?: number | null;
@@ -13,6 +16,16 @@ interface Props {
 export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUploadedFiles }: Props) {
   const t = useTranslations('Materials');
 
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const categoryOptions = (categories.data ? categories.data : []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title ?? '',
+  }));
+
   const handleTitleChange = (index: number, value: string) => {
     setUploadedFiles(prev => {
       const copy = [...prev];
@@ -20,6 +33,20 @@ export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUpload
       copy[index] = new File([file], value + file.name.substring(file.name.lastIndexOf('.')), {
         type: file.type,
       });
+      return copy;
+    });
+  };
+
+  const handleCategoryChange = (index: number, next: string[]) => {
+    setUploadedFiles(prev => {
+      const copy = [...prev];
+      const file = copy[index];
+      // можно модифицировать объект File напрямую, но создаём копию для предсказуемости
+      const newFile = new File([file], file.name, { type: file.type });
+      (newFile as any).categories = next;
+      // сохранить кастомный title, если был
+      if ((file as any).title) (newFile as any).title = (file as any).title;
+      copy[index] = newFile;
       return copy;
     });
   };
@@ -37,35 +64,53 @@ export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUpload
   return (
     <div className="flex flex-col gap-3 mt-3 relative">
       <p className="text-xs text-muted-foreground">{`${uploadedFiles.length} / 9`}</p>
-      {uploadedFiles.map((f, idx) => (
-        <div
-          key={idx}
-          className={`relative flex items-center gap-3 p-2 border rounded-md ${
-            fetchingIdx === idx ? 'bg-accent/10' : 'bg-background'
-          }`}
-        >
-          {fetchingIdx === idx && (
-            <Loader
-              className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin`}
-              color={'#65a1f5'}
-              size={38}
-            />
-          )}
-          <audio src={URL.createObjectURL(f)} controls className="w-68" />
-          <div className="flex-1">
-            <Input
-              value={f.name.replace(/\.[^/.]+$/, '') ?? ''}
-              maxLength={50}
-              onChange={e => handleTitleChange(idx, e.target.value)}
-              placeholder={t('enterTitle')}
-            />
-          </div>
+      {uploadedFiles.map((f, idx) => {
+        const metaTitle = (f as any).title;
+        const displayTitle = metaTitle ?? f.name.replace(/\.[^/.]+$/, '');
+        const selectedCategories = (f as any).categories ?? [];
 
-          <Button type="button" variant="destructive" size="icon" onClick={() => handleDelete(idx)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ))}
+        return (
+          <div
+            key={idx}
+            className={`relative flex flex-col w-full gap-3 p-2 border rounded-md ${
+              fetchingIdx === idx ? 'bg-accent/10' : 'bg-background'
+            }`}
+          >
+            {fetchingIdx === idx && (
+              <Loader
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin`}
+                color={'#65a1f5'}
+                size={38}
+              />
+            )}
+
+            <div className="flex gap-3">
+              <Input
+                value={displayTitle}
+                maxLength={50}
+                onChange={e => handleTitleChange(idx, e.target.value)}
+                placeholder={t('enterTitle')}
+              />
+              <MultiSelect
+                options={categoryOptions}
+                selected={selectedCategories}
+                onChange={next => handleCategoryChange(idx, next)}
+                className="relative"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                onClick={() => handleDelete(idx)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <audio src={URL.createObjectURL(f)} controls className="w-full max-w-68" />
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -39,7 +39,7 @@ export default function VideoLayout() {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
       <VideoModal
         video={selectedFile}
         setSelectedFile={setSelectedFile}

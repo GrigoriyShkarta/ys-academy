@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import DataTable from '@/common/Table';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { getUnassignedLessons } from '@/components/Materials/Lesson/action';
+import { getAllLessons } from '@/components/Materials/Lesson/action';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 
@@ -31,7 +31,7 @@ export default function ChooseLessonModal({ open, closeModal, handleAdd, lessons
 
   const { data: lessons, isLoading } = useQuery({
     queryKey: ['lessons', search],
-    queryFn: () => getUnassignedLessons({ search, page: 'all' }),
+    queryFn: () => getAllLessons({ search, page: 'all' }),
     placeholderData: keepPreviousData,
   });
 

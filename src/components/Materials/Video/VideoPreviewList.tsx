@@ -34,7 +34,7 @@ export const VideoPreviewList: FC<Props> = ({
       <p className="text-xs text-muted-foreground">{`${videoList.length} / 9`}</p>
 
       <div
-        className={`mt-3 grid ${videoList.length === 1 && 'grid-cols-1'} ${
+        className={`mt-3 grid max-sm:grid-cols-1 ${videoList.length === 1 && 'grid-cols-1'} ${
           videoList.length === 2 && 'grid-cols-2'
         } ${videoList.length > 2 && 'grid-cols-3'} gap-3`}
       >

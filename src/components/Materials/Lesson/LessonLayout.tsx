@@ -15,58 +15,6 @@ import { Block } from '@blocknote/core';
 import Cover from '@/components/Materials/Lesson/components/Cover';
 import ConfirmModal from '@/common/ConfirmModal';
 
-function normalizeBlocks(blocks: any[]): any[] {
-  return blocks.map(block => {
-    const b = { ...block };
-
-    // --- Fix youtube ---
-    if (b.type === 'youtube') {
-      b.props = {
-        url: b.props?.url ?? '',
-        videoId: b.props?.videoId ?? '',
-        width: b.props?.width ?? '50%',
-        height: b.props?.height ?? 315,
-      };
-    }
-
-    // --- Fix columnList ---
-    if (b.type === 'columnList') {
-      b.props = b.props ?? {};
-    }
-
-    // --- Fix column ---
-    if (b.type === 'column') {
-      b.props = {
-        width: b.props?.width ?? 1,
-      };
-    }
-
-    // --- Fix images ---
-    if (b.type === 'image') {
-      b.props = {
-        url: b.props?.url ?? '',
-        caption: b.props?.caption ?? '',
-        previewWidth: b.props?.previewWidth ?? '100%',
-      };
-    }
-
-    // --- Fix audio ---
-    if (b.type === 'audio') {
-      b.props = {
-        url: b.props?.url ?? '',
-        name: b.props?.name ?? '',
-      };
-    }
-
-    // Рекурсивно нормализуем children
-    if (b.children?.length) {
-      b.children = normalizeBlocks(b.children);
-    }
-
-    return b;
-  });
-}
-
 export default function LessonLayout({ id }: { id: number }) {
   const [isEditPlace, setIsEditPlace] = useState(false);
   const [lessonTitle, setLessonTitle] = useState('');
@@ -150,8 +98,8 @@ export default function LessonLayout({ id }: { id: number }) {
   if (!lesson) return <div>Lesson not found</div>;
 
   return (
-    <div className="space-y-6 p-4 relative">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 pb-4 relative">
+      <div className="flex justify-between items-center md:p-4 sm:p-0">
         <button
           type="button"
           onClick={() => router.back()}
@@ -194,7 +142,7 @@ export default function LessonLayout({ id }: { id: number }) {
         <h1 className="text-center text-4xl font-bold mb-6">{lesson.title}</h1>
       )}
 
-      <div className="relative">
+      <div className="relative p-2 sm:p-0">
         {lessonDoc.length > 0 &&
           lessonDoc.map((block: LessonDocItem) => (
             <LessonBlock
@@ -209,9 +157,11 @@ export default function LessonLayout({ id }: { id: number }) {
       </div>
 
       {isEditPlace && (
-        <Button variant="outline" className="w-full h-[50px]" onClick={addBlock}>
-          {t('add_section')}
-        </Button>
+        <div className="w-full px-8">
+          <Button variant="outline" className="w-full h-[50px]" onClick={addBlock}>
+            {t('add_section')}
+          </Button>
+        </div>
       )}
 
       <ConfirmModal

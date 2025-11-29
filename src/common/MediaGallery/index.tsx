@@ -157,7 +157,7 @@ export default function MediaGallery({
       </div>
 
       {/* Сетка медиа */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 w-full box-border">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full box-border">
         {data &&
           data?.map((item: IFile) => (
             <div
