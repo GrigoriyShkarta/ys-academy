@@ -144,18 +144,18 @@ export default function LessonLayout({ id }: { id: number }) {
       {(cover || isEditPlace) && (
         <Cover updateCover={setCover} cover={cover} isEdit={isEditPlace} />
       )}
-      {isEditPlace ? (
-        <Input
-          placeholder={t('lesson_title')}
-          value={lessonTitle}
-          onChange={e => setLessonTitle(e.target.value)}
-          className="min-w-1/2! text-[50px]! h-[58px] mx-auto text-center border-none"
-        />
-      ) : (
-        <h1 className="text-center text-[50px]! font-bold mb-6">{lesson.title}</h1>
-      )}
-
       <div className="relative p-2 sm:p-0 max-w-7xl mx-auto">
+        {isEditPlace ? (
+          <Input
+            placeholder={t('lesson_title')}
+            value={lessonTitle}
+            onChange={e => setLessonTitle(e.target.value)}
+            className="min-w-1/2! text-[50px]! h-[58px] mb-6 mx-auto text-center border-none"
+          />
+        ) : (
+          <h1 className="text-center text-[50px]! font-bold mb-6">{lesson.title}</h1>
+        )}
+
         {lessonDoc.length > 0 &&
           lessonDoc.map((block: LessonDocItem) => (
             <LessonBlock
@@ -167,15 +167,15 @@ export default function LessonLayout({ id }: { id: number }) {
               deleteSection={handleDeleteBlock}
             />
           ))}
-      </div>
 
-      {isEditPlace && (
-        <div className="w-full px-8">
-          <Button variant="outline" className="w-full h-[50px]" onClick={addBlock}>
-            {t('add_section')}
-          </Button>
-        </div>
-      )}
+        {isEditPlace && (
+          <div className="w-full px-8 mt-6">
+            <Button variant="outline" className="w-full h-[50px]" onClick={addBlock}>
+              {t('add_section')}
+            </Button>
+          </div>
+        )}
+      </div>
 
       <ConfirmModal
         open={open}

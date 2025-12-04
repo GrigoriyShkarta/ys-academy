@@ -66,7 +66,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
   };
 
   return (
-    <div className="space-y-6 relative w-full max-w-7xl mx-auto">
+    <div className="space-y-6 relative">
       <div className="flex justify-between items-center">
         <button
           type="button"
@@ -90,27 +90,29 @@ export default function EditPlace({ setIsEditPlace }: Props) {
 
       <Cover updateCover={setCover} cover={cover} isEdit />
 
-      <div className="w-full flex">
-        <Input
-          placeholder={t('lesson_title')}
-          value={lessonTitle}
-          onChange={e => setLessonTitle(e.target.value)}
-          className="min-w-1/2! text-[50px]! h-[58px] mx-auto border-none text-center"
-        />
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="w-full flex">
+          <Input
+            placeholder={t('lesson_title')}
+            value={lessonTitle}
+            onChange={e => setLessonTitle(e.target.value)}
+            className="min-w-1/2! text-[50px]! h-[58px] mx-auto border-none text-center"
+          />
+        </div>
+
+        {lessonDoc.map(block => (
+          <LessonBlock
+            key={block.blockId}
+            blockId={block.blockId}
+            onUpdate={updateBlock}
+            deleteSection={handleDeleteBlock}
+          />
+        ))}
+
+        <Button variant="outline" className="w-full h-[50px] mt-6" onClick={addBlock}>
+          {t('add_section')}
+        </Button>
       </div>
-
-      {lessonDoc.map(block => (
-        <LessonBlock
-          key={block.blockId}
-          blockId={block.blockId}
-          onUpdate={updateBlock}
-          deleteSection={handleDeleteBlock}
-        />
-      ))}
-
-      <Button variant="outline" className="w-full h-[50px]" onClick={addBlock}>
-        {t('add_section')}
-      </Button>
 
       <ConfirmModal
         open={open}
