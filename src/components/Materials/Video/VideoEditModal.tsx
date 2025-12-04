@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -26,6 +26,11 @@ import { IFile } from '@/components/Materials/utils/interfaces';
 import { editVideo, uploadVideo } from '@/components/Materials/Video/action';
 import { Button } from '@/components/ui/button';
 import { checkYouTubeVideoExists, getYouTubeId, isFile } from '@/lib/utils';
+import MultiSelect from '@/common/MultiSelect';
+import { getCategories } from '@/components/Materials/Categories/action';
+import { Label } from '@/components/ui/label';
+import { Plus } from 'lucide-react';
+import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 
 interface Props {
   video?: IFile | null;
@@ -37,6 +42,7 @@ export default function VideoEditModal({ video, setSelectedFile }: Props) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const t = useTranslations('Materials');
   const tForm = useTranslations('Validation');
@@ -46,8 +52,19 @@ export default function VideoEditModal({ video, setSelectedFile }: Props) {
     resolver: zodResolver(contentSchema(tForm)),
     reValidateMode: 'onChange',
     mode: 'onChange',
-    defaultValues: { title: '', content: '' },
+    defaultValues: { title: '', content: '', categories: [] },
   });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
 
   const fileValue = form.watch('content');
 
@@ -92,7 +109,12 @@ export default function VideoEditModal({ video, setSelectedFile }: Props) {
   useEffect(() => {
     if (video) {
       setOpen(true);
-      form.reset({ id: video.id, content: video.url, title: video.title });
+      form.reset({
+        id: video.id,
+        content: video.url,
+        title: video.title,
+        categories: video?.categories.map(c => String(c.id)) ?? [],
+      });
     } else {
       form.reset({ id: undefined, content: '', title: '' });
     }
@@ -102,17 +124,22 @@ export default function VideoEditModal({ video, setSelectedFile }: Props) {
     setIsLoading(true);
     try {
       const title = data.title ?? '';
-      const content = data.content === '' ? null : data.content;
+      const content = data.content === '' ? '' : data.content;
+      const formatedFile = {
+        title,
+        content,
+        categories: data.categories,
+      };
       if (data.id) {
-        await editVideo(data.id, { title, content });
+        await editVideo(data.id, formatedFile);
       } else {
         await uploadVideo({ ...data, title });
       }
+      await queryClient.invalidateQueries({ queryKey: ['videos'] });
     } finally {
       setIsLoading(false);
+      handleClose();
     }
-    await queryClient.invalidateQueries({ queryKey: ['videos'] });
-    setOpen(false);
   };
 
   const handleClose = () => {
@@ -120,6 +147,18 @@ export default function VideoEditModal({ video, setSelectedFile }: Props) {
     if (setSelectedFile) {
       setSelectedFile(null);
     }
+  };
+
+  const handleNewCategoriesForFile = (newCategories?: string[]) => {
+    if (!newCategories) return;
+
+    // Берём текущие категории из формы
+    const current = form.getValues('categories') || [];
+
+    // Добавляем новые (и убираем дубли, если нужно)
+    const updated = Array.from(new Set([...current, ...newCategories]));
+
+    form.setValue('categories', updated);
   };
 
   return (
@@ -146,6 +185,41 @@ export default function VideoEditModal({ video, setSelectedFile }: Props) {
                   </FormControl>
                   <FormMessage />
                 </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="categories"
+              render={({ field }) => (
+                <>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <Label>{t('categories')}</Label>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs text-primary hover:text-primary"
+                      onClick={() => setIsCategoryModalOpen(true)}
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1" />
+                      {t('create_category')}
+                    </Button>
+                  </div>
+                  <FormItem>
+                    <FormControl>
+                      <MultiSelect
+                        options={categoryOptions}
+                        selected={field.value || []}
+                        onChange={field.onChange}
+                        placeholder={t('select_categories')}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </>
               )}
             />
 
@@ -225,6 +299,15 @@ export default function VideoEditModal({ video, setSelectedFile }: Props) {
           </form>
         </Form>
       </DialogContent>
+
+      <CategoryModal
+        openModal={isCategoryModalOpen}
+        closeModal={() => {
+          setIsCategoryModalOpen(false);
+        }}
+        selectCategory={handleNewCategoriesForFile}
+        hideTrigger
+      />
     </Dialog>
   );
 }

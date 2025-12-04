@@ -108,7 +108,21 @@
     "creat_category": "Create category",
     "edit_category": "Edit category",
     "add_category": "Add category",
-    "remove_color": "Remove color"
+    "remove_color": "Remove color",
+    "drop_here": "Drag and drop file here",
+    "drop_to_upload": "The file will open in the download window.",
+    "uploaded_audio": "Uploaded audio",
+    "audio_title": "Audio title",
+    "categories": "Categories",
+    "create_category": "Create category",
+    "select_categories": "Select categories...",
+    "uploaded_photos": "Uploaded photo",
+    "photo_title": "Photo title",
+    "uploaded_videos": "Uploaded video",
+    "video_title": "Video title",
+    "add_to_module": "Add to module",
+    "save_lesson": "Save lesson",
+    "modules": "Modules"
   },
 
   "Validation": {
@@ -145,6 +159,8 @@
     "no_lessons_find": "No lessons found",
     "let_access": "Access",
     "close": "Close",
-    "select": "Select"
+    "select": "Select",
+    "nothing_found": "Nothing found",
+    "select_category": "Select category"
   }
 }

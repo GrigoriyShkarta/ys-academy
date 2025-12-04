@@ -100,24 +100,31 @@ export default function LessonBlock({
     return maybeId ?? block;
   };
 
-  const insertMedia = (type: 'image' | 'video' | 'audio', url: string) => {
+  const insertMedia = (type: 'image' | 'video' | 'audio', url: string, bankId?: number) => {
     const cursor = editor.getTextCursorPosition();
     if (!cursor?.block) return;
 
     // @ts-ignore
     const newBlock: Partial<BNBlock> = {
       type,
-      props: { url },
+      props: { url, bankId },
     };
 
     if (type === 'image' || type === 'video') {
-      newBlock.props = { ...(newBlock.props ?? {}), previewWidth: '100%', caption: '' };
+      newBlock.props = {
+        ...(newBlock.props ?? {}),
+        previewWidth: '100%',
+        caption: '',
+        name: bankId,
+        bankId,
+      };
     }
 
     if (type === 'audio') {
       newBlock.props = {
         ...(newBlock.props ?? {}),
-        name: decodeURIComponent(url.split('/').pop()?.split('?')[0] || 'Аудіо'),
+        name: bankId,
+        bankId,
       };
     }
 
@@ -128,12 +135,12 @@ export default function LessonBlock({
   };
 
   // Обработчики добавления медиа
-  const handleAddPhoto = (url: string) => {
-    insertMedia('image', url);
+  const handleAddPhoto = (url: string, bankId?: number) => {
+    insertMedia('image', url, bankId);
     setOpenChoosePhoto(false);
   };
 
-  const handleAddVideo = (url: string) => {
+  const handleAddVideo = (url: string, bankId?: number) => {
     const isYoutubeUrl = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//.test(url);
     const match = url.match(/(?:youtube\.com\/(?:.*v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
     const videoId = match ? match[1] : '';
@@ -143,21 +150,21 @@ export default function LessonBlock({
           {
             // @ts-ignore
             type: 'youtube',
-            props: { url, videoId },
+            props: { url, videoId, name: bankId },
           },
         ],
         editor.getTextCursorPosition()?.block ?? null,
         'after'
       );
     } else {
-      insertMedia('video', url);
+      insertMedia('video', url, bankId);
     }
 
     setOpenChooseVideo(false);
   };
 
-  const handleAddAudio = (url: string) => {
-    insertMedia('audio', url);
+  const handleAddAudio = (url: string, bankId?: number) => {
+    insertMedia('audio', url, bankId);
     setOpenChooseAudio(false);
   };
 
@@ -215,7 +222,7 @@ export default function LessonBlock({
         closeModal={() => {
           setOpenChoosePhoto(false);
         }}
-        handleAdd={(type, content, bankId) => handleAddPhoto(content as string)}
+        handleAdd={(type, content, bankId) => handleAddPhoto(content as string, bankId)}
       />
 
       <ChooseVideoModal
@@ -224,7 +231,7 @@ export default function LessonBlock({
           setOpenChooseVideo(false);
         }}
         handleAdd={(type, content, bankId) => {
-          handleAddVideo(content as string);
+          handleAddVideo(content as string, bankId);
         }}
       />
 
@@ -233,7 +240,7 @@ export default function LessonBlock({
         closeModal={() => {
           setOpenChooseAudio(false);
         }}
-        handleAdd={(type, content, bankId) => handleAddAudio(content as string)}
+        handleAdd={(type, content, bankId) => handleAddAudio(content as string, bankId)}
       />
     </>
   );

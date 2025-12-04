@@ -181,6 +181,10 @@ button {
     }
 }
 
+.bn-block-content.ProseMirror-selectednode > *, .ProseMirror-selectednode > .bn-block-content > * {
+    outline: none !important;
+}
+
 .tiptap {
     @media (max-width: 768px) {
         padding: 4px !important;

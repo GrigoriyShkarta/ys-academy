@@ -13,6 +13,7 @@ interface FormFooterProps {
   onCancelText?: string;
   loadingText?: string;
   disabled?: boolean;
+  onSave?: () => void;
   children?: ReactNode; // на случай, если ты хочешь добавить кастомный контент
 }
 
@@ -24,6 +25,7 @@ export const FormFooter = ({
   onCancelText,
   loadingText,
   disabled = false,
+  onSave,
   children,
 }: FormFooterProps) => {
   return (
@@ -34,7 +36,8 @@ export const FormFooter = ({
       </Button>
 
       <Button
-        type="submit"
+        type={onSave ? 'button' : 'submit'}
+        onClick={onSave && onSave}
         disabled={isLoading || !isValid || disabled}
         className="bg-accent flex items-center justify-center gap-2"
       >

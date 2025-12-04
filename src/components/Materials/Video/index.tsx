@@ -10,18 +10,35 @@ import VideoModal from '@/components/Materials/Video/VideoModal';
 import useDragAndDropMaterial from '@/hooks/useDragAndDropMaterial';
 import MediaGallery from '@/common/MediaGallery';
 import DrugOverflow from '@/common/DrugOverflow';
+import { getCategories } from '@/components/Materials/Categories/action';
 
 export default function VideoLayout() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
   const [addFiles, setAddFiles] = useState<File[] | null>(null);
 
   const { data: videos, isLoading } = useQuery({
-    queryKey: ['videos', page, search],
-    queryFn: () => getVideos({ page, search }),
+    queryKey: ['videos', page, search, selectedCategories],
+    queryFn: () => getVideos({ page, search, categories: selectedCategories }),
     placeholderData: keepPreviousData,
   });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const onMultiSelectChange = (selected: string[]) => {
+    setSelectedCategories(selected);
+  };
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
 
   useEffect(() => {
     if (videos && videos.meta.totalPages < videos.meta.currentPage) {
@@ -56,6 +73,8 @@ export default function VideoLayout() {
             totalPages={videos.meta.totalPages}
             currentPage={videos.meta.currentPage}
             handleDelete={deleteVideos}
+            multiSelectOptions={categoryOptions}
+            onMultiSelectChange={onMultiSelectChange}
             onPageChange={newPage => setPage(newPage)}
             handleEdit={(item: IFile) => setSelectedFile(item)}
             onSearchChange={newSearch => {

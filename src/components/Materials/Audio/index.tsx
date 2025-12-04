@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { keepPreviousData } from '@tanstack/query-core';
-import { IFile } from '@/components/Materials/utils/interfaces';
+import { Category, IFile, Lesson } from '@/components/Materials/utils/interfaces';
 import { deleteAudios, getAudios } from '@/components/Materials/Audio/action';
 import { Checkbox } from '@/components/ui/checkbox';
 import useDragAndDropMaterial from '@/hooks/useDragAndDropMaterial';
@@ -13,10 +13,19 @@ import DataTable from '@/common/Table';
 import Loader from '@/common/Loader';
 import TableActionMenu from '@/common/TableActioMenu';
 import ConfirmModal from '@/common/ConfirmModal';
-import { ArrowDown, ArrowUp, ChevronsUpDownIcon } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDownIcon,
+  CircleChevronRight,
+  ClipboardList,
+} from 'lucide-react';
 import AudioModal from '@/components/Materials/Audio/AudioModal';
 import { formatDateTime } from '@/lib/utils';
 import { getCategories } from '@/components/Materials/Categories/action';
+import LessonsListModal from '@/common/LessonsListModal';
+import Chip from '@/common/Chip';
+import CategoryListModal from '@/common/CategoryListModal';
 
 export default function AudioLayout() {
   const [page, setPage] = useState(1);
@@ -24,10 +33,13 @@ export default function AudioLayout() {
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectedId, setSelectedId] = useState<number>();
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [sortBy, setSortBy] = useState<'title' | 'createdAt' | undefined>(undefined);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
   const [addFiles, setAddFiles] = useState<File[] | null>(null);
+  const [lessonsList, setLessonsList] = useState<Lesson[] | undefined>([]);
+  const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
 
@@ -46,13 +58,24 @@ export default function AudioLayout() {
     },
   });
 
+  const onMultiSelectChange = (selected: string[]) => {
+    setSelectedCategories(selected);
+  };
+
   const handleConfirmDelete = () => {
     deleteAudio.mutate();
   };
 
   const { data: audios, isLoading } = useQuery({
-    queryKey: ['audios', page, search, sortBy, sortOrder],
-    queryFn: () => getAudios({ page, search, sortBy: sortBy ?? undefined, sortOrder }),
+    queryKey: ['audios', page, search, sortBy, sortOrder, selectedCategories],
+    queryFn: () =>
+      getAudios({
+        page,
+        search,
+        sortBy: sortBy ?? undefined,
+        sortOrder,
+        categories: selectedCategories,
+      }),
     placeholderData: keepPreviousData,
   });
 
@@ -60,6 +83,12 @@ export default function AudioLayout() {
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
   });
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
 
   useEffect(() => {
     if (audios && audios.meta.totalPages < audios.meta.currentPage) {
@@ -148,6 +177,37 @@ export default function AudioLayout() {
         ),
       },
       {
+        key: 'categories',
+        label: t('categories'),
+        render: (item: IFile) => (
+          <div className="flex gap-1">
+            {item?.categories &&
+              item.categories
+                .slice(0, 2)
+                .map(category => <Chip key={category.id} category={category} />)}
+
+            {item?.categories?.length > 2 && (
+              <CircleChevronRight
+                className="cursor-pointer"
+                onClick={() => seCategoryList(item.categories)}
+              />
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'lessons',
+        label: t('lessons'),
+        render: (item: IFile) =>
+          item?.lessons &&
+          item?.lessons?.length > 0 && (
+            <ClipboardList
+              onClick={() => setLessonsList(item.lessons)}
+              className="cursor-pointer"
+            />
+          ),
+      },
+      {
         key: 'created_at',
         label: (
           <button
@@ -193,10 +253,12 @@ export default function AudioLayout() {
             columns={columns}
             totalPages={audios.meta.totalPages}
             currentPage={page}
+            multiSelectOptions={categoryOptions}
             onPageChange={newPage => setPage(newPage)}
             showDeleteIcon={selectedIds.length > 0}
             selectedIds={selectedIds}
             handleDelete={() => setOpenConfirm(true)}
+            onMultiSelectChange={onMultiSelectChange}
             onSearchChange={newSearch => {
               setPage(1);
               setSearch(newSearch);
@@ -213,6 +275,9 @@ export default function AudioLayout() {
           isLoading={deleteAudio.isPending}
         />
       )}
+
+      <LessonsListModal list={lessonsList} close={() => setLessonsList(undefined)} />
+      <CategoryListModal list={categoryList} close={() => seCategoryList(undefined)} />
     </div>
   );
 }

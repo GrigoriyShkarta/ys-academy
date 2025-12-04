@@ -16,7 +16,21 @@ import { Input } from '@/components/ui/input';
 import { FormFooter } from '@/common/ModalFooter';
 import { Trash2 } from 'lucide-react';
 
-export default function CategoryModal({ category }: { category?: IFile }) {
+interface Props {
+  hideTrigger?: boolean;
+  openModal?: boolean;
+  closeModal?: () => void;
+  selectCategory?: (ids: []) => void;
+  category?: IFile | null;
+}
+
+export default function CategoryModal({
+  category,
+  closeModal,
+  openModal,
+  selectCategory,
+  hideTrigger = false,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
@@ -44,19 +58,32 @@ export default function CategoryModal({ category }: { category?: IFile }) {
     }
   }, [category, open]);
 
+  useEffect(() => {
+    if (openModal) {
+      setOpen(true);
+    }
+  }, [openModal]);
+
   const handleClose = (value: boolean) => {
     setOpen(value);
+    closeModal && closeModal();
     setCategories([]);
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsLoading(true);
     if (oneTitleMod) {
     } else {
-      await createCategory(categories);
+      const newCategories = await createCategory(categories);
+      if (selectCategory) {
+        const categoryIds = newCategories.map((cat: IFile) => String(cat.id));
+        selectCategory(categoryIds);
+      }
     }
     await queryClient.invalidateQueries({ queryKey: ['categories'] });
+
     setIsLoading(false);
     handleClose(false);
   };
@@ -71,9 +98,11 @@ export default function CategoryModal({ category }: { category?: IFile }) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogTrigger asChild>
-        <Button className="bg-accent w-[240px] mx-auto">{t('creat_category')}</Button>
-      </DialogTrigger>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          <Button className="bg-accent w-[240px] mx-auto">{t('creat_category')}</Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-[750px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>

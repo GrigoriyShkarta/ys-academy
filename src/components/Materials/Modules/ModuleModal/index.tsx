@@ -24,9 +24,11 @@ import PhotoEditor from '@/components/Materials/Modules/ModuleModal/PhotoEditor'
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ChooseLessonModal from '@/common/MaterialsCommon/ChooseLessonModal';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createModule, updateModule } from '@/components/Materials/Modules/action';
 import SortableLesson from '@/components/Materials/Modules/ModuleModal/SortableLesson';
+import MultiSelect from '@/common/MultiSelect';
+import { getCategories } from '@/components/Materials/Categories/action';
 
 interface Props {
   open: boolean;
@@ -42,6 +44,7 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
   const [name, setName] = useState<string>('');
   const [lessons, setLessons] = useState<{ id: number; title: string; index: number }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
+  const [categoryIds, setCategoryIds] = useState<string[] | undefined>([]);
   const [openLessonModal, setOpenLessonModal] = useState<boolean>(false);
   const [openPhotoBank, setOpenPhotoBank] = useState<boolean>(false);
 
@@ -52,6 +55,7 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
         setName(module.title ?? '');
         setImageSrc(module.url ?? '');
         setLessons((module.lessons ?? []).map((l, i) => ({ ...l, index: l.index ?? i })));
+        setCategoryIds((module.categories ?? []).map(c => String(c.id)));
       } else {
         setName('');
         setImageSrc('');
@@ -59,6 +63,17 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
       }
     }
   }, [open, module]);
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
 
   const handleAddImage = async (type: LessonItemType, content: string | File, bankId?: number) => {
     setImageSrc(content as string);
@@ -120,6 +135,7 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
       title: name,
       url: imageSrc ?? '',
       lessons: lessons.map(l => ({ id: l.id, index: l.index })),
+      categories: categoryIds ?? [],
     };
 
     mutation.mutate(data);
@@ -166,6 +182,14 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder={t('enter_name')}
+            />
+
+            <MultiSelect
+              options={categoryOptions}
+              selected={categoryIds}
+              onChange={next => setCategoryIds(prev => (prev ? next : undefined))}
+              placeholder={t('select_categories')}
+              className="w-full"
             />
 
             <div className="space-y-2">

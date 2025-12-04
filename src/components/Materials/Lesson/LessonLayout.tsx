@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteLesson, getLesson, updateLesson } from '@/components/Materials/Lesson/action';
 import Loader from '@/common/Loader';
-import { LessonDocItem } from '@/components/Materials/utils/interfaces';
+import { IFile, LessonDocItem } from '@/components/Materials/utils/interfaces';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,16 +14,22 @@ import LessonBlock from '@/components/Materials/Lesson/components/LessonBlock';
 import { Block } from '@blocknote/core';
 import Cover from '@/components/Materials/Lesson/components/Cover';
 import ConfirmModal from '@/common/ConfirmModal';
+import LessonSaveModal from '@/components/Materials/Lesson/components/LessonSaveModal';
 
 export default function LessonLayout({ id }: { id: number }) {
   const [isEditPlace, setIsEditPlace] = useState(false);
   const [lessonTitle, setLessonTitle] = useState('');
   const [cover, setCover] = useState<string>('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedModules, setSelectedModules] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [openSaveModal, setOpenSaveModal] = useState(false);
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const isEdit = searchParams.get('isEdit') === 'true';
   const t = useTranslations('Materials');
 
   const { data: lesson, isLoading } = useQuery({
@@ -36,6 +42,8 @@ export default function LessonLayout({ id }: { id: number }) {
     if (lesson) {
       setLessonTitle(lesson.title);
       setCover(lesson.cover);
+      setSelectedCategories(lesson?.categories?.map((c: IFile) => String(c.id)) ?? []);
+      setSelectedModules(lesson?.modules?.map((c: IFile) => String(c.id)) ?? []);
       const doc = (lesson.content || []).map((item: any) => ({
         blockId: item.blockId,
         content: item.content ?? [],
@@ -44,10 +52,14 @@ export default function LessonLayout({ id }: { id: number }) {
     }
   }, [lesson]);
 
+  useEffect(() => {
+    if (isEdit) setIsEditPlace(true);
+  }, [isEdit]);
+
   const handleUpdateLesson = async () => {
     try {
       setLoading(true);
-      await updateLesson(id, lessonDoc, lessonTitle, cover);
+      await updateLesson(id, lessonDoc, lessonTitle, cover, selectedCategories, selectedModules);
       await queryClient.invalidateQueries({ queryKey: ['lesson', id] });
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch (e) {
@@ -55,6 +67,7 @@ export default function LessonLayout({ id }: { id: number }) {
     } finally {
       setLoading(false);
       setIsEditPlace(false);
+      setOpenSaveModal(false);
     }
   };
 
@@ -65,7 +78,7 @@ export default function LessonLayout({ id }: { id: number }) {
   };
 
   const handleDeleteLesson = async () => {
-    await deleteLesson(id);
+    await deleteLesson([id]);
     await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     router.back();
   };
@@ -118,7 +131,7 @@ export default function LessonLayout({ id }: { id: number }) {
           )}
 
           {isEditPlace ? (
-            <Button className="bg-accent" onClick={handleUpdateLesson}>
+            <Button className="bg-accent" onClick={() => setOpenSaveModal(prev => !prev)}>
               {t('save')}
             </Button>
           ) : (
@@ -136,13 +149,13 @@ export default function LessonLayout({ id }: { id: number }) {
           placeholder={t('lesson_title')}
           value={lessonTitle}
           onChange={e => setLessonTitle(e.target.value)}
-          className="min-w-1/2! text-3xl! h-[58px] mx-auto text-center border-none"
+          className="min-w-1/2! text-[50px]! h-[58px] mx-auto text-center border-none"
         />
       ) : (
-        <h1 className="text-center text-4xl font-bold mb-6">{lesson.title}</h1>
+        <h1 className="text-center text-[50px]! font-bold mb-6">{lesson.title}</h1>
       )}
 
-      <div className="relative p-2 sm:p-0">
+      <div className="relative p-2 sm:p-0 max-w-7xl mx-auto">
         {lessonDoc.length > 0 &&
           lessonDoc.map((block: LessonDocItem) => (
             <LessonBlock
@@ -168,6 +181,17 @@ export default function LessonLayout({ id }: { id: number }) {
         open={open}
         setOnClose={() => setOpen(false)}
         confirmAction={handleDeleteLesson}
+      />
+
+      <LessonSaveModal
+        open={openSaveModal}
+        onClose={() => setOpenSaveModal(false)}
+        onSave={handleUpdateLesson}
+        selectedCategories={selectedCategories}
+        setSelectedCategories={setSelectedCategories}
+        selectedModules={selectedModules}
+        setSelectedModules={setSelectedModules}
+        isLoading={loading}
       />
     </div>
   );

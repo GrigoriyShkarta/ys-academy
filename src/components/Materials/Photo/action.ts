@@ -1,4 +1,5 @@
 import axiosInstance from '@/services/axios';
+import qs from 'qs';
 import { ContentFormValues } from '@/components/Materials/utils/materialSchemas';
 import { GetMaterialParams } from '@/components/Materials/utils/interfaces';
 import { compressImage } from '@/lib/utils';
@@ -18,6 +19,7 @@ export const uploadPhoto = async (form: ContentFormValues) => {
     }
   }
   formData.append('title', form?.title ?? '');
+  formData.append('categoryIds', JSON.stringify(form.categories));
   if (form.content) {
     formData.append('file', finalFile);
   }
@@ -28,23 +30,18 @@ export const uploadPhoto = async (form: ContentFormValues) => {
   return data;
 };
 
-export const getPhotos = async ({ page, search }: GetMaterialParams) => {
+export const getPhotos = async ({ page, search, categories }: GetMaterialParams) => {
   const { data } = await axiosInstance.get('/photo', {
-    params: { page, search },
+    params: { page, search, categories },
+    paramsSerializer: params => {
+      return qs.stringify(params, { arrayFormat: 'repeat' });
+    },
   });
   return data;
 };
 
 export const editPhoto = async (id: number, form: ContentFormValues) => {
-  const formData = new FormData();
-  formData.append('title', form?.title ?? '');
-  if (form.content) {
-    formData.append('file', form.content);
-  }
-
-  const { data } = await axiosInstance.patch(`/photo/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const { data } = await axiosInstance.patch(`/photo/${id}`, form);
 
   return data;
 };

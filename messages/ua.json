@@ -113,7 +113,22 @@
     "creat_category": "Створити категорію",
     "edit_category": "Редагувати категорію",
     "add_category": "Додати категорію",
-    "remove_color": "Прибрати колір"
+    "remove_color": "Прибрати колір",
+    "drop_here": "Перетягніть файл сюди",
+    "drop_to_upload": "Файл буде відкрито у вікні завантаження",
+    "uploaded_audio": "Завантажено аудіо",
+    "audio_title": "Назва аудіо",
+    "categories": "Категорії",
+    "create_category": "Створити категорію",
+    "select_categories": "Виберіть категорії...",
+    "nothing_found": "Нічого не знайдено",
+    "uploaded_photos": "Завантажено фото",
+    "photo_title": "Назва фото",
+    "uploaded_videos": "Завантажено відео",
+    "video_title": "Назва відео",
+    "add_to_module": "Додати до модуля",
+    "save_lesson": "Зберегти урок",
+    "modules": "Модулі"
   },
 
   "Validation": {
@@ -150,6 +165,7 @@
     "no_lessons_find": "Уроки не знайдено",
     "let_access": "Доступно",
     "close": "Закрито",
-    "select": "Обрати"
+    "select": "Обрати",
+    "select_category": "Обрати категорію"
   }
 }

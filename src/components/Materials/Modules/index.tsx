@@ -10,18 +10,35 @@ import { deleteModule, getModules } from '@/components/Materials/Modules/action'
 import MediaGallery from '@/common/MediaGallery';
 import { IFile, Module } from '@/components/Materials/utils/interfaces';
 import Loader from '@/common/Loader';
+import { getCategories } from '@/components/Materials/Categories/action';
 
 export default function ModulesLayout() {
   const [isCreateModule, setIsCreateModule] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedFile, setSelectedFile] = useState<Module | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const t = useTranslations('Materials');
 
   const { data: modules, isLoading } = useQuery({
-    queryKey: ['modules', search],
-    queryFn: () => getModules({ search }),
+    queryKey: ['modules', search, selectedCategories],
+    queryFn: () => getModules({ search, categories: selectedCategories }),
     placeholderData: keepPreviousData,
   });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
+
+  const onMultiSelectChange = (selected: string[]) => {
+    setSelectedCategories(selected);
+  };
 
   if (isLoading) return <Loader />;
 
@@ -48,12 +65,15 @@ export default function ModulesLayout() {
           onSearchChange={newSearch => {
             setSearch(newSearch);
           }}
+          multiSelectOptions={categoryOptions}
+          onMultiSelectChange={onMultiSelectChange}
           linkUrl={'modules'}
           hiddenClickAll
           isOneSelectItem
           hiddenCheckbox
           isLink
           queryKey="modules"
+          hideLessons
         />
       )}
 

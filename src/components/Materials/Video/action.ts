@@ -1,10 +1,12 @@
 import axiosInstance from '@/services/axios';
 import { ContentFormValues } from '@/components/Materials/utils/materialSchemas';
 import { GetMaterialParams } from '@/components/Materials/utils/interfaces';
+import qs from 'qs';
 
 export const uploadVideo = async (form: ContentFormValues) => {
   const formData = new FormData();
   formData.append('title', form?.title ?? '');
+  formData.append('categoryIds', JSON.stringify(form.categories));
   if (form.content) {
     formData.append('file', form.content);
   }
@@ -15,9 +17,12 @@ export const uploadVideo = async (form: ContentFormValues) => {
   return data;
 };
 
-export const getVideos = async ({ page, search }: GetMaterialParams) => {
+export const getVideos = async ({ page, search, categories }: GetMaterialParams) => {
   const { data } = await axiosInstance.get('/video', {
-    params: { page, search },
+    params: { page, search, categories },
+    paramsSerializer: params => {
+      return qs.stringify(params, { arrayFormat: 'repeat' });
+    },
   });
   return data;
 };
@@ -29,17 +34,8 @@ export const deleteVideos = async (ids: number[]) => {
   return data;
 };
 
-export const editVideo = async (
-  id: number,
-  form: { title: string; content: File | string | null }
-) => {
-  const formData = new FormData();
-  formData.append('title', form.title);
-  if (form.content) {
-    formData.append('file', form.content);
-  }
-
-  const { data } = await axiosInstance.patch(`/video/${id}`, formData);
+export const editVideo = async (id: number, form: ContentFormValues) => {
+  const { data } = await axiosInstance.patch(`/video/${id}`, form);
 
   return data;
 };

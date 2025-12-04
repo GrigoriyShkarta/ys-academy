@@ -10,6 +10,7 @@ import LessonBlock from '@/components/Materials/Lesson/components/LessonBlock';
 import { Block } from '@blocknote/core';
 import Cover from '@/components/Materials/Lesson/components/Cover';
 import ConfirmModal from '@/common/ConfirmModal';
+import LessonSaveModal from '@/components/Materials/Lesson/components/LessonSaveModal';
 
 interface Props {
   setIsEditPlace: Dispatch<SetStateAction<boolean>>;
@@ -19,6 +20,10 @@ export default function EditPlace({ setIsEditPlace }: Props) {
   const [lessonTitle, setLessonTitle] = useState('');
   const [cover, setCover] = useState<string>('');
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedModules, setSelectedModules] = useState<string[]>([]);
+  const [openSaveModal, setOpenSaveModal] = useState(false);
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
@@ -49,16 +54,19 @@ export default function EditPlace({ setIsEditPlace }: Props) {
 
   const saveLesson = async () => {
     try {
-      await createLesson(lessonDoc, lessonTitle, cover);
+      setLoading(true);
+      await createLesson(lessonDoc, lessonTitle, cover, selectedCategories, selectedModules);
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
-      setIsEditPlace(false);
     } catch (error) {
       console.error('Error saving lesson:', error);
+    } finally {
+      setLoading(false);
+      setIsEditPlace(false);
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative w-full max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
         <button
           type="button"
@@ -71,7 +79,10 @@ export default function EditPlace({ setIsEditPlace }: Props) {
         </button>
         <h2 className="text-xl font-bold">{t('createLesson')}</h2>
         <div className="flex gap-2">
-          <Button onClick={saveLesson} className="bg-accent text-white px-4 py-2 rounded-lg">
+          <Button
+            onClick={() => setOpenSaveModal(true)}
+            className="bg-accent text-white px-4 py-2 rounded-lg"
+          >
             {t('save')}
           </Button>
         </div>
@@ -84,7 +95,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
           placeholder={t('lesson_title')}
           value={lessonTitle}
           onChange={e => setLessonTitle(e.target.value)}
-          className="min-w-1/2! text-3xl! h-[58px] mx-auto border-none text-center"
+          className="min-w-1/2! text-[50px]! h-[58px] mx-auto border-none text-center"
         />
       </div>
 
@@ -106,6 +117,17 @@ export default function EditPlace({ setIsEditPlace }: Props) {
         setOnClose={() => setOpen(false)}
         confirmAction={() => setIsEditPlace(false)}
         textContent={t('confirm_lesson')}
+      />
+
+      <LessonSaveModal
+        open={openSaveModal}
+        onClose={() => setOpenSaveModal(false)}
+        onSave={saveLesson}
+        selectedCategories={selectedCategories}
+        setSelectedCategories={setSelectedCategories}
+        selectedModules={selectedModules}
+        setSelectedModules={setSelectedModules}
+        isLoading={loading}
       />
     </div>
   );

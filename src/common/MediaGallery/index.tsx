@@ -8,14 +8,23 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { CircleChevronRight, ClipboardList, Edit, FunnelX, Trash2 } from 'lucide-react';
 import Loader from '@/common/Loader';
-import { IFile } from '@/components/Materials/utils/interfaces';
+import { Category, IFile, Lesson } from '@/components/Materials/utils/interfaces';
 import PreviewModal from '@/common/PreviewModal';
 import ConfirmModal from '@/common/ConfirmModal';
 import Pagination from '@/common/Pagination';
 import { getYouTubeId } from '@/lib/utils';
 import logo from '../../../public/assets/logo.png';
+import Chip from '@/common/Chip';
+import LessonsListModal from '@/common/LessonsListModal';
+import CategoryListModal from '@/common/CategoryListModal';
+import MultiSelect from '@/common/MultiSelect';
+
+interface MultiOption {
+  value: string;
+  label: string;
+}
 
 interface MediaGalleryProps {
   data: IFile[];
@@ -34,8 +43,12 @@ interface MediaGalleryProps {
   hiddenClickAll?: boolean;
   hiddenCheckbox?: boolean;
   showFromDevice?: boolean;
+  hideLessons?: boolean;
   queryKey?: string;
   handleClickFromDevice?: () => void;
+  multiSelectOptions?: MultiOption[];
+  selectedMulti?: string[];
+  onMultiSelectChange?: (selected: string[]) => void;
 }
 
 export default function MediaGallery({
@@ -57,15 +70,28 @@ export default function MediaGallery({
   isLink = false,
   hiddenClickAll = false,
   hiddenCheckbox = false,
+  hideLessons = false,
+  multiSelectOptions = [],
+  selectedMulti = [],
+  onMultiSelectChange,
 }: MediaGalleryProps) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectedId, setSelectedId] = useState<number>();
   const [search, setSearch] = useState('');
   const [openConfirm, setOpenConfirm] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [lessonsList, setLessonsList] = useState<Lesson[] | undefined>([]);
+  const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
+  const [localSelected, setLocalSelected] = useState<string[]>([]);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const queryClient = useQueryClient();
   const t = useTranslations('Common');
+
+  useEffect(() => {
+    if (selectedMulti.length > 0) {
+      setLocalSelected(selectedMulti);
+    }
+  }, [selectedMulti]);
 
   const toggleSelect = (id: number) => {
     if (handleClickItem) {
@@ -128,6 +154,36 @@ export default function MediaGallery({
             onChange={handleSearchChange}
             className="max-w-sm"
           />
+          {multiSelectOptions.length > 0 && (
+            <div className="flex gap-2">
+              <MultiSelect
+                options={multiSelectOptions}
+                selected={localSelected}
+                onChange={next => {
+                  setLocalSelected(prev => {
+                    if (prev.length === next.length && prev.every((v, i) => v === next[i]))
+                      return prev;
+                    return next;
+                  });
+                  onMultiSelectChange?.(next);
+                }}
+                placeholder={t('select')}
+                className="relative"
+              />
+
+              {localSelected.length > 0 && (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setLocalSelected([]);
+                    onMultiSelectChange?.([]);
+                  }}
+                >
+                  <FunnelX />
+                </Button>
+              )}
+            </div>
+          )}
 
           {!isOneSelectItem && selectedIds.length > 0 && (
             <Button
@@ -241,6 +297,27 @@ export default function MediaGallery({
               >
                 {item.title}
               </div>
+              {item?.categories?.length > 0 && (
+                <div className="flex gap-1 m-2 justify-center">
+                  {item?.categories?.slice(0, 2).map(category => (
+                    <Chip key={category.id} category={category} />
+                  ))}
+                  {item?.categories?.length > 2 && (
+                    <CircleChevronRight
+                      className="cursor-pointer"
+                      onClick={() => seCategoryList(item.categories)}
+                    />
+                  )}
+                </div>
+              )}
+              {!hideLessons && item?.lessons?.length > 0 && (
+                <div className="flex gap-1 m-2 justify-center">
+                  <ClipboardList
+                    onClick={() => setLessonsList(item.lessons)}
+                    className="cursor-pointer"
+                  />
+                </div>
+              )}
             </div>
           ))}
       </div>
@@ -264,6 +341,9 @@ export default function MediaGallery({
           isLoading={isDeleting}
         />
       )}
+
+      <LessonsListModal list={lessonsList} close={() => setLessonsList(undefined)} />
+      <CategoryListModal list={categoryList} close={() => seCategoryList(undefined)} />
     </div>
   );
 }

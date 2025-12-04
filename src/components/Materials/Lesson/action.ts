@@ -1,15 +1,20 @@
 import axiosInstance from '@/services/axios';
 import { GetMaterialParams, LessonDocItem } from '@/components/Materials/utils/interfaces';
+import qs from 'qs';
 
 export const createLesson = async (
   lessons: LessonDocItem[],
   lessonTitle: string,
-  cover?: string
+  cover?: string,
+  categoryIds?: string[],
+  moduleIds?: string[]
 ) => {
   const formatedLesson = {
     title: lessonTitle,
     blocks: lessons,
     cover,
+    categoryIds,
+    moduleIds,
   };
   const { data } = await axiosInstance.post('/lesson/create', formatedLesson);
 
@@ -20,12 +25,16 @@ export const updateLesson = async (
   id: number,
   lessons: LessonDocItem[],
   lessonTitle: string,
-  cover?: string
+  cover?: string,
+  categoryIds?: string[],
+  moduleIds?: string[]
 ) => {
   const formatedLesson = {
     title: lessonTitle,
     blocks: lessons,
     cover,
+    categoryIds,
+    moduleIds,
   };
 
   const { data } = await axiosInstance.post(`/lesson/update/${id}`, formatedLesson);
@@ -33,8 +42,10 @@ export const updateLesson = async (
   return data;
 };
 
-export const deleteLesson = async (id: number | number[]) => {
-  const { data } = await axiosInstance.delete(`/lesson/${id}`);
+export const deleteLesson = async (id: number[]) => {
+  const { data } = await axiosInstance.delete(`/lesson`, {
+    data: { ids: id },
+  });
   return data;
 };
 
@@ -43,9 +54,13 @@ export const getAllLessons = async ({
   search = '',
   sortBy,
   sortOrder,
+  categories,
 }: GetMaterialParams) => {
   const { data } = await axiosInstance.get('/lesson', {
-    params: { page, search, sortBy, sortOrder },
+    params: { page, search, sortBy, sortOrder, categories },
+    paramsSerializer: params => {
+      return qs.stringify(params, { arrayFormat: 'repeat' });
+    },
   });
   return data;
 };

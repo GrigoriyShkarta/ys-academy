@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { FunnelX, Trash2 } from 'lucide-react';
 import Pagination from '@/common/Pagination';
 import { useTranslations } from 'next-intl';
 import MultiSelect from '@/common/MultiSelect';
@@ -66,10 +66,8 @@ export default function DataTable<T extends Record<string, any>>({
   onMultiSelectChange,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('');
-  const [open, setOpen] = useState(false);
   const [localSelected, setLocalSelected] = useState<string[]>([]);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const t = useTranslations('Common');
 
   useEffect(() => {
@@ -77,17 +75,6 @@ export default function DataTable<T extends Record<string, any>>({
       setLocalSelected(selectedMulti);
     }
   }, [selectedMulti]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (!dropdownRef.current) return;
-      if (!dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -115,20 +102,33 @@ export default function DataTable<T extends Record<string, any>>({
           className="max-w-sm"
         />
         {multiSelectOptions.length > 0 && (
-          <MultiSelect
-            options={multiSelectOptions}
-            selected={localSelected}
-            onChange={next => {
-              setLocalSelected(prev => {
-                // предотвратить лишний setState, если массив не изменился
-                if (prev.length === next.length && prev.every((v, i) => v === next[i])) return prev;
-                return next;
-              });
-              onMultiSelectChange?.(next);
-            }}
-            placeholder={t('select')}
-            className="relative"
-          />
+          <div className="flex gap-2">
+            <MultiSelect
+              options={multiSelectOptions}
+              selected={localSelected}
+              onChange={next => {
+                setLocalSelected(prev => {
+                  if (prev.length === next.length && prev.every((v, i) => v === next[i]))
+                    return prev;
+                  return next;
+                });
+                onMultiSelectChange?.(next);
+              }}
+              placeholder={t('select')}
+              className="relative"
+            />
+            {localSelected.length > 0 && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setLocalSelected([]);
+                  onMultiSelectChange?.([]);
+                }}
+              >
+                <FunnelX />
+              </Button>
+            )}
+          </div>
         )}
         {showDeleteIcon && (
           <Button className="bg-destructive hover:bg-destructive/80" onClick={handleDelete}>

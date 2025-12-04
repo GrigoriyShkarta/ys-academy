@@ -1,20 +1,32 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import EditPlace from '@/components/Materials/Lesson/EditPlace';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { keepPreviousData } from '@tanstack/query-core';
-import { ArrowDown, ArrowUp, ChevronsUpDownIcon, Loader } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import EditPlace from '@/components/Materials/Lesson/EditPlace';
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDownIcon,
+  CircleChevronRight,
+  ClipboardList,
+  Loader,
+} from 'lucide-react';
 import { deleteLesson, getAllLessons } from '@/components/Materials/Lesson/action';
 import { Checkbox } from '@/components/ui/checkbox';
-import { IFile } from '@/components/Materials/utils/interfaces';
+import { Category, IFile } from '@/components/Materials/utils/interfaces';
 import TableActionMenu from '@/common/TableActioMenu';
 import { formatDateTime } from '@/lib/utils';
 import DataTable from '@/common/Table';
 import ConfirmModal from '@/common/ConfirmModal';
-import Link from 'next/link';
+import Chip from '@/common/Chip';
+import LessonsListModal from '@/common/LessonsListModal';
+import CategoryListModal from '@/common/CategoryListModal';
+import { getCategories } from '@/components/Materials/Categories/action';
 
 export default function LessonsLayout() {
   const [page, setPage] = useState(1);
@@ -22,23 +34,48 @@ export default function LessonsLayout() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectedId, setSelectedId] = useState<number>();
   const [openConfirm, setOpenConfirm] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'title' | 'createdAt' | undefined>(undefined);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
-
+  const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
+  const [moduleList, setModuleList] = useState<Category[] | undefined>([]);
   const [search, setSearch] = useState('');
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { data: lessons, isLoading } = useQuery({
-    queryKey: ['lessons', page, search, sortBy, sortOrder],
-    queryFn: () => getAllLessons({ page, search, sortBy: sortBy ?? undefined, sortOrder }),
+    queryKey: ['lessons', page, search, sortBy, sortOrder, selectedCategories],
+    queryFn: () =>
+      getAllLessons({
+        page,
+        search,
+        sortBy: sortBy ?? undefined,
+        sortOrder,
+        categories: selectedCategories,
+      }),
     placeholderData: keepPreviousData,
   });
 
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
+
+  const onMultiSelectChange = (selected: string[]) => {
+    setSelectedCategories(selected);
+  };
+
   const deleteLessonMutation = useMutation({
-    mutationFn: () => deleteLesson(selectedId || selectedIds),
+    mutationFn: () => deleteLesson(selectedId ? [selectedId] : selectedIds),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['audios'] });
+      await queryClient.invalidateQueries({ queryKey: ['lessons'] });
       setSelectedId(undefined);
       setSelectedIds([]);
       setOpenConfirm(false);
@@ -94,6 +131,7 @@ export default function LessonsLayout() {
               setSelectedId(item.id);
               setOpenConfirm(true);
             }}
+            handleEdit={() => router.push(`/main/materials/lessons/${item.id}?isEdit=true`)}
           />
         ),
       },
@@ -120,6 +158,34 @@ export default function LessonsLayout() {
         render: (lesson: IFile) => (
           <Link href={`/main/materials/lessons/${lesson.id}`}>{lesson.title}</Link>
         ),
+      },
+      {
+        key: 'categories',
+        label: t('categories'),
+        render: (item: IFile) => (
+          <div className="flex gap-1">
+            {item?.categories &&
+              item.categories
+                .slice(0, 2)
+                .map(category => <Chip key={category.id} category={category} />)}
+
+            {item?.categories?.length > 2 && (
+              <CircleChevronRight
+                className="cursor-pointer"
+                onClick={() => seCategoryList(item.categories)}
+              />
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'modules',
+        label: t('modules'),
+        render: (item: IFile) =>
+          item?.modules &&
+          item?.modules?.length > 0 && (
+            <ClipboardList onClick={() => setModuleList(item.modules)} className="cursor-pointer" />
+          ),
       },
       {
         key: 'created_at',
@@ -165,6 +231,8 @@ export default function LessonsLayout() {
           totalPages={lessons?.meta?.totalPages}
           currentPage={page}
           onPageChange={newPage => setPage(newPage)}
+          multiSelectOptions={categoryOptions}
+          onMultiSelectChange={onMultiSelectChange}
           showDeleteIcon={selectedIds.length > 0}
           selectedIds={selectedIds}
           handleDelete={() => setOpenConfirm(true)}
@@ -182,6 +250,9 @@ export default function LessonsLayout() {
           isLoading={deleteLessonMutation.isPending}
         />
       )}
+
+      <LessonsListModal list={moduleList} close={() => setModuleList(undefined)} />
+      <CategoryListModal list={categoryList} close={() => seCategoryList(undefined)} />
     </div>
   );
 }

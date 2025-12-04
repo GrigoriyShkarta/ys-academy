@@ -10,6 +10,7 @@ import MediaGallery from '@/common/MediaGallery';
 import VideoModal from '@/components/Materials/Video/VideoModal';
 import useDragAndDropMaterial from '@/hooks/useDragAndDropMaterial';
 import DrugOverlay from '@/common/MaterialsCommon/DrugOverlay';
+import { getCategories } from '@/components/Materials/Categories/action';
 
 interface Props {
   open: boolean;
@@ -21,16 +22,32 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
   const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [addFiles, setAddFiles] = useState<File[] | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
     accept: ['video/*'],
     onFiles: files => setAddFiles(files),
   });
 
   const { data: videos, isLoading } = useQuery({
-    queryKey: ['videos', search],
-    queryFn: () => getVideos({ search, page: 'all' }),
+    queryKey: ['videos', search, selectedCategories],
+    queryFn: () => getVideos({ search, page: 'all', categories: selectedCategories }),
     placeholderData: keepPreviousData,
   });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
+
+  const onMultiSelectChange = (selected: string[]) => {
+    setSelectedCategories(selected);
+  };
 
   return (
     <>
@@ -50,6 +67,8 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
           ) : (
             <MediaGallery
               data={videos.data}
+              multiSelectOptions={categoryOptions}
+              onMultiSelectChange={onMultiSelectChange}
               onSearchChange={newSearch => {
                 setSearch(newSearch);
               }}

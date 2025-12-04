@@ -1,5 +1,6 @@
 import axiosInstance from '@/services/axios';
-import { Module, ModuleDTO } from '@/components/Materials/utils/interfaces';
+import { GetMaterialParams, Module, ModuleDTO } from '@/components/Materials/utils/interfaces';
+import qs from 'qs';
 
 export const createModule = async (form: ModuleDTO) => {
   const { data } = await axiosInstance.post('/module/create', form);
@@ -18,9 +19,12 @@ export const deleteModule = async (id?: number) => {
   return data;
 };
 
-export const getModules = async ({ search = '' }) => {
+export const getModules = async ({ search = '', categories }: GetMaterialParams) => {
   const { data } = await axiosInstance.get('/module', {
-    params: { search },
+    params: { search, categories },
+    paramsSerializer: params => {
+      return qs.stringify(params, { arrayFormat: 'repeat' });
+    },
   });
   return data;
 };

@@ -18,41 +18,47 @@ export const formatDateTime = (value?: string | Date | null) => {
   )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
-export const getYouTubeId = (url: string) => {
-  // допускаем, что пользователь мог вставить просто id
-
-  const idOnlyMatch = url.match(/^[A-Za-z0-9_-]{11}$/);
-  if (idOnlyMatch) return url;
+export const getYouTubeId = (url: string): string | null => {
+  // 1. Если просто ID (11 символов)
+  if (/^[A-Za-z0-9_-]{11}$/.test(url.trim())) {
+    return url.trim();
+  }
 
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(url.trim());
     const host = parsed.hostname.toLowerCase();
 
-    // короткий формат youtu.be/ID
+    // youtu.be
     if (host === 'youtu.be' || host.endsWith('.youtu.be')) {
-      const id = parsed.pathname.replace(/^\//, '');
+      const id = parsed.pathname.slice(1);
       return id.length === 11 ? id : null;
     }
 
-    // обычный youtube.com
+    // youtube.com или www.youtube.com
     if (host.includes('youtube.com') || host.endsWith('.youtube.com')) {
       // ?v=ID
       const v = parsed.searchParams.get('v');
-      if (v && v.length === 11 && /^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+      if (v && /^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+
       // /embed/ID
       const embedMatch = parsed.pathname.match(/\/embed\/([A-Za-z0-9_-]{11})/);
       if (embedMatch) return embedMatch[1];
+
+      // /shorts/ID ← ВОТ ЭТО ГЛАВНОЕ!
+      const shortsMatch = parsed.pathname.match(/\/shorts\/([A-Za-z0-9_-]{11})/);
+      if (shortsMatch) return shortsMatch[1];
+
+      // /watch?v=ID (fallback)
+      if (parsed.pathname === '/watch' && v) return v;
+
       return null;
     }
 
-    // fallback: попытка регулярки, но требуем строго 11 символов
-    const regExp = /(?:v=|\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{11})/;
-    const match = url.match(regExp);
-    return match ? match[1] : null;
-  } catch (e) {
-    // не URL — пробуем регексп на чистый id
-    const match = url.match(/^[A-Za-z0-9_-]{11}$/);
-    return match ? url : null;
+    return null;
+  } catch {
+    // Если не URL — пробуем как чистый ID
+    const match = url.trim().match(/^[A-Za-z0-9_-]{11}$/);
+    return match ? match[0] : null;
   }
 };
 

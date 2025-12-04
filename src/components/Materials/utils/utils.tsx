@@ -7,6 +7,7 @@ const youtubeBlock = createBlockSpec(
     propSchema: {
       url: { default: '' },
       videoId: { default: '' },
+      name: { default: '' },
       align: {
         default: 'center',
         values: ['left', 'center', 'right'] as const,

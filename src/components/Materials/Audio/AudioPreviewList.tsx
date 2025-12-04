@@ -1,12 +1,15 @@
-import { Dispatch, SetStateAction } from 'react';
-import { useTranslations } from 'next-intl';
-import { Input } from '@/components/ui/input';
+import { Loader, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Loader, Trash2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import MultiSelect from '@/common/MultiSelect';
+import { useTranslations } from 'next-intl';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/components/Materials/Categories/action';
-import MultiSelect from '@/common/MultiSelect';
+import CategoryModal from '@/components/Materials/Categories/CategoryModal'; // ← твоя модалка
 
+// ... остальные импорты
 interface Props {
   fetchingIdx?: number | null;
   uploadedFiles: File[];
@@ -14,6 +17,8 @@ interface Props {
 }
 
 export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUploadedFiles }: Props) {
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null);
   const t = useTranslations('Materials');
 
   const { data: categories } = useQuery({
@@ -21,18 +26,19 @@ export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUpload
     queryFn: () => getCategories({ page: 'all' }),
   });
 
-  const categoryOptions = (categories.data ? categories.data : []).map((c: any) => ({
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
     value: String(c.id),
-    label: c.title ?? '',
+    label: c.title,
+    color: c.color,
   }));
 
   const handleTitleChange = (index: number, value: string) => {
     setUploadedFiles(prev => {
       const copy = [...prev];
       const file = copy[index];
-      copy[index] = new File([file], value + file.name.substring(file.name.lastIndexOf('.')), {
-        type: file.type,
-      });
+      const ext = file.name.includes('.') ? file.name.substring(file.name.lastIndexOf('.')) : '';
+      copy[index] = new File([file], value + ext, { type: file.type });
+      (copy[index] as any).title = value;
       return copy;
     });
   };
@@ -40,77 +46,131 @@ export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUpload
   const handleCategoryChange = (index: number, next: string[]) => {
     setUploadedFiles(prev => {
       const copy = [...prev];
-      const file = copy[index];
-      // можно модифицировать объект File напрямую, но создаём копию для предсказуемости
-      const newFile = new File([file], file.name, { type: file.type });
-      (newFile as any).categories = next;
-      // сохранить кастомный title, если был
-      if ((file as any).title) (newFile as any).title = (file as any).title;
-      copy[index] = newFile;
+      (copy[index] as any).categories = next;
       return copy;
     });
   };
 
-  const handleDelete = (index: number) => {
+  const handleNewCategoriesForFile = (newCategories?: string[]) => {
+    if (activeFileIndex === null) return;
+    if (!newCategories) return;
+
     setUploadedFiles(prev => {
       const copy = [...prev];
-      copy.splice(index, 1);
-      return copy.length > 0 ? copy : [];
+      const file = copy[activeFileIndex];
+      const existing = (file as any).categories || [];
+      (copy[activeFileIndex] as any).categories = [...new Set([...existing, ...newCategories])];
+      return copy;
     });
+    setActiveFileIndex(null);
   };
 
-  if (!uploadedFiles || uploadedFiles.length === 0) return null;
+  const handleDelete = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleCreateNewCategory = (idx: number) => {
+    setActiveFileIndex(idx);
+    setIsCategoryModalOpen(true);
+  };
+
+  if (uploadedFiles.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3 mt-3 relative">
-      <p className="text-xs text-muted-foreground">{`${uploadedFiles.length} / 9`}</p>
-      {uploadedFiles.map((f, idx) => {
-        const metaTitle = (f as any).title;
-        const displayTitle = metaTitle ?? f.name.replace(/\.[^/.]+$/, '');
-        const selectedCategories = (f as any).categories ?? [];
+    <>
+      <div className="mt-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">
+            {t('uploaded_audio')}: <span className="font-bold">{uploadedFiles.length}</span>/9
+          </p>
+        </div>
 
-        return (
-          <div
-            key={idx}
-            className={`relative flex flex-col w-full gap-3 p-2 border rounded-md ${
-              fetchingIdx === idx ? 'bg-accent/10' : 'bg-background'
-            }`}
-          >
-            {fetchingIdx === idx && (
-              <Loader
-                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin`}
-                color={'#65a1f5'}
-                size={38}
-              />
-            )}
+        {uploadedFiles.map((file, idx) => {
+          const customTitle = (file as any).title;
+          const displayTitle = customTitle ?? file.name.replace(/\.[^/.]+$/, '');
+          const selectedCategories = (file as any).categories ?? [];
 
-            <div className="flex gap-3">
-              <Input
-                value={displayTitle}
-                maxLength={50}
-                onChange={e => handleTitleChange(idx, e.target.value)}
-                placeholder={t('enterTitle')}
-              />
-              <MultiSelect
-                options={categoryOptions}
-                selected={selectedCategories}
-                onChange={next => handleCategoryChange(idx, next)}
-                className="relative"
-              />
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                onClick={() => handleDelete(idx)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+          return (
+            <div
+              key={idx}
+              className={`relative rounded-xl border bg-card p-5 shadow-sm transition-all
+                ${fetchingIdx === idx ? 'ring-2 ring-primary/20 bg-primary/5' : ''}`}
+            >
+              {/* Загрузка */}
+              {fetchingIdx === idx && (
+                <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">
+                  <Loader className="w-10 h-10 animate-spin text-primary" />
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Название */}
+                <div>
+                  <Label htmlFor={`title-${idx}`} className="text-xs font-medium">
+                    {t('audio_title')}
+                  </Label>
+                  <Input
+                    id={`title-${idx}`}
+                    value={displayTitle}
+                    onChange={e => handleTitleChange(idx, e.target.value)}
+                    placeholder={t('enterTitle')}
+                    maxLength={80}
+                    className="mt-1.5"
+                  />
+                </div>
+
+                {/* Категории */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <Label htmlFor={`categories-${idx}`} className="text-xs font-medium">
+                      {t('categories')}
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs text-primary hover:text-primary"
+                      onClick={() => handleCreateNewCategory(idx)}
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1" />
+                      {t('create_category')}
+                    </Button>
+                  </div>
+                  <MultiSelect
+                    options={categoryOptions}
+                    selected={selectedCategories}
+                    onChange={next => handleCategoryChange(idx, next)}
+                    placeholder={t('select_categories')}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Плеер + удалить */}
+                <div className="flex items-center justify-between gap-4">
+                  <audio src={URL.createObjectURL(file)} controls className="flex-1 max-w-md" />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => handleDelete(idx)}
+                    className="shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
+          );
+        })}
+      </div>
 
-            <audio src={URL.createObjectURL(f)} controls className="w-full max-w-68" />
-          </div>
-        );
-      })}
-    </div>
+      {/* Модалка создания категории */}
+      <CategoryModal
+        openModal={isCategoryModalOpen}
+        closeModal={() => setIsCategoryModalOpen(false)}
+        selectCategory={handleNewCategoriesForFile}
+        hideTrigger
+      />
+    </>
   );
 }

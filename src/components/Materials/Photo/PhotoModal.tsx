@@ -1,6 +1,6 @@
 import { Dispatch, FormEvent, SetStateAction, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { editPhoto, uploadPhoto } from '@/components/Materials/Photo/action';
 import {
   Dialog,
@@ -15,7 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Dropzone } from '@/common/Dropzone';
 import { FormFooter } from '@/common/ModalFooter';
 import { IFile } from '@/components/Materials/utils/interfaces';
-import PhotoPreviewList from '@/components/Materials/Audio/PhotoPreviewList';
+import PhotoPreviewList from '@/components/Materials/Photo/PhotoPreviewList';
+import MultiSelect from '@/common/MultiSelect';
+import { getCategories } from '@/components/Materials/Categories/action';
 
 interface Props {
   openModal?: boolean;
@@ -40,9 +42,21 @@ export default function PhotoModal({
   const [isLoading, setIsLoading] = useState(false);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [title, setTitle] = useState('');
+  const [categoryIds, setCategoryIds] = useState<string[] | undefined>([]);
   const [fetchingFileIdx, setFetchingFileIdx] = useState<number | null>(null);
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
 
   useEffect(() => {
     if (uploadedFiles) {
@@ -51,6 +65,7 @@ export default function PhotoModal({
     }
     if (photo) {
       setTitle(photo.title);
+      setCategoryIds(photo?.categories?.map(c => String(c.id)));
       setOpen(true);
     }
     if (openModal) {
@@ -70,15 +85,19 @@ export default function PhotoModal({
     if (photo) {
       const formatedFile = {
         content: photo.url,
+        categoryIds,
         title,
       };
       await editPhoto(photo.id, formatedFile);
     } else {
       for (let i = 0; i < photoFiles.length; i++) {
         const item = photoFiles[i];
+        const rawCategories = (item as any).categories ?? [];
+        const categories = rawCategories.map((id: string | number) => Number(id));
         const formatedFile = {
           content: item,
           title: item.name?.replace(/\.[^/.]+$/, ''),
+          categories,
         };
         setFetchingFileIdx(i);
         await uploadPhoto(formatedFile);
@@ -123,9 +142,20 @@ export default function PhotoModal({
             <>
               <>
                 <label>{t('title')}</label>
-                <Input placeholder={t('enterTitle')} />
+                <Input
+                  placeholder={t('enterTitle')}
+                  maxLength={50}
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                />
               </>
-
+              <MultiSelect
+                options={categoryOptions}
+                selected={categoryIds}
+                onChange={next => setCategoryIds(prev => (prev ? next : undefined))}
+                placeholder={t('select_categories')}
+                className="w-full"
+              />
               <img
                 src={photo.url}
                 alt={photo.title}

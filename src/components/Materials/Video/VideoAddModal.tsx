@@ -25,6 +25,22 @@ interface Props {
   initialFiles?: File[] | null;
 }
 
+type YouTubePreview = {
+  id: string; // ← ID видео с YouTube (например: "dQw4w9WgXcQ")
+  url: string; // ← Полная ссылка[](https://youtube.com/watch?v=...)
+  title?: string; // ← Кастомное название, которое ввёл пользователь (необязательно)
+  categories?: string[]; // ← Массив ID категорий (строкой: ["12", "45"])
+};
+
+type FilePreview = {
+  uid: string; // ← Уникальный ID (обычно crypto.randomUUID())
+  preview: string; // ← object URL: URL.createObjectURL(file)
+  title?: string; // ← Кастомное название (по умолчанию — имя файла без расширения)
+  fileName?: string; // ← Оригинальное имя файла (например: "intro.mp4")
+  categories?: string[]; // ← Выбранные категории (["3", "7"])
+  file?: File; // ← Сам File объект (если нужно отправить на сервер)
+};
+
 export default function VideoAddModal({
   hideTrigger,
   open = false,
@@ -36,11 +52,18 @@ export default function VideoAddModal({
   const [internalOpen, setInternalOpen] = useState(open);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedUploads, setSelectedUploads] = useState<
-    { uid: string; file: File; title: string; preview: string }[]
+    { uid: string; file: File; title: string; preview: string; categories?: string[] }[]
   >([]);
   const [urlsText, setUrlsText] = useState('');
   const [youtubeItems, setYoutubeItems] = useState<
-    { id?: string; url: string; title?: string; valid?: boolean; error?: 'format' | 'not_found' }[]
+    {
+      id?: string;
+      url: string;
+      title?: string;
+      valid?: boolean;
+      categories?: string[];
+      error?: 'format' | 'not_found';
+    }[]
   >([]);
   const [fetchingFile, setFetchingFile] = useState<number | null>(null);
 
@@ -146,17 +169,23 @@ export default function VideoAddModal({
       for (let i = 0; i < validYoutubeToUpload.length; i++) {
         const y = validYoutubeToUpload[i];
         setFetchingFile(i);
-        await uploadVideo({ title: y.title ?? `YouTube ${y.id}`, content: y.url });
+        await uploadVideo({
+          title: y.title ?? `YouTube ${y.id}`,
+          content: y.url,
+          categories: y.categories,
+        });
       }
 
       // загрузим файлы
       for (let i = 0; i < selectedUploads.length; i++) {
         const item = selectedUploads[i];
+
         setFetchingFile(i + validYoutubeToUpload.length);
         try {
           await uploadVideo({
             title: item.title || item.file.name.replace(/\.[^/.]+$/, ''),
             content: item.file,
+            categories: item.categories,
           });
         } catch {}
       }
@@ -250,6 +279,7 @@ export default function VideoAddModal({
                 preview: s.preview,
                 title: s.title,
                 fileName: s.file.name,
+                categories: s.categories,
               }))}
               onRemoveFile={(uid: string) =>
                 setSelectedUploads(prev => {
@@ -281,6 +311,18 @@ export default function VideoAddModal({
               onFileTitleChange={(uid: string, title: string) =>
                 setSelectedUploads(prev => prev.map(it => (it.uid === uid ? { ...it, title } : it)))
               }
+              onYoutubeCategoriesChange={(idx, categories) => {
+                setYoutubeItems(prev => {
+                  const copy = [...prev];
+                  copy[idx] = { ...copy[idx], categories };
+                  return copy;
+                });
+              }}
+              onFileCategoriesChange={(uid, categories) => {
+                setSelectedUploads(prev =>
+                  prev.map(f => (f.uid === uid ? { ...f, categories } : f))
+                );
+              }}
             />
           </div>
 

@@ -2,7 +2,7 @@
 
 import { Dispatch, FormEvent, SetStateAction, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { editAudio, uploadAudio } from '@/components/Materials/Audio/action';
 import { IFile } from '@/components/Materials/utils/interfaces';
 import {
@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Dropzone } from '@/common/Dropzone';
 import { FormFooter } from '@/common/ModalFooter';
 import AudioPreviewList from '@/components/Materials/Audio/AudioPreviewList';
+import MultiSelect from '@/common/MultiSelect';
+import { getCategories } from '@/components/Materials/Categories/action';
 
 interface Props {
   openModal?: boolean;
@@ -45,9 +47,19 @@ export default function AudioModal({
   const [audioFiles, setAudioFiles] = useState<File[]>([]);
   const [fetchingFileIdx, setFetchingFileIdx] = useState<number | null>(null);
   const [title, setTitle] = useState('');
+  const [categoryIds, setCategoryIds] = useState<string[] | undefined>([]);
   const queryClient = useQueryClient();
 
-  console.log('audioFiles', audioFiles);
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => getCategories({ page: 'all' }),
+  });
+
+  const categoryOptions = (categories?.data ?? []).map((c: any) => ({
+    value: String(c.id),
+    label: c.title,
+    color: c.color,
+  }));
 
   useEffect(() => {
     if (uploadedFiles) {
@@ -56,6 +68,7 @@ export default function AudioModal({
     }
     if (audio) {
       setTitle(audio.title);
+      setCategoryIds(audio?.categories?.map(c => String(c.id)));
       setOpen(true);
     }
     if (openModal) {
@@ -84,6 +97,7 @@ export default function AudioModal({
     if (audio) {
       const formatedFile = {
         content: audio.url,
+        categoryIds,
         title,
       };
       await editAudio(audio.id, formatedFile);
@@ -92,7 +106,6 @@ export default function AudioModal({
         const item = audioFiles[i];
         const rawCategories = (item as any).categories ?? [];
         const categories = rawCategories.map((id: string | number) => Number(id));
-        console.log('categories', categories);
         const formatedFile = {
           content: item,
           title: item.name?.replace(/\.[^/.]+$/, ''),
@@ -133,6 +146,13 @@ export default function AudioModal({
                   className="mt-2"
                 />
               </>
+              <MultiSelect
+                options={categoryOptions}
+                selected={categoryIds}
+                onChange={next => setCategoryIds(prev => (prev ? next : undefined))}
+                placeholder={t('select_categories')}
+                className="w-full"
+              />
               <audio
                 controls
                 preload="metadata"

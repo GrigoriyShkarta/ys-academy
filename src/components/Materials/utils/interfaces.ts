@@ -7,12 +7,20 @@ export interface IFile {
   url: string;
   createdAt?: string;
   color?: string;
+  lessons: Lesson[];
+  categories: Category[];
+  modules: Module[];
 }
 
-export interface IText {
+export interface Category {
   id: number;
   title: string;
-  content: string;
+  color?: string;
+}
+
+export interface Lesson {
+  id: number;
+  title: string;
 }
 
 export interface GetMaterialParams {
@@ -20,6 +28,7 @@ export interface GetMaterialParams {
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  categories?: string[];
 }
 
 export type BlockSource = 'custom' | 'bank';
@@ -51,12 +60,14 @@ export interface ModuleDTO {
     id: number;
     index: number;
   }[];
+  categories?: string[];
 }
 
 export interface Module {
   id: number;
   title: string;
   url?: string;
+  categories?: Category[];
   lessons?: {
     id: number;
     title: string;
