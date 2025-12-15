@@ -1,10 +1,23 @@
+'use client';
+
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import FormAuth from '@/components/Auth/Form';
 import logo from '../../../public/assets/logo.png';
+import { useEffect } from 'react';
+import { YS_TOKEN } from '@/lib/consts';
+import { useRouter } from 'next/navigation';
 
 export function Auth() {
   const t = useTranslations('Auth');
+  const router = useRouter();
+
+  useEffect(() => {
+    const ls = localStorage.getItem(YS_TOKEN);
+    if (ls) {
+      router.push('/main');
+    }
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center max-sm:justify-start min-h-screen w-full bg-gradient-to-b from-gray-900 to-gray-800 px-4 py-8">

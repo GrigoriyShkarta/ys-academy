@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getStudent } from '@/components/Students/Student/actions';
 import Info from '@/components/Students/Student/components/Info';
 import { Loader } from 'lucide-react';
-import StudentModules from '@/components/Students/Student/components/StudentModules';
+import StudentCourses from '@/components/Students/Student/components/StudentCourses';
 
 export default function Student({ id }: { id: number }) {
   const { data: student, isLoading } = useQuery({
@@ -17,9 +17,9 @@ export default function Student({ id }: { id: number }) {
 
   return (
     student && (
-      <div className="flex flex-col p-8 gap-4 w-full mt-18 sm:mt-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 flex flex-col gap-4 w-full mt-18 sm:mt-0">
         <Info student={student} />
-        <StudentModules modules={student.modules} studentId={id} />
+        <StudentCourses courses={student.courses} userId={id} />
       </div>
     )
   );

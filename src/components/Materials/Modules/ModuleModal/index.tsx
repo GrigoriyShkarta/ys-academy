@@ -23,12 +23,15 @@ import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
 import PhotoEditor from '@/components/Materials/Modules/ModuleModal/PhotoEditor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import ChooseLessonModal from '@/common/MaterialsCommon/ChooseLessonModal';
+import ChooseListModal from '@/common/MaterialsCommon/ChooseListModal';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createModule, updateModule } from '@/components/Materials/Modules/action';
 import SortableLesson from '@/components/Materials/Modules/ModuleModal/SortableLesson';
 import MultiSelect from '@/common/MultiSelect';
 import { getCategories } from '@/components/Materials/Categories/action';
+import { Plus } from 'lucide-react';
+import CategoryModal from '@/components/Materials/Categories/CategoryModal';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   open: boolean;
@@ -42,11 +45,13 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
   const editorRef = useRef<AvatarEditor | null>(null);
 
   const [name, setName] = useState<string>('');
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [lessons, setLessons] = useState<{ id: number; title: string; index: number }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
-  const [categoryIds, setCategoryIds] = useState<string[] | undefined>([]);
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [openLessonModal, setOpenLessonModal] = useState<boolean>(false);
   const [openPhotoBank, setOpenPhotoBank] = useState<boolean>(false);
+  const { user } = useUser();
 
   // Сброс при открытии
   useEffect(() => {
@@ -54,7 +59,7 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
       if (module) {
         setName(module.title ?? '');
         setImageSrc(module.url ?? '');
-        setLessons((module.lessons ?? []).map((l, i) => ({ ...l, index: l.index ?? i })));
+        setLessons((module.lessons ?? []).map((l, i) => ({ ...l, index: l.order ?? i })));
         setCategoryIds((module.categories ?? []).map(c => String(c.id)));
       } else {
         setName('');
@@ -67,6 +72,7 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({
@@ -75,7 +81,13 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
     color: c.color,
   }));
 
-  const handleAddImage = async (type: LessonItemType, content: string | File, bankId?: number) => {
+  const handleNewCategoriesForFile = (newCategories?: string[]) => {
+    if (!newCategories) return;
+    setCategoryIds(prev => Array.from(new Set([...prev, ...newCategories])));
+    setIsCategoryModalOpen(false);
+  };
+
+  const handleAddImage = async (type: LessonItemType, content?: string | File, bankId?: number) => {
     setImageSrc(content as string);
   };
 
@@ -134,7 +146,7 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
     const data = {
       title: name,
       url: imageSrc ?? '',
-      lessons: lessons.map(l => ({ id: l.id, index: l.index })),
+      lessons: lessons.map(l => ({ id: l.id, order: l.index })),
       categories: categoryIds ?? [],
     };
 
@@ -184,13 +196,28 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
               placeholder={t('enter_name')}
             />
 
-            <MultiSelect
-              options={categoryOptions}
-              selected={categoryIds}
-              onChange={next => setCategoryIds(prev => (prev ? next : undefined))}
-              placeholder={t('select_categories')}
-              className="w-full"
-            />
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <Label className="text-xs font-medium">{t('categories')}</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-primary hover:text-primary"
+                  onClick={() => setIsCategoryModalOpen(true)}
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  {t('create_category')}
+                </Button>
+              </div>
+              <MultiSelect
+                options={categoryOptions}
+                selected={categoryIds}
+                onChange={next => setCategoryIds(prev => (prev ? next : ['']))}
+                placeholder={t('select_categories')}
+                className="w-full"
+              />
+            </div>
 
             <div className="space-y-2">
               <Label>{t('lessons')}</Label>
@@ -239,11 +266,17 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
         closeModal={() => setOpenPhotoBank(false)}
         handleAdd={handleAddImage}
       />
-      <ChooseLessonModal
+      <ChooseListModal
         open={openLessonModal}
         closeModal={() => setOpenLessonModal(false)}
         handleAdd={addLesson}
-        lessonsArray={lessons}
+        array={lessons}
+      />
+      <CategoryModal
+        openModal={isCategoryModalOpen}
+        closeModal={() => setIsCategoryModalOpen(false)}
+        selectCategory={handleNewCategoriesForFile}
+        hideTrigger
       />
     </Dialog>
   );

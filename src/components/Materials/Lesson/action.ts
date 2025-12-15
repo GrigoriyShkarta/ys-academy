@@ -70,10 +70,15 @@ export const getLesson = async (id: number) => {
   return data;
 };
 
-export const assignLesson = async (userIds: number[], lessonIds?: number | number[]) => {
+export const assignLesson = async (
+  userIds: number[],
+  lessonIds?: ({ id: number } | { id: number; remove: boolean })[],
+  replaceAll?: boolean
+) => {
   const { data } = await axiosInstance.post('/lesson/assign', {
     lessonIds,
     userIds,
+    replaceAll,
   });
   return data;
 };

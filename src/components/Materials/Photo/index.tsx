@@ -77,6 +77,7 @@ export default function PhotoLayout() {
             onPageChange={newPage => setPage(newPage)}
             handleEdit={(item: IFile) => setSelectedFile(item)}
             handleDelete={deletePhotos}
+            isFiles
             onSearchChange={newSearch => {
               setPage(1);
               setSearch(newSearch);

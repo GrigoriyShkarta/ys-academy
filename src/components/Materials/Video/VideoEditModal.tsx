@@ -113,7 +113,7 @@ export default function VideoEditModal({ video, setSelectedFile }: Props) {
         id: video.id,
         content: video.url,
         title: video.title,
-        categories: video?.categories.map(c => String(c.id)) ?? [],
+        categories: video?.categories?.map(c => String(c.id)) ?? [],
       });
     } else {
       form.reset({ id: undefined, content: '', title: '' });

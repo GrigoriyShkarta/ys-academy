@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { useUser } from '@/providers/UserContext';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
@@ -13,6 +14,7 @@ import {
   ChevronUp,
   Folder,
   Image,
+  Layers,
   LogOut,
   Menu,
   Moon,
@@ -21,6 +23,7 @@ import {
   PanelLeftOpen,
   Sun,
   TagsIcon,
+  User,
   Users,
   Video,
   X,
@@ -34,16 +37,21 @@ export default function Sidebar() {
   const { theme, setTheme } = useTheme();
   const t = useTranslations('SideBar');
   const pathname = usePathname() || '/';
-
-  useEffect(() => {
-    const token = localStorage.getItem(YS_TOKEN);
-    if (!token) window.location.href = '/';
-  }, []);
+  const { user } = useUser();
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const isInMaterials = pathname.startsWith('/main/materials');
+
+  const studentItems = [
+    {
+      name: 'my_profile',
+      icon: <User className="w-5 h-5" />,
+      href: '/main/profile',
+      submenu: false,
+    },
+  ];
 
   const menuItems = [
     { name: 'students_database', icon: <Users className="w-5 h-5" />, href: '/main/students' },
@@ -70,6 +78,11 @@ export default function Sidebar() {
           href: '/main/materials/modules',
           icon: <BookAudio className="w-4 h-4" />,
         },
+        {
+          name: 'courses',
+          href: '/main/materials/courses',
+          icon: <Layers className="w-4 h-4" />,
+        },
       ],
     },
   ];
@@ -91,8 +104,8 @@ export default function Sidebar() {
 
   const MenuContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <>
-      {menuItems.map(item => {
-        const hasSubmenu = !!item.submenu;
+      {(user?.role === 'super_admin' ? menuItems : studentItems).map(item => {
+        const hasSubmenu = !!item?.submenu;
         const isGroupActive = hasSubmenu && isInMaterials;
         const isItemActive = !hasSubmenu && item.href && isActive(item.href);
 
@@ -139,22 +152,23 @@ export default function Sidebar() {
                 }`}
               >
                 <div className="ml-10 mt-1 space-y-1 pb-2">
-                  {item.submenu!.map(sub => {
-                    const subActive = isActive(sub.href);
-                    return (
-                      <Link
-                        key={sub.name}
-                        href={sub.href}
-                        className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors block ${
-                          subActive ? 'bg-white/20 text-white' : 'hover:bg-white/10'
-                        }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {sub.icon}
-                        <span>{t(sub.name)}</span>
-                      </Link>
-                    );
-                  })}
+                  {Array.isArray(item.submenu) &&
+                    item.submenu!.map(sub => {
+                      const subActive = isActive(sub.href);
+                      return (
+                        <Link
+                          key={sub.name}
+                          href={sub.href}
+                          className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors block ${
+                            subActive ? 'bg-white/20 text-white' : 'hover:bg-white/10'
+                          }`}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {sub.icon}
+                          <span>{t(sub.name)}</span>
+                        </Link>
+                      );
+                    })}
                 </div>
               </div>
             )}

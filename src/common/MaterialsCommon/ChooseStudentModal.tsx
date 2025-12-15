@@ -11,7 +11,7 @@ import Loader from '@/common/Loader';
 import DataTable from '@/common/Table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { IFile } from '@/components/Materials/utils/interfaces';
-import { assignLesson } from '@/components/Materials/Lesson/action';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   open: boolean;
@@ -31,6 +31,7 @@ export default function ChooseStudentModal({
   const [loading, setLoading] = useState(false);
   const t = useTranslations('Students');
   const client = useQueryClient();
+  const { user } = useUser();
 
   useEffect(() => {
     setSelectedIds(acceptedLessons ?? []);
@@ -40,6 +41,7 @@ export default function ChooseStudentModal({
     queryKey: ['students', search],
     queryFn: () => getStudents(search, 'all'),
     placeholderData: keepPreviousData,
+    enabled: user?.role === 'super_admin',
   });
 
   const toggleSelect = useCallback((id: number) => {
@@ -55,20 +57,20 @@ export default function ChooseStudentModal({
     );
   }, [students]);
 
-  const assignLessons = async () => {
-    if (selectedIds && selectedLesson) {
-      try {
-        setLoading(true);
-        await assignLesson(selectedIds, selectedLesson);
-        await client.invalidateQueries({ queryKey: ['students'] });
-      } catch (error) {
-        console.log('error: ', error);
-      } finally {
-        setLoading(false);
-        closeModal();
-      }
-    }
-  };
+  // const assignLessons = async () => {
+  //   if (selectedIds && selectedLesson) {
+  //     try {
+  //       setLoading(true);
+  //       await assignLesson(selectedIds, selectedLesson);
+  //       await client.invalidateQueries({ queryKey: ['students'] });
+  //     } catch (error) {
+  //       console.log('error: ', error);
+  //     } finally {
+  //       setLoading(false);
+  //       closeModal();
+  //     }
+  //   }
+  // };
 
   const columns = [
     {

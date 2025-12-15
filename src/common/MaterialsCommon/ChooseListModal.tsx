@@ -14,36 +14,56 @@ import Chip from '@/common/Chip';
 import { CircleChevronRight } from 'lucide-react';
 import CategoryListModal from '@/common/CategoryListModal';
 import { getCategories } from '@/components/Materials/Categories/action';
+import { getModules } from '@/components/Materials/Modules/action';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   open: boolean;
   closeModal: () => void;
   handleAdd: (lesson: { id: number; title: string }[]) => void;
-  lessonsArray?: { id: number; title: string }[];
+  array?: { id: number; title: string }[];
+  isCourse?: boolean;
 }
 
-export default function ChooseLessonModal({ open, closeModal, handleAdd, lessonsArray }: Props) {
+export default function ChooseListModal({ open, closeModal, handleAdd, array, isCourse }: Props) {
   const [search, setSearch] = useState('');
   const [selectedLessons, setSelectedLessons] = useState<{ id: number; title: string }[]>([]);
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const t = useTranslations('Materials');
+  const { user } = useUser();
 
   useEffect(() => {
-    if (lessonsArray) {
-      setSelectedLessons(lessonsArray);
+    if (array) {
+      setSelectedLessons(array);
     }
-  }, [lessonsArray, open]);
+  }, [array, open]);
 
-  const { data: lessons, isLoading } = useQuery({
-    queryKey: ['lessons', search, selectedCategories],
-    queryFn: () => getAllLessons({ search, page: 'all', categories: selectedCategories }),
+  const { data: list, isLoading } = useQuery({
+    queryKey: ['lessons', search, selectedCategories, isCourse],
+    queryFn: () => {
+      if (isCourse) {
+        return getModules({
+          search,
+          page: 'all',
+          categories: selectedCategories,
+        });
+      }
+
+      return getAllLessons({
+        search,
+        page: 'all',
+        categories: selectedCategories,
+      });
+    },
     placeholderData: keepPreviousData,
+    enabled: user?.role === 'super_admin',
   });
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({
@@ -52,7 +72,7 @@ export default function ChooseLessonModal({ open, closeModal, handleAdd, lessons
     color: c.color,
   }));
 
-  const items = lessons?.data ?? lessons ?? ([] as { id: number; title: string }[]);
+  const items = list?.data ?? list ?? ([] as { id: number; title: string }[]);
   const allSelected = selectedLessons.length === items.length && items.length > 0;
 
   const toggleSelect = (item: { id: number; title: string }) => {
@@ -78,7 +98,7 @@ export default function ChooseLessonModal({ open, closeModal, handleAdd, lessons
       key: 'checkbox',
       label: (
         <Checkbox
-          checked={selectedLessons.length === lessons?.length && lessons?.length > 0}
+          checked={selectedLessons.length === list?.length && list?.length > 0}
           onCheckedChange={toggleSelectAll}
         />
       ),
@@ -104,7 +124,7 @@ export default function ChooseLessonModal({ open, closeModal, handleAdd, lessons
               .slice(0, 2)
               .map(category => <Chip key={category.id} category={category} />)}
 
-          {item?.categories?.length > 2 && (
+          {item?.categories && item?.categories?.length > 2 && (
             <CircleChevronRight
               className="cursor-pointer"
               onClick={() => seCategoryList(item.categories)}
@@ -126,16 +146,19 @@ export default function ChooseLessonModal({ open, closeModal, handleAdd, lessons
             <Loader />
           ) : (
             <>
-              <DataTable
-                data={lessons?.data}
-                columns={columns}
-                multiSelectOptions={categoryOptions}
-                onMultiSelectChange={onMultiSelectChange}
-                onSearchChange={newSearch => {
-                  setSearch(newSearch);
-                }}
-              />
-              <div className="flex w-full justify-end">
+              <div className="h-[70vh] overflow-auto">
+                <DataTable
+                  data={list?.data ? list.data : list}
+                  columns={columns}
+                  multiSelectOptions={categoryOptions}
+                  onMultiSelectChange={onMultiSelectChange}
+                  onSearchChange={newSearch => {
+                    setSearch(newSearch);
+                  }}
+                />
+              </div>
+
+              <div className="flex w-full justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={closeModal}>
                   {t('cancel')}
                 </Button>

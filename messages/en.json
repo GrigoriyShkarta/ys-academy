@@ -28,7 +28,9 @@
     "text_bank": "Text bank",
     "lessons": "Lessons",
     "modules": "Modules",
-    "categories": "Categories"
+    "categories": "Categories",
+    "courses": "Courses",
+    "my_profile": "My profile"
   },
 
   "Students": {
@@ -91,9 +93,11 @@
     "name": "Name",
     "enter_name": "Enter name",
     "add_lesson": "Add lesson",
+    "add_module": "Add module",
     "edit_module": "Edit module",
     "lessons": "Lessons",
     "no_lessons_yet": "No lessons yet",
+    "no_modules_yet": "No modules yet",
     "or": "or",
     "one_per_line": "The link is not valid",
     "each_url_new_line": "Each URL on a new line",
@@ -122,7 +126,9 @@
     "video_title": "Video title",
     "add_to_module": "Add to module",
     "save_lesson": "Save lesson",
-    "modules": "Modules"
+    "modules": "Modules",
+    "create_course": "Create course",
+    "edit_course": "Edit course"
   },
 
   "Validation": {
@@ -161,6 +167,8 @@
     "close": "Close",
     "select": "Select",
     "nothing_found": "Nothing found",
-    "select_category": "Select category"
+    "select_category": "Select category",
+    "delete_files_confirm": "Are you sure you want to delete the file(s)?",
+    "files_used_in_lessons_warning": "If the file(s) are used in lessons, they will also be removed from those lessons."
   }
 }

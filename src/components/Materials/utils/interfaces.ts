@@ -1,15 +1,18 @@
 import { Layout } from 'react-grid-layout';
 import { Block } from '@blocknote/core';
+import { StudentModule } from '@/components/Students/interface';
 
 export interface IFile {
   id: number;
   title: string;
-  url: string;
+  url?: string;
   createdAt?: string;
   color?: string;
-  lessons: Lesson[];
-  categories: Category[];
-  modules: Module[];
+  lessons?: Lesson[];
+  categories?: Category[];
+  modules?: Module[];
+  index?: number;
+  progress?: number;
 }
 
 export interface Category {
@@ -58,7 +61,7 @@ export interface ModuleDTO {
   url?: string;
   lessons?: {
     id: number;
-    index: number;
+    order: number;
   }[];
   categories?: string[];
 }
@@ -71,8 +74,16 @@ export interface Module {
   lessons?: {
     id: number;
     title: string;
-    index?: number;
+    order?: number;
   }[];
+}
+
+export interface Course {
+  id: number;
+  title: string;
+  url?: string;
+  modules: StudentModule[];
+  categories?: Category[];
 }
 
 export interface LessonDocItem {

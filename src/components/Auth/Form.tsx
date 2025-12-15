@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
+import { useUser } from '@/providers/UserContext';
 import {
   Form,
   FormControl,
@@ -16,22 +17,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoginFormValues, loginSchema } from '@/components/Auth/authSchema';
-import { YS_TOKEN } from '@/lib/consts';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { onSubmit } from '@/components/Auth/action';
 
 export default function FormAuth() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useUser();
   const t = useTranslations('Auth');
-
-  useEffect(() => {
-    const token = localStorage.getItem(YS_TOKEN);
-
-    if (token) {
-      window.location.href = '/main';
-    }
-  }, []);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema(t)),
@@ -52,7 +45,7 @@ export default function FormAuth() {
       <CardContent>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(data => onSubmit(data, setIsLoading, form))}
+            onSubmit={form.handleSubmit(data => onSubmit(data, setIsLoading, form, setUser))}
             className="space-y-4"
           >
             <FormField

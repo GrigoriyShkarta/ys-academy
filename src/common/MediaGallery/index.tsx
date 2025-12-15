@@ -20,6 +20,8 @@ import Chip from '@/common/Chip';
 import LessonsListModal from '@/common/LessonsListModal';
 import CategoryListModal from '@/common/CategoryListModal';
 import MultiSelect from '@/common/MultiSelect';
+import ConfirmTextChild from '@/common/ConfirmTextChild';
+import { useUser } from '@/providers/UserContext';
 
 interface MultiOption {
   value: string;
@@ -31,7 +33,7 @@ interface MediaGalleryProps {
   totalPages?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
-  onSearchChange: (search: string) => void;
+  onSearchChange?: (search: string) => void;
   handleEdit?: (file: IFile) => void;
   handleDelete?: (ids: number[]) => Promise<void>;
   isDeleting?: boolean;
@@ -43,12 +45,14 @@ interface MediaGalleryProps {
   hiddenClickAll?: boolean;
   hiddenCheckbox?: boolean;
   showFromDevice?: boolean;
+  hiddenSearch?: boolean;
   hideLessons?: boolean;
   queryKey?: string;
   handleClickFromDevice?: () => void;
   multiSelectOptions?: MultiOption[];
   selectedMulti?: string[];
   onMultiSelectChange?: (selected: string[]) => void;
+  isFiles?: boolean;
 }
 
 export default function MediaGallery({
@@ -71,8 +75,10 @@ export default function MediaGallery({
   hiddenClickAll = false,
   hiddenCheckbox = false,
   hideLessons = false,
+  hiddenSearch = false,
   multiSelectOptions = [],
   selectedMulti = [],
+  isFiles,
   onMultiSelectChange,
 }: MediaGalleryProps) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -85,6 +91,7 @@ export default function MediaGallery({
   const [localSelected, setLocalSelected] = useState<string[]>([]);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const queryClient = useQueryClient();
+  const { user } = useUser();
   const t = useTranslations('Common');
 
   useEffect(() => {
@@ -148,12 +155,15 @@ export default function MediaGallery({
 
       <div className="flex flex-col gap-3">
         <div className="flex gap-4">
-          <Input
-            placeholder={t('search')}
-            value={search}
-            onChange={handleSearchChange}
-            className="max-w-sm"
-          />
+          {!hiddenSearch && (
+            <Input
+              placeholder={t('search')}
+              value={search}
+              onChange={handleSearchChange}
+              className="max-w-sm"
+            />
+          )}
+
           {multiSelectOptions.length > 0 && (
             <div className="flex gap-2">
               <MultiSelect
@@ -231,27 +241,27 @@ export default function MediaGallery({
                     className="w-full h-48 object-cover cursor-pointer"
                   />
                 </Link>
-              ) : getYouTubeId(item.url) ? (
+              ) : getYouTubeId(item?.url ?? '') ? (
                 <iframe
                   className="w-full h-48 object-cover cursor-pointer"
-                  src={`https://www.youtube.com/embed/${getYouTubeId(item.url)}`}
+                  src={`https://www.youtube.com/embed/${getYouTubeId(item?.url ?? '')}`}
                   title={item.title}
                   allowFullScreen
-                  onClick={() => setPreviewUrl(item.url)}
+                  onClick={() => setPreviewUrl(item?.url ?? '')}
                 />
               ) : !isPhoto || isVideoFileUrl(item.url) ? (
                 <video
                   src={item.url}
                   controls
                   className="w-full h-48 object-cover cursor-pointer"
-                  onClick={() => setPreviewUrl(item.url)}
+                  onClick={() => setPreviewUrl(item?.url ?? '')}
                 />
               ) : (
                 <img
                   src={item.url}
                   alt={item.title}
                   className="w-full h-48 object-cover cursor-pointer"
-                  onClick={() => setPreviewUrl(item.url)}
+                  onClick={() => setPreviewUrl(item?.url ?? '')}
                 />
               )}
 
@@ -291,13 +301,19 @@ export default function MediaGallery({
                 </div>
               )}
 
+              {item?.progress && (
+                <div className="absolute left-2 top-2 p-1 bg-white/50 text-xs rounded-xl">
+                  {item.progress}%
+                </div>
+              )}
+
               <div
                 className="p-2 text-center text-sm font-medium text-muted-foreground truncate"
                 title={item.title}
               >
                 {item.title}
               </div>
-              {item?.categories?.length > 0 && (
+              {item?.categories && item?.categories?.length > 0 && (
                 <div className="flex gap-1 m-2 justify-center">
                   {item?.categories?.slice(0, 2).map(category => (
                     <Chip key={category.id} category={category} />
@@ -310,14 +326,17 @@ export default function MediaGallery({
                   )}
                 </div>
               )}
-              {!hideLessons && item?.lessons?.length > 0 && (
-                <div className="flex gap-1 m-2 justify-center">
-                  <ClipboardList
-                    onClick={() => setLessonsList(item.lessons)}
-                    className="cursor-pointer"
-                  />
-                </div>
-              )}
+              {!hideLessons &&
+                user?.role === 'super_admin' &&
+                item?.lessons &&
+                item?.lessons?.length > 0 && (
+                  <div className="flex gap-1 m-2 justify-center">
+                    <ClipboardList
+                      onClick={() => setLessonsList(item.lessons)}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                )}
             </div>
           ))}
       </div>
@@ -339,6 +358,7 @@ export default function MediaGallery({
           confirmAction={() => handleConfirmDelete(selectedId ? [selectedId] : selectedIds)}
           setOnClose={() => setOpenConfirm(false)}
           isLoading={isDeleting}
+          children={isFiles && <ConfirmTextChild />}
         />
       )}
 

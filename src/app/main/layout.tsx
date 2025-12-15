@@ -1,6 +1,29 @@
-import Sidebar from '@/common/SideBar';
+'use client';
 
-export default function MainLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+import { ReactNode, useEffect } from 'react';
+import Sidebar from '@/common/SideBar';
+import { useQuery } from '@tanstack/react-query';
+import { getMe } from '@/services/profile';
+import Loader from '@/common/Loader';
+import { useUser } from '@/providers/UserContext';
+
+export default function MainLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const { setUser, user } = useUser();
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ['user'],
+    queryFn: getMe,
+  });
+
+  useEffect(() => {
+    if (userData) {
+      setUser({ role: userData.role, id: userData.id });
+    }
+  }, [userData]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
     <div className="flex">
       <Sidebar />

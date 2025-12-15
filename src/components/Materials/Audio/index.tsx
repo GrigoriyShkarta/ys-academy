@@ -26,6 +26,8 @@ import { getCategories } from '@/components/Materials/Categories/action';
 import LessonsListModal from '@/common/LessonsListModal';
 import Chip from '@/common/Chip';
 import CategoryListModal from '@/common/CategoryListModal';
+import ConfirmTextChild from '@/common/ConfirmTextChild';
+import { useUser } from '@/providers/UserContext';
 
 export default function AudioLayout() {
   const [page, setPage] = useState(1);
@@ -42,6 +44,7 @@ export default function AudioLayout() {
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
+  const { user } = useUser();
 
   const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
     accept: ['audio/*'],
@@ -82,6 +85,7 @@ export default function AudioLayout() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({
@@ -186,7 +190,7 @@ export default function AudioLayout() {
                 .slice(0, 2)
                 .map(category => <Chip key={category.id} category={category} />)}
 
-            {item?.categories?.length > 2 && (
+            {item?.categories && item?.categories?.length > 2 && (
               <CircleChevronRight
                 className="cursor-pointer"
                 onClick={() => seCategoryList(item.categories)}
@@ -273,6 +277,7 @@ export default function AudioLayout() {
           confirmAction={handleConfirmDelete}
           setOnClose={() => setOpenConfirm(false)}
           isLoading={deleteAudio.isPending}
+          children={<ConfirmTextChild />}
         />
       )}
 

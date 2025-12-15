@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ interface Props {
   confirmAction: () => void;
   isLoading?: boolean;
   textContent?: string;
+  children?: ReactNode;
 }
 
 export default function ConfirmModal({
@@ -18,6 +20,7 @@ export default function ConfirmModal({
   isLoading,
   setOnClose,
   textContent,
+  children,
 }: Props) {
   const t = useTranslations('Common');
 
@@ -28,7 +31,7 @@ export default function ConfirmModal({
           <VisuallyHidden>Preview Image</VisuallyHidden>
         </DialogTitle>
         <div className="flex flex-col gap-4">
-          <p className="text-center">{textContent || t('confirm_action')}</p>
+          <p className="text-center">{children || textContent || t('confirm_action')}</p>
           <div className="flex w-full gap-4 justify-center">
             <Button variant="ghost" type="button" onClick={setOnClose}>
               {t('cancel')}

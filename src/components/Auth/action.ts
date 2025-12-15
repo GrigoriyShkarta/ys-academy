@@ -1,13 +1,15 @@
 import { LoginFormValues } from '@/components/Auth/authSchema';
-import { YS_REFRESH_TOKEN, YS_TOKEN } from '@/lib/consts';
+import { Role, YS_REFRESH_TOKEN, YS_TOKEN } from '@/lib/consts';
 import { UseFormReturn } from 'react-hook-form';
+import { User } from '@/providers/UserContext';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function onSubmit(
   data: LoginFormValues,
   setIsLoading: (isLoading: boolean) => void,
-  form: UseFormReturn<LoginFormValues>
+  form: UseFormReturn<LoginFormValues>,
+  setUser: (user: User | null) => void
 ) {
   setIsLoading(true);
 
@@ -30,6 +32,7 @@ export async function onSubmit(
     } else {
       localStorage.setItem(YS_TOKEN, responseData.access_token);
       localStorage.setItem(YS_REFRESH_TOKEN, responseData.refresh_token);
+      setUser({ role: responseData.role as Role, id: responseData.id });
       window.location.href = '/main';
     }
   } catch (error) {

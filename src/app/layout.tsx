@@ -4,6 +4,7 @@ import './globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import ReactQueryProvider from '@/providers/ReactQueryProvider';
 import { ThemeProvider } from '@/providers/ThemeProviders';
+import { UserProvider } from '@/providers/UserContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,7 +31,9 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider>
           <ReactQueryProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              <UserProvider>{children}</UserProvider>
+            </ThemeProvider>
           </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>

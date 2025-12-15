@@ -27,6 +27,7 @@ import Chip from '@/common/Chip';
 import LessonsListModal from '@/common/LessonsListModal';
 import CategoryListModal from '@/common/CategoryListModal';
 import { getCategories } from '@/components/Materials/Categories/action';
+import { useUser } from '@/providers/UserContext';
 
 export default function LessonsLayout() {
   const [page, setPage] = useState(1);
@@ -43,6 +44,7 @@ export default function LessonsLayout() {
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { user } = useUser();
 
   const { data: lessons, isLoading } = useQuery({
     queryKey: ['lessons', page, search, sortBy, sortOrder, selectedCategories],
@@ -60,6 +62,7 @@ export default function LessonsLayout() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({
@@ -169,7 +172,7 @@ export default function LessonsLayout() {
                 .slice(0, 2)
                 .map(category => <Chip key={category.id} category={category} />)}
 
-            {item?.categories?.length > 2 && (
+            {item?.categories && item?.categories?.length > 2 && (
               <CircleChevronRight
                 className="cursor-pointer"
                 onClick={() => seCategoryList(item.categories)}

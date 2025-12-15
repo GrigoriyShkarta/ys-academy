@@ -15,11 +15,19 @@ interface Props {
   lessons?: StudentLesson[];
   studentId: number;
   moduleId: number;
+  courseId: number;
   open: boolean;
   close: () => void;
 }
 
-export default function StudentModuleModal({ lessons, open, close, studentId, moduleId }: Props) {
+export default function StudentModuleModal({
+  lessons,
+  open,
+  close,
+  studentId,
+  moduleId,
+  courseId,
+}: Props) {
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,10 +64,23 @@ export default function StudentModuleModal({ lessons, open, close, studentId, mo
   const handleAddAccess = async () => {
     try {
       setLoading(true);
-      const lessons = selectedIds?.map(s => ({ id: s }));
-      // @ts-ignore
-      await assignLesson([+studentId], lessons);
-      await client.invalidateQueries({ queryKey: ['student'] });
+
+      const allLessonIds = lessons?.map(l => l.id) ?? [];
+      const selected = selectedIds;
+
+      // Дать доступ
+      const toAdd = selected.map(id => ({ id }));
+
+      // Удалить доступ
+      const toRemove = allLessonIds
+        .filter(id => !selected.includes(id))
+        .map(id => ({ id, remove: true }));
+
+      const payload = [...toAdd, ...toRemove];
+
+      await assignLesson([+studentId], payload);
+
+      await client.invalidateQueries({ queryKey: ['course', courseId] });
     } catch (error) {
       console.log('error: ', error);
     } finally {
@@ -99,13 +120,16 @@ export default function StudentModuleModal({ lessons, open, close, studentId, mo
     {
       key: 'access',
       label: <p className="text-center">{t('access')}</p>,
-      render: (item: StudentLesson) => <p className="text-center">{item.blocks}</p>,
+      render: (item: StudentLesson) => <p className="text-center">{item.accessBlocks}</p>,
     },
     {
       key: 'details',
       label: <p className="text-center">{t('details')}</p>,
       render: (item: StudentLesson) => (
-        <Link href={`${studentId}/lesson-detail/${item.id}`} className="w-full flex justify-center">
+        <Link
+          href={`/main/students/${studentId}/lesson-detail/${item.id}`}
+          className="w-full flex justify-center"
+        >
           <UserLock />
         </Link>
       ),

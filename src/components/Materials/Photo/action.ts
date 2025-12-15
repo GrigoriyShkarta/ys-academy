@@ -40,7 +40,14 @@ export const getPhotos = async ({ page, search, categories }: GetMaterialParams)
   return data;
 };
 
-export const editPhoto = async (id: number, form: ContentFormValues) => {
+export const editPhoto = async (
+  id: number,
+  form: {
+    content: string | undefined;
+    categoryIds: string[] | undefined;
+    title: string;
+  }
+) => {
   const { data } = await axiosInstance.patch(`/photo/${id}`, form);
 
   return data;

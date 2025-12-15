@@ -7,7 +7,8 @@ import { useTranslations } from 'next-intl';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/components/Materials/Categories/action';
-import CategoryModal from '@/components/Materials/Categories/CategoryModal'; // ← твоя модалка
+import CategoryModal from '@/components/Materials/Categories/CategoryModal';
+import { useUser } from '@/providers/UserContext'; // ← твоя модалка
 
 // ... остальные импорты
 interface Props {
@@ -20,10 +21,12 @@ export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUpload
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null);
   const t = useTranslations('Materials');
+  const { user } = useUser();
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({

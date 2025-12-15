@@ -15,6 +15,7 @@ import { Block } from '@blocknote/core';
 import Cover from '@/components/Materials/Lesson/components/Cover';
 import ConfirmModal from '@/common/ConfirmModal';
 import LessonSaveModal from '@/components/Materials/Lesson/components/LessonSaveModal';
+import { useUser } from '@/providers/UserContext';
 
 export default function LessonLayout({ id }: { id: number }) {
   const [isEditPlace, setIsEditPlace] = useState(false);
@@ -29,6 +30,7 @@ export default function LessonLayout({ id }: { id: number }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
+  const { user } = useUser();
   const isEdit = searchParams.get('isEdit') === 'true';
   const t = useTranslations('Materials');
 
@@ -124,7 +126,7 @@ export default function LessonLayout({ id }: { id: number }) {
         </button>
 
         <div className="flex gap-2">
-          {!isEditPlace && (
+          {!isEditPlace && user?.role === 'super_admin' && (
             <Button className="bg-accent" onClick={() => setIsEditPlace(prev => !prev)}>
               {t('edit')}
             </Button>
@@ -135,9 +137,11 @@ export default function LessonLayout({ id }: { id: number }) {
               {t('save')}
             </Button>
           ) : (
-            <Button className="bg-destructive" onClick={() => setOpen(true)}>
-              {t('delete')}
-            </Button>
+            user?.role === 'super_admin' && (
+              <Button className="bg-destructive" onClick={() => setOpen(true)}>
+                {t('delete')}
+              </Button>
+            )
           )}
         </div>
       </div>

@@ -28,7 +28,9 @@
     "text_bank": "Текстовий банк",
     "lessons": "Уроки",
     "modules": "Модулі",
-    "categories": "Категорії"
+    "categories": "Категорії",
+    "courses": "Курси",
+    "my_profile": "Мій профіль"
   },
 
   "Students": {
@@ -96,9 +98,11 @@
     "name": "Назва",
     "enter_name": "Введіть назву",
     "add_lesson": "Додати урок",
+    "add_module": "Додати модуль",
     "edit_module": "Редагувати модуль",
     "lessons": "Уроки",
     "no_lessons_yet": "Поки немає уроків",
+    "no_modules_yet": "Поки немає модулів",
     "or": "або",
     "one_per_line": "по одному на рядок",
     "each_url_new_line": "Кожен URL з нового рядка",
@@ -128,7 +132,9 @@
     "video_title": "Назва відео",
     "add_to_module": "Додати до модуля",
     "save_lesson": "Зберегти урок",
-    "modules": "Модулі"
+    "modules": "Модулі",
+    "create_course": "Створити курс",
+    "edit_course": "Редагувати курс"
   },
 
   "Validation": {
@@ -166,6 +172,9 @@
     "let_access": "Доступно",
     "close": "Закрито",
     "select": "Обрати",
-    "select_category": "Обрати категорію"
+    "nothing_found": "Нічого не знайдено",
+    "select_category": "Обрати категорію",
+    "delete_files_confirm": "Ви впевнені, що хочете видалити файл(и)?",
+    "files_used_in_lessons_warning": "Якщо файл(и) використовуються в уроках, їх також буде видалено з цих уроків."
   }
 }

@@ -63,8 +63,9 @@ export default function LessonDetail({
     try {
       setLoading(true);
       // @ts-ignore
-      await assignLesson([+studentId], [{ id: lessonId, blocks: selectedBlocks }]);
+      await assignLesson([+studentId], [{ id: lessonId, blocks: selectedBlocks }], false);
       await queryClient.invalidateQueries({ queryKey: ['student'] });
+      router.back();
     } catch (error) {
       console.log('error: ', error);
     } finally {

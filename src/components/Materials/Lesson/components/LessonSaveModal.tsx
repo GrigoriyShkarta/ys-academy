@@ -17,6 +17,7 @@ import { Plus } from 'lucide-react';
 import MultiSelect from '@/common/MultiSelect';
 import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 import { FormFooter } from '@/common/ModalFooter';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   open: boolean;
@@ -40,12 +41,14 @@ export default function LessonSaveModal({
   isLoading,
 }: Props) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const { user } = useUser();
 
   const t = useTranslations('Materials');
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const { data: modules } = useQuery({

@@ -11,6 +11,7 @@ import MediaGallery from '@/common/MediaGallery';
 import { IFile, Module } from '@/components/Materials/utils/interfaces';
 import Loader from '@/common/Loader';
 import { getCategories } from '@/components/Materials/Categories/action';
+import { useUser } from '@/providers/UserContext';
 
 export default function ModulesLayout() {
   const [isCreateModule, setIsCreateModule] = useState(false);
@@ -18,6 +19,7 @@ export default function ModulesLayout() {
   const [selectedFile, setSelectedFile] = useState<Module | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const t = useTranslations('Materials');
+  const { user } = useUser();
 
   const { data: modules, isLoading } = useQuery({
     queryKey: ['modules', search, selectedCategories],
@@ -28,6 +30,7 @@ export default function ModulesLayout() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({

@@ -16,11 +16,12 @@ import Chip from '@/common/Chip';
 import { CircleChevronRight, ClipboardList } from 'lucide-react';
 import CategoryListModal from '@/common/CategoryListModal';
 import LessonsListModal from '@/common/LessonsListModal';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   open: boolean;
   closeModal: () => void;
-  handleAdd: (type: LessonItemType, content: string | File, bankId?: number) => void;
+  handleAdd: (type: LessonItemType, content?: string | File, bankId?: number) => void;
 }
 
 export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props) {
@@ -35,16 +36,19 @@ export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props)
     onFiles: files => setAddFiles(files),
   });
   const t = useTranslations('Materials');
+  const { user } = useUser();
 
   const { data: audios, isLoading } = useQuery({
     queryKey: ['audios', search, selectedCategories],
     queryFn: () => getAudios({ search, page: 'all', categories: selectedCategories }),
     placeholderData: keepPreviousData,
+    enabled: user?.role === 'super_admin',
   });
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({
@@ -136,7 +140,7 @@ export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props)
             <Loader />
           ) : (
             <DataTable
-              data={audios.data}
+              data={audios?.data}
               columns={columns}
               showFromDevice
               multiSelectOptions={categoryOptions}

@@ -12,11 +12,12 @@ import DrugOverlay from '@/common/MaterialsCommon/DrugOverlay';
 import PhotoModal from '@/components/Materials/Photo/PhotoModal';
 import { getCategories } from '@/components/Materials/Categories/action';
 import CategoryListModal from '@/common/CategoryListModal';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   open: boolean;
   closeModal: () => void;
-  handleAdd: (type: LessonItemType, content: string | File, bankId?: number) => void;
+  handleAdd: (type: LessonItemType, content?: string | File, bankId?: number) => void;
 }
 
 export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props) {
@@ -25,6 +26,7 @@ export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props)
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [addFiles, setAddFiles] = useState<File[] | null>(null);
+  const { user } = useUser();
   const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
     accept: 'image/*',
     onFiles: files => setAddFiles(files),
@@ -34,11 +36,13 @@ export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props)
     queryKey: ['photos', search, selectedCategories],
     queryFn: () => getPhotos({ search, page: 'all', categories: selectedCategories }),
     placeholderData: keepPreviousData,
+    enabled: user?.role === 'super_admin',
   });
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({
@@ -68,7 +72,7 @@ export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props)
             <Loader />
           ) : (
             <MediaGallery
-              data={photos.data}
+              data={photos?.data}
               showFromDevice
               handleClickFromDevice={() => setOpenModal(true)}
               multiSelectOptions={categoryOptions}
@@ -77,7 +81,7 @@ export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props)
                 setSearch(newSearch);
               }}
               handleClickItem={(item: IFile) => {
-                handleAdd('image', item.url, item.id);
+                handleAdd('image', item?.url, item.id);
                 closeModal();
               }}
               isOneSelectItem

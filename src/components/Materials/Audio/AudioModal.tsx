@@ -20,6 +20,7 @@ import { FormFooter } from '@/common/ModalFooter';
 import AudioPreviewList from '@/components/Materials/Audio/AudioPreviewList';
 import MultiSelect from '@/common/MultiSelect';
 import { getCategories } from '@/components/Materials/Categories/action';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   openModal?: boolean;
@@ -49,10 +50,12 @@ export default function AudioModal({
   const [title, setTitle] = useState('');
   const [categoryIds, setCategoryIds] = useState<string[] | undefined>([]);
   const queryClient = useQueryClient();
+  const { user } = useUser();
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({
@@ -96,7 +99,7 @@ export default function AudioModal({
     setIsLoading(true);
     if (audio) {
       const formatedFile = {
-        content: audio.url,
+        content: audio.url as string,
         categoryIds,
         title,
       };

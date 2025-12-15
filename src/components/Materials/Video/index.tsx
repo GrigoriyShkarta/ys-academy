@@ -77,6 +77,7 @@ export default function VideoLayout() {
             onMultiSelectChange={onMultiSelectChange}
             onPageChange={newPage => setPage(newPage)}
             handleEdit={(item: IFile) => setSelectedFile(item)}
+            isFiles
             onSearchChange={newSearch => {
               setPage(1);
               setSearch(newSearch);

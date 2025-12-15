@@ -2,16 +2,23 @@ import { StudentModule } from '@/components/Students/interface';
 import logo from '../../../../../public/assets/logo.png';
 import { useState } from 'react';
 import StudentModuleModal from '@/components/Students/Student/components/StudentModuleModal';
+import Chip from '@/common/Chip';
+import { CircleChevronRight } from 'lucide-react';
+import { Category } from '@/components/Materials/utils/interfaces';
+import CategoryListModal from '@/common/CategoryListModal';
 
 export default function StudentModules({
   modules,
   studentId,
+  courseId,
 }: {
   modules?: StudentModule[];
   studentId: number;
+  courseId: number;
 }) {
   const [selectedModule, setSelectedModule] = useState<StudentModule | null>(null);
   const [openModal, setOpenModal] = useState(false);
+  const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
 
   const selectModule = (module: StudentModule) => {
     setSelectedModule(module);
@@ -44,6 +51,20 @@ export default function StudentModules({
                 {module.title}
               </div>
 
+              {module?.categories && module?.categories?.length > 0 && (
+                <div className="flex gap-1 m-2 justify-center">
+                  {module?.categories?.slice(0, 2).map(category => (
+                    <Chip key={category.id} category={category} />
+                  ))}
+                  {module?.categories?.length > 2 && (
+                    <CircleChevronRight
+                      className="cursor-pointer"
+                      onClick={() => seCategoryList(module.categories)}
+                    />
+                  )}
+                </div>
+              )}
+
               <div className="absolute top-2 left-2 bg-white/90 text-xs font-medium px-2 py-1 rounded shadow text-secondary">
                 {completed}/{total}
               </div>
@@ -53,11 +74,13 @@ export default function StudentModules({
 
       <StudentModuleModal
         studentId={studentId}
+        courseId={courseId}
         moduleId={selectedModule?.id as number}
         open={openModal}
         close={() => setOpenModal(false)}
         lessons={selectedModule?.lessons}
       />
+      <CategoryListModal list={categoryList} close={() => seCategoryList(undefined)} />
     </div>
   );
 }

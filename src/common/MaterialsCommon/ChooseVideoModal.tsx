@@ -11,11 +11,12 @@ import VideoModal from '@/components/Materials/Video/VideoModal';
 import useDragAndDropMaterial from '@/hooks/useDragAndDropMaterial';
 import DrugOverlay from '@/common/MaterialsCommon/DrugOverlay';
 import { getCategories } from '@/components/Materials/Categories/action';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   open: boolean;
   closeModal: () => void;
-  handleAdd: (type: LessonItemType, content: string | File, bankId?: number) => void;
+  handleAdd: (type: LessonItemType, content?: string | File, bankId?: number) => void;
 }
 
 export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props) {
@@ -23,6 +24,7 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
   const [openModal, setOpenModal] = useState(false);
   const [addFiles, setAddFiles] = useState<File[] | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const { user } = useUser();
   const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
     accept: ['video/*'],
     onFiles: files => setAddFiles(files),
@@ -32,11 +34,13 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
     queryKey: ['videos', search, selectedCategories],
     queryFn: () => getVideos({ search, page: 'all', categories: selectedCategories }),
     placeholderData: keepPreviousData,
+    enabled: user?.role === 'super_admin',
   });
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategories({ page: 'all' }),
+    enabled: user?.role === 'super_admin',
   });
 
   const categoryOptions = (categories?.data ?? []).map((c: any) => ({
@@ -66,7 +70,7 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
             <Loader />
           ) : (
             <MediaGallery
-              data={videos.data}
+              data={videos?.data}
               multiSelectOptions={categoryOptions}
               onMultiSelectChange={onMultiSelectChange}
               onSearchChange={newSearch => {

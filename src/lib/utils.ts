@@ -189,39 +189,6 @@ export const compressImage = async (
   });
 };
 
-export const quillModules = {
-  toolbar: {
-    container: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ color: [] }, { background: [] }],
-      [{ align: [] }],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['blockquote', 'code-block'],
-      ['link'],
-      ['clean'],
-    ],
-  },
-};
-
-export const quillFormats = [
-  'header',
-  'bold',
-  'italic',
-  'underline',
-  'strike',
-  'blockquote',
-  'code-block',
-  'list',
-  'indent',
-  'link',
-  'image',
-  'video',
-  'color',
-  'background',
-  'align',
-];
-
 export const isFile = (value: unknown): value is File => {
   return value instanceof File;
 };
