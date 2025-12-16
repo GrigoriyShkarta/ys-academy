@@ -28,7 +28,7 @@ export default function StudentsLayout() {
       render: (student: Student) => (
         <Link href={`students/${student.id}`} className="flex items-center gap-2">
           <Avatar className="w-8 h-8">
-            <AvatarImage src={student?.avatar ?? ''} alt={student.name} />
+            <AvatarImage src={student?.photo ?? ''} alt={student.name} />
             <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <span>{student.name}</span>

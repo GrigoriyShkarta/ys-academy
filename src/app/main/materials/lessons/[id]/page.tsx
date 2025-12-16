@@ -1,9 +1,11 @@
 import LessonLayout from '@/components/Materials/Lesson/LessonLayout';
 
 interface LessonPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function LessonPage({ params }: LessonPageProps) {
-  return <LessonLayout id={Number(params.id)} />;
+export default async function LessonPage({ params }: LessonPageProps) {
+  const { id } = await params;
+  const lessonId = Number(id);
+  return <LessonLayout id={lessonId} />;
 }

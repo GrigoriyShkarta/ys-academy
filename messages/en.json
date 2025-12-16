@@ -41,8 +41,21 @@
     "email": "Email",
     "password": "Password",
     "generate": "Generate",
+    "create": "Create",
+    "editStudent": "Edit student",
+    "fullName": "Full name",
+    "telegram": "Telegram",
+    "instagram": "Instagram",
+    "birthDate": "Date of birth",
+    "photo": "Photo",
+    "musicLevel": "Musical level",
+    "musicLevelPlaceholder": "Describe your musical experience",
+    "vocalExperience": "Vocal experience",
+    "vocalExperiencePlaceholder": "Describe your vocal experience",
+    "goals": "What would you like to learn",
+    "goalsPlaceholder": "Describe your learning goals",
     "cancel": "Cancel",
-    "create": "Create"
+    "save": "Save"
   },
 
   "Materials": {

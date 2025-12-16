@@ -1,5 +1,7 @@
 import Student from '@/components/Students/Student';
 
-export default function StudentPage({ params }: { params: { id: number } }) {
-  return <Student id={params.id} />;
+export default async function StudentPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const studentId = Number(id);
+  return <Student id={studentId} />;
 }

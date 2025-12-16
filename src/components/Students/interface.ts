@@ -4,7 +4,13 @@ export interface Student {
   id: number;
   name: string;
   email: string;
-  avatar?: string;
+  photo?: string;
+  telegram?: string;
+  instagram?: string;
+  birthDate?: string;
+  musicLevel?: string;
+  vocalExperience?: string;
+  goals?: string;
   modules?: StudentModule[];
   courses?: StudentCourse[];
 }

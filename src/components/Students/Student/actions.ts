@@ -5,3 +5,8 @@ export const getStudent = async (id: number): Promise<Student> => {
   const { data } = await axiosInstance.get(`/user/${id}`);
   return data;
 };
+
+export const updateStudent = async (student: Student) => {
+  const { data } = await axiosInstance.patch(`/user/${student.id}`, student);
+  return data;
+};

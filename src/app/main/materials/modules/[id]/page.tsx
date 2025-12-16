@@ -1,5 +1,7 @@
 import ModuleLayout from '@/components/Materials/Modules/Module';
 
-export default function ModulePage({ params }: { params: { id: number } }) {
-  return <ModuleLayout moduleId={params.id} />;
+export default async function ModulePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const moduleId = Number(id);
+  return <ModuleLayout moduleId={moduleId} />;
 }

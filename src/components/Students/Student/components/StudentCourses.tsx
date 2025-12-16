@@ -6,6 +6,7 @@ import { CircleChevronRight, LockKeyhole } from 'lucide-react';
 import { useState } from 'react';
 import { Category } from '@/components/Materials/utils/interfaces';
 import CategoryListModal from '@/common/CategoryListModal';
+import { useUser } from '@/providers/UserContext';
 
 export default function StudentCourses({
   courses,
@@ -15,12 +16,13 @@ export default function StudentCourses({
   userId: number;
 }) {
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
+  const { user } = useUser();
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full box-border">
       {courses &&
         courses.map(course => {
-          if (course.access) {
+          if (course.access || user?.role === 'super_admin') {
             return (
               <Link
                 href={`/main/course/${course.id}/?id=${userId}`}
