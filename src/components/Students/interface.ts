@@ -4,10 +4,11 @@ export interface Student {
   id: number;
   name: string;
   email: string;
-  photo?: string;
+  photo?: File | string | null;
   telegram?: string;
+  city?: string;
   instagram?: string;
-  birthDate?: string;
+  birthDate?: string | Date | null;
   musicLevel?: string;
   vocalExperience?: string;
   goals?: string;

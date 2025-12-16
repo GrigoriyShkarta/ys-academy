@@ -55,7 +55,15 @@
     "goals": "What would you like to learn",
     "goalsPlaceholder": "Describe your learning goals",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "contact_information": "Contact information",
+    "basic_information": "Basic information",
+    "date_of_birth": "Date of birth",
+    "music_and_vocal_experience": "Musical and vocal experience",
+    "musical_level": "Musical level",
+    "vocal_experience": "Vocal experience",
+    "learning_goals": "Learning goals",
+    "city": "City"
   },
 
   "Materials": {

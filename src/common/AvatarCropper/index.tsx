@@ -2,6 +2,7 @@ import Cropper from 'react-easy-crop';
 import { useCallback, useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 
 interface Props {
   open: boolean;
@@ -14,6 +15,7 @@ export function AvatarCropper({ open, image, onClose, onCropComplete }: Props) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const t = useTranslations('Students');
 
   const onCropCompleteInternal = useCallback((_: any, pixels: any) => {
     setCroppedAreaPixels(pixels);
@@ -68,9 +70,11 @@ export function AvatarCropper({ open, image, onClose, onCropComplete }: Props) {
 
         <div className="flex justify-end gap-3 mt-4">
           <Button variant="outline" onClick={onClose}>
-            Отмена
+            {t('cancel')}
           </Button>
-          <Button onClick={createCroppedImage}>Сохранить</Button>
+          <Button onClick={createCroppedImage} className="bg-accent">
+            {t('save')}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

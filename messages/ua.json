@@ -56,6 +56,14 @@
     "goalsPlaceholder": "Опишіть свої навчальні цілі",
     "cancel": "Скасувати",
     "save": "Зберегти",
+    "contact_information": "Контактна інформація",
+    "basic_information": "Основна інформація",
+    "date_of_birth": "Дата народження",
+    "music_and_vocal_experience": "Музичний та вокальний досвід",
+    "musical_level": "Музичний рівень",
+    "vocal_experience": "Вокальний досвід",
+    "learning_goals": "Цілі навчання",
+    "city": "Місто",
 
     "validation": {
       "required_field": "Обов’язкове поле",
