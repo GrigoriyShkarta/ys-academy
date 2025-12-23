@@ -30,7 +30,8 @@
     "modules": "Modules",
     "categories": "Categories",
     "courses": "Courses",
-    "my_profile": "My profile"
+    "my_profile": "My profile",
+    "subscriptions": "Subscriptions"
   },
 
   "Students": {
@@ -63,7 +64,21 @@
     "musical_level": "Musical level",
     "vocal_experience": "Vocal experience",
     "learning_goals": "Learning goals",
-    "city": "City"
+    "city": "City",
+    "profile": "Profile",
+    "courses": "Courses",
+    "subscriptions": "Subscriptions",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "partial_paid": "Partial paid",
+    "add_subscription": "Add subscription",
+    "partially_paid": "Partially paid",
+    "expired": "Expired",
+    "pending": "Not completed",
+    "completed": "Completed",
+    "transferred": "Transferred",
+    "data_saved": "Data saved",
+    "amount": "Amount"
   },
 
   "Materials": {
@@ -149,7 +164,18 @@
     "save_lesson": "Save lesson",
     "modules": "Modules",
     "create_course": "Create course",
-    "edit_course": "Edit course"
+    "edit_course": "Edit course",
+    "create_subscription": "Create subscription",
+    "add_subscription": "Add subscription",
+    "edit_subscription": "Edit subscription",
+    "price": "Price",
+    "lessons_count": "Number of lessons",
+    "subscription": "Subscription",
+    "select_lesson_dates": "Select dates for lessons",
+    "select_dates": "Select dates",
+    "set_lesson_times": "Set times for lessons",
+    "select_subscription": "Select subscription",
+    "no_dates_selected": "No dates selected"
   },
 
   "Validation": {

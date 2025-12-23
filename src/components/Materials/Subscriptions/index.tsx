@@ -3,18 +3,18 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteCategory, getCategories } from '@/components/Materials/Categories/action';
 import { keepPreviousData } from '@tanstack/query-core';
-import { IFile } from '@/components/Materials/utils/interfaces';
+import { IFile, Subscription } from '@/components/Materials/utils/interfaces';
 import { Checkbox } from '@/components/ui/checkbox';
 import TableActionMenu from '@/common/TableActioMenu';
 import { ArrowDown, ArrowUp, ChevronsUpDownIcon } from 'lucide-react';
-import { formatDateTime } from '@/lib/utils';
 import DataTable from '@/common/Table';
 import ConfirmModal from '@/common/ConfirmModal';
-import CategoryModal from '@/components/Materials/Categories/CategoryModal';
+import { deleteSubscriptions, getSubscriptions } from '@/components/Materials/Subscriptions/action';
+import Loader from '@/common/Loader';
+import SubscriptionModal from '@/components/Materials/Subscriptions/SubscriptionModal';
 
-export default function CategoriesLayout() {
+export default function SubscriptionsLayout() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [selectedFile, setSelectedFile] = useState<IFile>();
@@ -27,16 +27,16 @@ export default function CategoriesLayout() {
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
 
-  const { data: categories, isLoading } = useQuery({
-    queryKey: ['categories', page, search, sortBy, sortOrder],
-    queryFn: () => getCategories({ page, search, sortBy: sortBy ?? undefined, sortOrder }),
+  const { data: subscriptions, isLoading } = useQuery({
+    queryKey: ['subscriptions', page, search, sortBy, sortOrder],
+    queryFn: () => getSubscriptions({ page, search, sortBy: sortBy ?? undefined, sortOrder }),
     placeholderData: keepPreviousData,
   });
 
-  const deleteCategoriesMutation = useMutation({
-    mutationFn: () => deleteCategory(selectedId ? [selectedId] : selectedIds),
+  const deleteSubscriptionsMutation = useMutation({
+    mutationFn: () => deleteSubscriptions(selectedId ? [selectedId] : selectedIds),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['categories'] });
+      await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
       setSelectedId(undefined);
       setSelectedIds([]);
       setOpenConfirm(false);
@@ -44,7 +44,7 @@ export default function CategoriesLayout() {
   });
 
   const handleConfirmDelete = () => {
-    deleteCategoriesMutation.mutate();
+    deleteSubscriptionsMutation.mutate();
   };
 
   const toggleSelect = useCallback((id: number) => {
@@ -52,11 +52,11 @@ export default function CategoriesLayout() {
   }, []);
 
   const toggleSelectAll = useCallback(() => {
-    if (!categories) return;
+    if (!subscriptions) return;
     setSelectedIds(prev =>
-      prev.length === categories.data.length ? [] : categories.data.map((a: IFile) => a.id)
+      prev.length === subscriptions.data.length ? [] : subscriptions.data.map((a: IFile) => a.id)
     );
-  }, [categories]);
+  }, [subscriptions]);
 
   const toggleSort = useCallback(
     (field: 'title' | 'createdAt') => {
@@ -73,7 +73,7 @@ export default function CategoriesLayout() {
         label: (
           <Checkbox
             checked={
-              selectedIds.length === categories?.data?.length && categories?.data?.length > 0
+              selectedIds.length === subscriptions?.data?.length && subscriptions?.data?.length > 0
             }
             onCheckedChange={toggleSelectAll}
           />
@@ -118,49 +118,32 @@ export default function CategoriesLayout() {
             )}
           </button>
         ),
-        render: (category: IFile) => (
-          <div
-            className="p-1 rounded-xl w-fit leading-3.5"
-            style={{ backgroundColor: category?.color ?? '' }}
-          >
-            {category.title}
-          </div>
-        ),
+        render: (item: IFile) => item.title,
       },
       {
-        key: 'created_at',
-        label: (
-          <button
-            type="button"
-            onClick={() => toggleSort('createdAt')}
-            className="flex items-center gap-2"
-          >
-            {t('downloaded')}
-            {sortBy === 'createdAt' ? (
-              sortOrder === 'asc' ? (
-                <ArrowUp size={14} />
-              ) : (
-                <ArrowDown size={14} />
-              )
-            ) : (
-              <ChevronsUpDownIcon size={14} />
-            )}
-          </button>
-        ),
-        render: (item: IFile) => <span>{formatDateTime(item.createdAt)}</span>,
+        key: 'price',
+        label: t('price'),
+        render: (item: IFile) => item?.price,
+      },
+      {
+        key: 'lessons_count',
+        label: t('lessons_count'),
+        render: (item: IFile) => item?.lessons_count,
       },
     ],
-    [selectedIds, categories, toggleSelectAll, toggleSelect, sortBy, sortOrder, t, toggleSort]
+    [selectedIds, subscriptions, toggleSelectAll, toggleSelect, sortBy, sortOrder, t, toggleSort]
   );
+
+  if (isLoading) return <Loader />;
 
   return (
     <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
-      <CategoryModal category={selectedFile} closeModal={() => setSelectedFile(undefined)} />
-      {categories && (
+      <SubscriptionModal subscription={selectedFile as Subscription} />
+      {subscriptions && (
         <DataTable
-          data={categories.data}
+          data={subscriptions.data}
           columns={columns}
-          totalPages={categories.meta.totalPages}
+          totalPages={subscriptions.meta.totalPages}
           currentPage={page}
           onPageChange={newPage => setPage(newPage)}
           showDeleteIcon={selectedIds.length > 0}
@@ -177,7 +160,7 @@ export default function CategoriesLayout() {
           open={openConfirm}
           confirmAction={handleConfirmDelete}
           setOnClose={() => setOpenConfirm(false)}
-          isLoading={deleteCategoriesMutation.isPending}
+          isLoading={deleteSubscriptionsMutation.isPending}
         />
       )}
     </div>

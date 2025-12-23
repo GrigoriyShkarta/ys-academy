@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import ReactQueryProvider from '@/providers/ReactQueryProvider';
 import { ThemeProvider } from '@/providers/ThemeProviders';
 import { UserProvider } from '@/providers/UserContext';
+import { ThemedToaster } from '@/common/ThemeToaster';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -32,6 +33,7 @@ export default function RootLayout({
         <NextIntlClientProvider>
           <ReactQueryProvider>
             <ThemeProvider>
+              <ThemedToaster />
               <UserProvider>{children}</UserProvider>
             </ThemeProvider>
           </ReactQueryProvider>

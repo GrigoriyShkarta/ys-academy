@@ -13,6 +13,8 @@ export interface IFile {
   modules?: Module[];
   index?: number;
   progress?: number;
+  price?: number;
+  lessons_count?: number;
 }
 
 export interface Category {
@@ -89,4 +91,11 @@ export interface Course {
 export interface LessonDocItem {
   blockId: number;
   content: Block[];
+}
+
+export interface Subscription {
+  id: number;
+  title: string;
+  price: number;
+  lessons_count: number;
 }

@@ -12,6 +12,7 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
+  CreditCard,
   Folder,
   Image,
   Layers,
@@ -67,6 +68,11 @@ export default function Sidebar() {
           name: 'categories',
           href: '/main/materials/categories',
           icon: <TagsIcon className="w-4 h-4" />,
+        },
+        {
+          name: 'subscriptions',
+          href: '/main/materials/subscriptions',
+          icon: <CreditCard className="w-4 h-4" />,
         },
         {
           name: 'lessons',

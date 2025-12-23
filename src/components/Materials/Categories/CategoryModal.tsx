@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { IFile } from '@/components/Materials/utils/interfaces';
-import { createCategory } from '@/components/Materials/Categories/action';
+import { createCategory, updateCategory } from '@/components/Materials/Categories/action';
 import {
   Dialog,
   DialogContent,
@@ -75,6 +75,7 @@ export default function CategoryModal({
     e.stopPropagation();
     setIsLoading(true);
     if (oneTitleMod) {
+      await updateCategory(category?.id as number, categories[0]);
     } else {
       const newCategories = await createCategory(categories);
       if (selectCategory) {

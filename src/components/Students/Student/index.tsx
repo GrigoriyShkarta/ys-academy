@@ -12,10 +12,11 @@ import { Button } from '@/components/ui/button';
 import InfoUserModal from '@/components/Students/Student/components/InfoUserModal';
 import { useTranslations } from 'next-intl';
 import Loader from '@/common/Loader';
+import Subscriptions from '@/components/Students/Student/components/Subscriptions/Subscriptions';
 
 export default function Student({ id }: { id: number }) {
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'courses'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'courses' | 'subscriptions'>('profile');
   const t = useTranslations('Students');
 
   const { data: student, isLoading } = useQuery({
@@ -60,10 +61,13 @@ export default function Student({ id }: { id: number }) {
         <Tabs value={activeTab} onValueChange={val => setActiveTab(val as any)}>
           <TabsList className="flex gap-2 mb-4 justify-center">
             <TabsTrigger value="profile" className="px-4 py-2 rounded-t-lg shadow-sm">
-              Профиль
+              {t('profile')}
             </TabsTrigger>
             <TabsTrigger value="courses" className="px-4 py-2 rounded-t-lg shadow-sm">
-              Курсы
+              {t('courses')}
+            </TabsTrigger>
+            <TabsTrigger value="subscriptions" className="px-4 py-2 rounded-t-lg shadow-sm">
+              {t('subscriptions')}
             </TabsTrigger>
           </TabsList>
 
@@ -73,6 +77,10 @@ export default function Student({ id }: { id: number }) {
 
           <TabsContent value="courses">
             <StudentCourses courses={student.courses} userId={id} />
+          </TabsContent>
+
+          <TabsContent value="subscriptions">
+            <Subscriptions student={student} />
           </TabsContent>
         </Tabs>
       </div>

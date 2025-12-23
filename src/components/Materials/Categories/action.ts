@@ -24,3 +24,8 @@ export const createCategory = async (form: { title: string; color?: string }[]) 
   const { data } = await axiosInstance.post('/category', { form });
   return data;
 };
+
+export const updateCategory = async (id: number, form: { title: string; color?: string }) => {
+  const { data } = await axiosInstance.patch(`/category/${id}`, { form });
+  return data;
+};

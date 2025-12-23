@@ -1,6 +1,20 @@
 import axiosInstance from '@/services/axios';
 import { Student } from '@/components/Students/interface';
 
+interface SubscribeStudentParams {
+  userId: number;
+  subscriptionId: number;
+  slots: string[];
+}
+
+interface UpdateStudentParams {
+  userSubscriptionId: number;
+  subscriptionId: number;
+  slots: string[];
+  paymentStatus: string;
+  amount?: number;
+}
+
 export const getStudent = async (id: number): Promise<Student> => {
   const { data } = await axiosInstance.get(`/user/${id}`);
   return data;
@@ -36,6 +50,73 @@ export const updateStudent = async (student: Student) => {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+  });
+
+  return data;
+};
+
+export const subscribeStudent = async ({
+  userId,
+  subscriptionId,
+  slots,
+}: SubscribeStudentParams): Promise<void> => {
+  const body = {
+    userId,
+    subscriptionId,
+    lessonDates: slots,
+  };
+
+  const { data } = await axiosInstance.post('/subscriptions/subscribe', body);
+  return data;
+};
+
+export const updateSubscribeStudent = async ({
+  userSubscriptionId,
+  subscriptionId,
+  slots,
+  amount,
+  paymentStatus,
+}: UpdateStudentParams): Promise<void> => {
+  const body = {
+    subscriptionId,
+    amount,
+    paymentStatus,
+    lessonDates: slots,
+  };
+
+  const { data } = await axiosInstance.patch(
+    `/subscriptions/subscribe/${userSubscriptionId}`,
+    body
+  );
+  return data;
+};
+
+export const deleteSubscription = async (subscriptionId: number) => {
+  const { data } = await axiosInstance.delete(`/subscriptions/subscribe/${subscriptionId}`);
+  return data;
+};
+
+export const updateSubscriptionPaymentStatus = async (
+  subscriptionId: number,
+  paymentStatus: string,
+  amount?: number
+) => {
+  const { data } = await axiosInstance.patch(`/subscriptions/${subscriptionId}/payment-status`, {
+    paymentStatus,
+    amount,
+  });
+
+  return data;
+};
+
+export const updateLessonStatusInSubscription = async (
+  lessonId: number,
+  status: string,
+  transferredTo?: string
+) => {
+  const { data } = await axiosInstance.patch(`/subscriptions/${lessonId}/lesson-status`, {
+    status,
+    transferredTo,
   });
 
   return data;

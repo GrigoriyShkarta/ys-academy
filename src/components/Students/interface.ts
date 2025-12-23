@@ -14,6 +14,7 @@ export interface Student {
   goals?: string;
   modules?: StudentModule[];
   courses?: StudentCourse[];
+  subscriptions?: StudentSubscription[];
 }
 
 export interface StudentModule {
@@ -43,4 +44,22 @@ export interface StudentCourse {
   modules: StudentModule[];
   categories: Category[];
   progress: number;
+}
+
+export interface StudentSubscription {
+  id: number;
+  paymentStatus: string;
+  amount: number;
+  subscription: {
+    id: number;
+    title: string;
+    price: number;
+  };
+  lessons: StudentSubscriptionLesson[];
+}
+
+export interface StudentSubscriptionLesson {
+  id: number;
+  scheduledAt: string;
+  status: string;
 }

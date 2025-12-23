@@ -3,6 +3,9 @@ import { twMerge } from 'tailwind-merge';
 import { RefObject } from 'react';
 import type AvatarEditor from 'react-avatar-editor';
 import axios from 'axios';
+import { format } from 'date-fns';
+import { StudentSubscription } from '@/components/Students/interface';
+import { uk } from 'date-fns/locale';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -191,4 +194,99 @@ export const compressImage = async (
 
 export const isFile = (value: unknown): value is File => {
   return value instanceof File;
+};
+
+const getLessonWord = (count: number): string => {
+  if (count % 10 === 1 && count % 100 !== 11) {
+    return 'урок';
+  }
+  if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
+    return 'уроки';
+  }
+  return 'уроків';
+};
+
+// Функція для генерації тексту повідомлення
+export const generateRenewalMessage = (subscription: StudentSubscription): string => {
+  const lessons = subscription.lessons.sort(
+    (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+  );
+
+  const lessonCount = lessons.length;
+  const title = subscription.subscription.title; // наприклад "STANDARD"
+  const price = subscription.subscription.price; // припустимо, що є поле price в subscription.subscription
+
+  // Групуємо уроки за днем тижня + часом (щоб знайти регулярні слоти)
+  const slotsMap = new Map<string, { dayName: string; time: string }>();
+
+  lessons.forEach(lesson => {
+    const date = new Date(lesson.scheduledAt);
+    const dayOfWeek = date.getUTCDay(); // 0 = неділя, 1 = понеділок, ..., 6 = субота
+    const time = format(date, 'HH:mm');
+
+    const dayNames = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', "п'ятниця", 'субота'];
+    const dayName = dayNames[dayOfWeek];
+
+    const key = `${dayOfWeek}-${time}`;
+    if (!slotsMap.has(key)) {
+      slotsMap.set(key, { dayName, time });
+    }
+  });
+
+  // Формуємо рядок з часом уроків
+  const slotsArray = Array.from(slotsMap.values());
+  let timeLine = 'Твій час для уроків: ';
+  if (slotsArray.length === 1) {
+    const { dayName, time } = slotsArray[0];
+    timeLine += `${dayName} о ${time} за Києвом`;
+  } else {
+    timeLine +=
+      slotsArray
+        .slice(0, -1)
+        .map(s => `${s.dayName} о ${s.time}`)
+        .join(' за Києвом та ') +
+      ` за Києвом та ${slotsArray[slotsArray.length - 1].dayName} о ${
+        slotsArray[slotsArray.length - 1].time
+      } за Києвом`;
+  }
+
+  // Список дат уроків: 02, 06, 09... грудня 2025
+  const datesLine = lessons
+    .map(lesson => {
+      const date = new Date(lesson.scheduledAt);
+      const day = format(date, 'dd', { locale: uk });
+      const month = format(date, 'MMMM yyyy', { locale: uk });
+      return `${day} ${month}`;
+    })
+    .join(', ');
+
+  // Дата поновлення — дата останнього урока
+  const lastLessonDate = lessons[lessons.length - 1]
+    ? format(new Date(lessons[lessons.length - 1].scheduledAt), 'dd.MM.yyyy')
+    : '';
+
+  // Текст повідомлення
+  return `Вітаю, твій абонемент "${title}" на ${lessonCount} ${getLessonWord(
+    lessonCount
+  )} вокалу успішно поновлено! 🎉
+
+Дійсний до: ${lastLessonDate} включно
+${timeLine}
+
+Уроки за розкладом:
+${datesLine}
+
+Дата поновлення абонементу: ${lastLessonDate}
+
+Вартість абонементу: ${price.toLocaleString('uk-UA')} грн
+
+Рахунок для оплати: UA423510050000026006879203138
+
+Одержувач: Сабада Яна Олексіївна
+
+ІПН/ЄДРПОУ: 3670300783
+
+Призначення: сплата за уроки вокалу (ПІБ)
+
+Бажаю успіхів у навчанні! 😊`;
 };

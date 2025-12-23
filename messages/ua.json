@@ -30,7 +30,8 @@
     "modules": "Модулі",
     "categories": "Категорії",
     "courses": "Курси",
-    "my_profile": "Мій профіль"
+    "my_profile": "Мій профіль",
+    "subscriptions": "Абонементи"
   },
 
   "Students": {
@@ -64,6 +65,20 @@
     "vocal_experience": "Вокальний досвід",
     "learning_goals": "Цілі навчання",
     "city": "Місто",
+    "profile": "Профіль",
+    "courses": "Курси",
+    "subscriptions": "Абонементи",
+    "paid": "Сплачено",
+    "unpaid": "Несплачено",
+    "partial_paid": "Спдачено частково",
+    "add_subscription": "Додати абонемент",
+    "partially_paid": "Частково сплачено",
+    "expired": "Згорів",
+    "transfer": "Перенос",
+    "pending": "Не проведен",
+    "completed": "Проведен",
+    "data_saved": "Дані збережено",
+    "amount": "Сума",
 
     "validation": {
       "required_field": "Обов’язкове поле",
@@ -155,7 +170,18 @@
     "save_lesson": "Зберегти урок",
     "modules": "Модулі",
     "create_course": "Створити курс",
-    "edit_course": "Редагувати курс"
+    "edit_course": "Редагувати курс",
+    "create_subscription": "Створити абонемент",
+    "add_subscription": "Додати абонемент",
+    "edit_subscription": "Редагувати абонемент",
+    "price": "Ціна",
+    "lessons_count": "Кількість уроків",
+    "subscription": "Абонемент",
+    "select_lesson_dates": "Виберіть дати для уроків",
+    "select_dates": "Виберіть дати",
+    "set_lesson_times": "Встановіть час для уроків",
+    "select_subscription": "Виберіть абонемент",
+    "no_dates_selected": "Дати не вибрані"
   },
 
   "Validation": {
