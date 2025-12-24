@@ -78,7 +78,12 @@
     "completed": "Completed",
     "transferred": "Transferred",
     "data_saved": "Data saved",
-    "amount": "Amount"
+    "amount": "Amount",
+    "send_email": "Send mail",
+    "extend_subscription": "Extend subscription",
+    "edit": "Edit",
+    "delete": "Delete",
+    "collapse": "Collapse"
   },
 
   "Materials": {

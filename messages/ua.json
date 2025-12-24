@@ -79,6 +79,11 @@
     "completed": "Проведен",
     "data_saved": "Дані збережено",
     "amount": "Сума",
+    "send_email": "Надіслати лист",
+    "extend_subscription": "Продовжити абонемент",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "collapse": "Згорнути",
 
     "validation": {
       "required_field": "Обов’язкове поле",
