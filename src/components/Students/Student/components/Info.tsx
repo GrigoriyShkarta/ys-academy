@@ -13,10 +13,14 @@ export default function Info({ student }: { student: Student }) {
           <CardTitle>{t('basic_information')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <InfoRow label={t('city')} value={student?.city ?? '—'} />
+          <InfoRow label={t('email')} value={student?.email ?? '—'} />
           <InfoRow
             label={t('date_of_birth')}
             value={student.birthDate ? new Date(student.birthDate).toLocaleDateString() : '—'}
           />
+          <InfoRow label={t('telegram')} value={student?.telegram ?? '—'} />
+          <InfoRow label={t('instagram')} value={student?.instagram ?? '—'} />
         </CardContent>
       </Card>
 

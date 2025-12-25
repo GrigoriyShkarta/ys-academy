@@ -48,12 +48,6 @@ export default function Student({ id }: { id: number }) {
           </Button>
         </div>
         <h1 className="text-4xl font-semibold text-center">{student.name}</h1>
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-          {student.city && <p>{student.city}</p>}
-          <p>Email: {student.email}</p>
-          {student.telegram && <p>Telegram: {student.telegram}</p>}
-          {student.instagram && <p>Instagram: {student.instagram}</p>}
-        </div>
       </div>
 
       {/* Tabs */}

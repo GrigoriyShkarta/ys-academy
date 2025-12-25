@@ -107,6 +107,7 @@ export default function SubscriptionCard({
           <div className="flex flex-wrap gap-2">
             {subscription.lessons.map(lesson => (
               <SubscriptionLesson
+                key={lesson.id}
                 lesson={lesson}
                 changeLessonStatus={changeLessonStatus}
                 saveLessonDate={saveLessonDate}

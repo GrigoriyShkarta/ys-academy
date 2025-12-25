@@ -184,7 +184,7 @@ export default function useSubscription({ student, setOpen }: Props) {
   const handleCopyMessage = (subscription: StudentSubscription) => {
     const message = generateRenewalMessage(subscription);
     navigator.clipboard.writeText(message).then(() => {
-      toast.success('Повідомлення про поновлення абонемента скопійовано в буфер обміну');
+      toast.success(t('subscription_renewal_message_copied'));
     });
   };
 

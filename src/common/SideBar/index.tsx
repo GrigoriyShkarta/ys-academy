@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import Link from 'next/link';
-import { useUser } from '@/providers/UserContext';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { useUser } from '@/providers/UserContext';
+import { YS_TOKEN } from '@/lib/consts';
 import {
+  Banknote,
   BookAudio,
   BookOpen,
   ChevronDown,
@@ -29,34 +31,79 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { YS_TOKEN } from '@/lib/consts';
+
+/* ===================== TYPES ===================== */
+
+type MenuItem = {
+  name: string;
+  href?: string;
+  icon: ReactNode;
+  submenu?: MenuItem[];
+};
+
+/* ===================== COMPONENT ===================== */
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openMaterials, setOpenMaterials] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const t = useTranslations('SideBar');
+  const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
+
   const pathname = usePathname() || '/';
+  const { theme, setTheme } = useTheme();
   const { user } = useUser();
+  const t = useTranslations('SideBar');
+
+  /* ===================== HELPERS ===================== */
+
+  const isActive = (href?: string) =>
+    !!href && (pathname === href || pathname.startsWith(`${href}/`));
+
+  const isGroupActive = (item: MenuItem) => item.submenu?.some(sub => isActive(sub.href));
+
+  const toggleSubmenu = (key: string) => {
+    setCollapsed(false);
+    setOpenSubmenus(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleCollapse = () => {
+    setCollapsed(v => !v);
+    setOpenSubmenus({});
+  };
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
-  const isInMaterials = pathname.startsWith('/main/materials');
+  const handleLogout = () => {
+    localStorage.removeItem(YS_TOKEN);
+    window.location.href = '/';
+  };
 
-  const studentItems = [
+  /* ===================== MENU CONFIG ===================== */
+
+  const studentMenu: MenuItem[] = [
     {
       name: 'my_profile',
       icon: <User className="w-5 h-5" />,
       href: '/main/profile',
-      submenu: false,
     },
   ];
 
-  const menuItems = [
-    { name: 'students_database', icon: <Users className="w-5 h-5" />, href: '/main/students' },
-    // { name: 'my_courses', icon: <GraduationCap className="w-5 h-5" />, href: '/main/courses' },
+  const adminMenu: MenuItem[] = [
+    {
+      name: 'students_database',
+      icon: <Users className="w-5 h-5" />,
+      href: '/main/students',
+    },
+    {
+      name: 'my_finance',
+      icon: <Banknote className="w-5 h-5" />,
+      submenu: [
+        {
+          name: 'subscriptions',
+          href: '/main/finance/subscriptions',
+          icon: <CreditCard className="w-4 h-4" />,
+        },
+      ],
+    },
     {
       name: 'my_materials',
       icon: <Folder className="w-5 h-5" />,
@@ -70,11 +117,6 @@ export default function Sidebar() {
           icon: <TagsIcon className="w-4 h-4" />,
         },
         {
-          name: 'subscriptions',
-          href: '/main/materials/subscriptions',
-          icon: <CreditCard className="w-4 h-4" />,
-        },
-        {
           name: 'lessons',
           href: '/main/materials/lessons',
           icon: <BookOpen className="w-4 h-4" />,
@@ -84,46 +126,32 @@ export default function Sidebar() {
           href: '/main/materials/modules',
           icon: <BookAudio className="w-4 h-4" />,
         },
-        {
-          name: 'courses',
-          href: '/main/materials/courses',
-          icon: <Layers className="w-4 h-4" />,
-        },
+        { name: 'courses', href: '/main/materials/courses', icon: <Layers className="w-4 h-4" /> },
       ],
     },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem(YS_TOKEN);
-    window.location.href = '/';
-  };
+  const menu = user?.role === 'super_admin' ? adminMenu : studentMenu;
 
-  const handleCollapse = () => {
-    setCollapsed(prev => !prev);
-    setOpenMaterials(false);
-  };
-
-  const handleMaterials = () => {
-    setCollapsed(false);
-    setOpenMaterials(prev => !prev);
-  };
+  /* ===================== RENDER ===================== */
 
   const MenuContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <>
-      {(user?.role === 'super_admin' ? menuItems : studentItems).map(item => {
-        const hasSubmenu = !!item?.submenu;
-        const isGroupActive = hasSubmenu && isInMaterials;
-        const isItemActive = !hasSubmenu && item.href && isActive(item.href);
+      {menu.map(item => {
+        const hasSubmenu = !!item.submenu;
+        const open = !!openSubmenus[item.name];
+        const active = hasSubmenu ? isGroupActive(item) : isActive(item.href);
 
         if (!hasSubmenu) {
           return (
             <Link
               key={item.name}
               href={item.href!}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isItemActive ? 'bg-white/20 text-white' : 'hover:bg-white/10'
-              } ${isCollapsed ? 'justify-center' : ''}`}
               onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                ${active ? 'bg-white/20 text-white' : 'hover:bg-white/10'}
+                ${isCollapsed ? 'justify-center' : ''}
+              `}
             >
               {item.icon}
               {!isCollapsed && <span>{t(item.name)}</span>}
@@ -134,47 +162,43 @@ export default function Sidebar() {
         return (
           <div key={item.name}>
             <button
-              onClick={handleMaterials}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isGroupActive ? 'bg-white/20 text-white' : 'hover:bg-white/10'
-              } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
+              onClick={() => toggleSubmenu(item.name)}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+                ${active ? 'bg-white/20 text-white' : 'hover:bg-white/10'}
+                ${isCollapsed ? 'justify-center' : 'justify-between'}
+              `}
             >
               <div className="flex items-center gap-3">
                 {item.icon}
                 {!isCollapsed && <span>{t(item.name)}</span>}
               </div>
               {!isCollapsed &&
-                (openMaterials ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                ))}
+                (open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
             </button>
 
             {!isCollapsed && (
               <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  openMaterials ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}
+                className={`overflow-hidden transition-all duration-300
+                  ${open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+                `}
               >
                 <div className="ml-10 mt-1 space-y-1 pb-2">
-                  {Array.isArray(item.submenu) &&
-                    item.submenu!.map(sub => {
-                      const subActive = isActive(sub.href);
-                      return (
-                        <Link
-                          key={sub.name}
-                          href={sub.href}
-                          className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors block ${
-                            subActive ? 'bg-white/20 text-white' : 'hover:bg-white/10'
-                          }`}
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          {sub.icon}
-                          <span>{t(sub.name)}</span>
-                        </Link>
-                      );
-                    })}
+                  {item.submenu!.map(sub => {
+                    const subActive = isActive(sub.href);
+                    return (
+                      <Link
+                        key={sub.name}
+                        href={sub.href!}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors
+                          ${subActive ? 'bg-white/20 text-white' : 'hover:bg-white/10'}
+                        `}
+                      >
+                        {sub.icon}
+                        <span>{t(sub.name)}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -182,12 +206,12 @@ export default function Sidebar() {
         );
       })}
 
-      <div className={`border-t border-white/10 pt-4 mt-6 space-y-2`}>
+      <div className="mt-6 space-y-2 border-t border-white/10 pt-4">
         <button
           onClick={toggleTheme}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-white/10 ${
-            isCollapsed ? 'justify-center' : ''
-          }`}
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm hover:bg-white/10
+            ${isCollapsed ? 'justify-center' : ''}
+          `}
         >
           {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
           {!isCollapsed && <span>{t('change_theme')}</span>}
@@ -195,9 +219,9 @@ export default function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-400 transition-colors hover:bg-red-900/20 ${
-            isCollapsed ? 'justify-center' : ''
-          }`}
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-400 hover:bg-red-900/20
+            ${isCollapsed ? 'justify-center' : ''}
+          `}
         >
           <LogOut className="w-5 h-5" />
           {!isCollapsed && <span>{t('logout')}</span>}
@@ -206,64 +230,49 @@ export default function Sidebar() {
     </>
   );
 
+  /* ===================== LAYOUT ===================== */
+
   return (
     <>
-      {/* ДЕСКТОПНАЯ САЙДБАР */}
+      {/* DESKTOP */}
       <aside
-        className={`hidden md:flex h-screen flex-col border-r bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300 ${
-          collapsed ? 'w-20' : 'w-64'
-        }`}
+        className={`hidden md:flex h-screen flex-col border-r bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300
+          ${collapsed ? 'w-20' : 'w-64'}
+        `}
       >
-        {/* Заголовок */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          {!collapsed && <span className="font-bold text-lg">YS Vocal Coach</span>}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleCollapse}
-            className={`text-white hover:bg-white/10 ${collapsed ? 'mx-auto' : ''}`}
-          >
-            {collapsed ? (
-              <PanelLeftOpen className="h-5 w-5" />
-            ) : (
-              <PanelLeftClose className="h-5 w-5" />
-            )}
+        <div className="flex items-center justify-between border-b border-white/10 p-4">
+          {!collapsed && <span className="text-lg font-bold">YS Vocal Coach</span>}
+          <Button variant="ghost" size="icon" onClick={handleCollapse}>
+            {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
           </Button>
         </div>
 
-        {/* Меню */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           <MenuContent isCollapsed={collapsed} />
         </nav>
       </aside>
 
-      {/* МОБИЛЬНЫЙ ХЕДЕР + МЕНЮ */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-gray-900 to-gray-800 text-white shadow-lg">
+      {/* MOBILE */}
+      <header className="fixed top-0 z-50 w-full bg-gradient-to-b from-gray-900 to-gray-800 text-white md:hidden">
         <div className="flex items-center justify-between p-4">
-          <span className="font-bold text-lg">YS Vocal Coach</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileMenuOpen(v => !v)}
-            className="text-white"
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          <span className="text-lg font-bold">YS Vocal Coach</span>
+          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(v => !v)}>
+            {mobileMenuOpen ? <X /> : <Menu />}
           </Button>
         </div>
 
         <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out bg-gray-800/95 backdrop-blur border-t border-white/10 ${
-            mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-          }`}
+          className={`overflow-hidden transition-all duration-300
+            ${mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}
+          `}
         >
-          <nav className="p-4 pb-6 space-y-3">
-            <MenuContent /> {/* всегда раскрыто */}
+          <nav className="space-y-3 p-4 pb-6">
+            <MenuContent />
           </nav>
         </div>
       </header>
 
-      {/* Отступ под мобильный хедер */}
-      <div className="md:hidden h-16" />
+      <div className="h-16 md:hidden" />
     </>
   );
 }

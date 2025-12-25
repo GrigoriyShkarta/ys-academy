@@ -1,5 +1,3 @@
-// components/Students/Student/components/LessonItem.tsx
-
 import { Dispatch, SetStateAction } from 'react';
 import { useTranslations } from 'next-intl';
 import { format, Locale } from 'date-fns';
@@ -21,7 +19,7 @@ interface LessonItemProps {
   subscriptionId: number;
   changeLessonStatus: (subscriptionId: number, lessonId: number, status: string) => void;
   saveLessonDate: (lessonId: number) => void;
-  editingDateTime: Date | null; // может быть null, не undefined
+  editingDateTime: Date | null;
   setEditingDateTime: Dispatch<SetStateAction<Date | null>>;
   editingLessonId?: number;
   isLoadingChangeLessonDate?: boolean;
@@ -45,7 +43,6 @@ export default function LessonItem({
 
   return (
     <div
-      key={lesson.id}
       className={`flex flex-col gap-1 p-2 rounded-[8px] border
                       ${lesson.status === 'completed' && 'bg-green-500 text-white'}
                       ${lesson.status === 'expired' && 'bg-red-500 text-white'}

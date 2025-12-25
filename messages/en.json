@@ -31,7 +31,8 @@
     "categories": "Categories",
     "courses": "Courses",
     "my_profile": "My profile",
-    "subscriptions": "Subscriptions"
+    "subscriptions": "Subscriptions",
+    "my_finance": "My finance"
   },
 
   "Students": {
@@ -83,7 +84,9 @@
     "extend_subscription": "Extend subscription",
     "edit": "Edit",
     "delete": "Delete",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "subscription_deleted": "Subscription deleted",
+    "subscription_renewal_message_copied": "The subscription renewal message has been copied to the clipboard"
   },
 
   "Materials": {

@@ -31,7 +31,8 @@
     "categories": "Категорії",
     "courses": "Курси",
     "my_profile": "Мій профіль",
-    "subscriptions": "Абонементи"
+    "subscriptions": "Абонементи",
+    "my_finance": "Мої фінанси"
   },
 
   "Students": {
@@ -84,6 +85,8 @@
     "edit": "Редагувати",
     "delete": "Видалити",
     "collapse": "Згорнути",
+    "subscription_deleted": "Абонемент видален",
+    "subscription_renewal_message_copied": "Повідомлення про поновлення абонемента скопійовано в буфер обміну",
 
     "validation": {
       "required_field": "Обов’язкове поле",
