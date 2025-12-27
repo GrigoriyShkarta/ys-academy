@@ -42,8 +42,6 @@ export default function CoursePageLayout({
     enabled: !!courseId,
   });
 
-  console.log('courseId', courseId);
-
   const deleteMutation = useMutation({
     mutationFn: () => deleteCourse(courseId),
     onSuccess: () => {
@@ -51,9 +49,6 @@ export default function CoursePageLayout({
       router.back();
     },
   });
-
-  console.log('isLoading', isLoading);
-  console.log('course', course);
 
   if (isLoading) return <Loader />;
 
