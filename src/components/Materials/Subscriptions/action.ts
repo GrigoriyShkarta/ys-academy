@@ -28,3 +28,11 @@ export const createSubscription = async (form: {
   const { data } = await axiosInstance.post('/subscriptions', form);
   return data;
 };
+
+export const updateSubscription = async (
+  id: number,
+  form: { title: string; lessons_count: number; price: number }
+) => {
+  const { data } = await axiosInstance.patch(`/subscriptions/${id}`, form);
+  return data;
+};

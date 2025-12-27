@@ -6,6 +6,7 @@ import { Role } from '@/lib/consts';
 
 export interface User {
   role: Role;
+  name: string;
   id: number;
 }
 

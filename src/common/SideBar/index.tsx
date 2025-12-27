@@ -240,8 +240,16 @@ export default function Sidebar() {
           ${collapsed ? 'w-20' : 'w-64'}
         `}
       >
-        <div className="flex items-center justify-between border-b border-white/10 p-4">
-          {!collapsed && <span className="text-lg font-bold">YS Vocal Coach</span>}
+        <div
+          className={`flex items-center ${
+            collapsed ? 'justify-center' : 'justify-between'
+          } border-b border-white/10 p-4`}
+        >
+          {!collapsed && (
+            <Link href="/main" className="text-lg font-bold">
+              YS Vocal Coach
+            </Link>
+          )}
           <Button variant="ghost" size="icon" onClick={handleCollapse}>
             {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
           </Button>

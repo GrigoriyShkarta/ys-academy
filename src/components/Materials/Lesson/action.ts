@@ -38,11 +38,9 @@ export const updateLesson = async (
     moduleIds,
   };
 
-  console.log('formatedLesson', formatedLesson);
+  const { data } = await axiosInstance.post(`/lesson/update/${id}`, formatedLesson);
 
-  // const { data } = await axiosInstance.post(`/lesson/update/${id}`, formatedLesson);
-  //
-  // return data;
+  return data;
 };
 
 export const deleteLesson = async (id: number[]) => {

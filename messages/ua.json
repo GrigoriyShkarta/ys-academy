@@ -16,6 +16,17 @@
     }
   },
 
+  "Main": {
+    "my_profile": "Мій профіль",
+    "welcome_back": "З поверненням",
+    "continue_learning_prompt": "Готові продовжити навчання? Перегляньте ваші останні курси",
+    "welcome_title": "Ласкаво просимо до YS Academy",
+    "welcome_description": "Ваша універсальна платформа для управління освітою та навчанням.",
+    "courses": "Курси",
+    "lessons": "Уроки",
+    "students": "Студенти"
+  },
+
   "SideBar": {
     "students_database": "База учнів",
     "my_courses": "Мої курси",
