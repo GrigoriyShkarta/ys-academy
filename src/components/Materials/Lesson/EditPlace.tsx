@@ -29,8 +29,6 @@ export default function EditPlace({ setIsEditPlace }: Props) {
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
 
-  console.log('cover', cover)
-
   const addBlock = () => {
     setLessonDoc(prev => {
       const newBlockId = prev.length > 0 ? prev[prev.length - 1].blockId + 1 : 1;
@@ -67,7 +65,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
           categories: [],
           isOther: true,
         });
-        console.log('res', res)
+        console.log('res', res);
         coverUrl = res;
       }
 
