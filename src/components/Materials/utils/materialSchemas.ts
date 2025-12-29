@@ -5,6 +5,7 @@ export const contentSchema = (t: (key: string) => string) =>
     id: z.number().optional(),
     title: z.string().optional(),
     categories: z.array(z.string()).optional(),
+    isOther: z.boolean().optional(),
     content: z
       .union([
         z.instanceof(File),

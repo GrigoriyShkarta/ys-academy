@@ -11,6 +11,7 @@ import { Block } from '@blocknote/core';
 import Cover from '@/components/Materials/Lesson/components/Cover';
 import ConfirmModal from '@/common/ConfirmModal';
 import LessonSaveModal from '@/components/Materials/Lesson/components/LessonSaveModal';
+import { uploadPhoto } from '@/components/Materials/Photo/action';
 
 interface Props {
   setIsEditPlace: Dispatch<SetStateAction<boolean>>;
@@ -18,7 +19,7 @@ interface Props {
 
 export default function EditPlace({ setIsEditPlace }: Props) {
   const [lessonTitle, setLessonTitle] = useState('');
-  const [cover, setCover] = useState<string>('');
+  const [cover, setCover] = useState<string | File>('');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -27,6 +28,8 @@ export default function EditPlace({ setIsEditPlace }: Props) {
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
+
+  console.log('cover', cover)
 
   const addBlock = () => {
     setLessonDoc(prev => {
@@ -55,7 +58,20 @@ export default function EditPlace({ setIsEditPlace }: Props) {
   const saveLesson = async () => {
     try {
       setLoading(true);
-      await createLesson(lessonDoc, lessonTitle, cover, selectedCategories, selectedModules);
+      let coverUrl = typeof cover === 'string' ? cover : undefined;
+
+      if (cover instanceof File) {
+        const res = await uploadPhoto({
+          content: cover,
+          title: 'Lesson Cover',
+          categories: [],
+          isOther: true,
+        });
+        console.log('res', res)
+        coverUrl = res;
+      }
+
+      await createLesson(lessonDoc, lessonTitle, coverUrl, selectedCategories, selectedModules);
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch (error) {
       console.error('Error saving lesson:', error);
@@ -90,7 +106,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
 
       <Cover updateCover={setCover} cover={cover} isEdit />
 
-      <div className="w-full max-w-7xl mx-auto">
+      <div className="max-w-7xl sm:w-[75%] mx-auto">
         <div className="w-full flex">
           <Input
             placeholder={t('lesson_title')}

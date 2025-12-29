@@ -20,7 +20,7 @@ import { useUser } from '@/providers/UserContext';
 export default function LessonLayout({ id }: { id: number }) {
   const [isEditPlace, setIsEditPlace] = useState(false);
   const [lessonTitle, setLessonTitle] = useState('');
-  const [cover, setCover] = useState<string>('');
+  const [cover, setCover] = useState<File | string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,7 +61,7 @@ export default function LessonLayout({ id }: { id: number }) {
   const handleUpdateLesson = async () => {
     try {
       setLoading(true);
-      await updateLesson(id, lessonDoc, lessonTitle, cover, selectedCategories, selectedModules);
+      await updateLesson(id, lessonDoc, lessonTitle, cover as string, selectedCategories, selectedModules);
       await queryClient.invalidateQueries({ queryKey: ['lesson', id] });
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch (e) {
@@ -148,7 +148,7 @@ export default function LessonLayout({ id }: { id: number }) {
       {(cover || isEditPlace) && (
         <Cover updateCover={setCover} cover={cover} isEdit={isEditPlace} />
       )}
-      <div className="relative p-2 sm:p-0 max-w-7xl mx-auto">
+      <div className="relative p-2 sm:p-0 max-w-7xl w-2/3 mx-auto">
         {isEditPlace ? (
           <Input
             placeholder={t('lesson_title')}
