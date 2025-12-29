@@ -84,7 +84,7 @@ export default function StudentsTable({ data, columns, rowsPerPage = 5 }: Studen
         </Button>
 
         <span className="text-sm text-muted-foreground">
-          Страница {page} из {totalPages}
+          Сторінка {page} з {totalPages}
         </span>
 
         <Button
@@ -92,7 +92,7 @@ export default function StudentsTable({ data, columns, rowsPerPage = 5 }: Studen
           disabled={page === totalPages || totalPages === 0}
           onClick={() => setPage(p => p + 1)}
         >
-          Вперёд
+          Вперед
         </Button>
       </div>
     </div>

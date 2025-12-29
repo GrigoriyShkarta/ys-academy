@@ -6,11 +6,10 @@ import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { keepPreviousData } from '@tanstack/query-core';
 import { getCategories } from '@/components/Materials/Categories/action';
-import { getCourses } from '@/components/Materials/Course/action';
+import { deleteCourse, getCourses } from '@/components/Materials/Course/action';
 import Loader from '@/common/Loader';
 import { Button } from '@/components/ui/button';
 import MediaGallery from '@/common/MediaGallery';
-import { deleteModule } from '@/components/Materials/Modules/action';
 import CourseModal from '@/components/Materials/Course/CourseModal';
 import { useUser } from '@/providers/UserContext';
 
@@ -65,7 +64,7 @@ export default function CourseLayout() {
             setSelectedFile(item as Course);
             setIsCreateCourse(true);
           }}
-          handleDelete={ids => deleteModule(ids[0])}
+          handleDelete={ids => deleteCourse(ids[0])}
           onSearchChange={newSearch => {
             setSearch(newSearch);
           }}

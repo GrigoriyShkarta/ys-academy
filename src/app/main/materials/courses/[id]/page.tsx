@@ -1,5 +1,7 @@
 import CoursePageLayout from '@/components/Materials/Course/CoursePage';
 
-export default function CoursePage({ params }: { params: { id: number } }) {
-  return <CoursePageLayout courseId={params.id} />;
+export default async function CoursePage({ params }: { params: Promise<{ id: number }> }) {
+  const { id } = await params;
+
+  return <CoursePageLayout courseId={+id} />;
 }

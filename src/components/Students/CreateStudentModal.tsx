@@ -27,9 +27,11 @@ import { useTranslations } from 'next-intl';
 import { CreateStudentFormValues, createStudentSchema } from '@/components/Students/studentsSchema';
 import { generatePassword } from '@/components/Students/utils';
 import { createStudent } from '@/components/Students/actions';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function CreateStudentModal() {
   const [open, setOpen] = useState(false);
+  const client = useQueryClient();
   const t = useTranslations('Students');
   const form = useForm<CreateStudentFormValues>({
     resolver: zodResolver(createStudentSchema(t)),
@@ -44,6 +46,7 @@ export default function CreateStudentModal() {
 
   const onSubmit = async (data: CreateStudentFormValues) => {
     await createStudent(data);
+    await client.invalidateQueries({ queryKey: ['students'] });
     setOpen(false);
     form.reset();
   };
