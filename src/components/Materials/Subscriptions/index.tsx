@@ -139,7 +139,7 @@ export default function SubscriptionsLayout() {
   return (
     <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
       <SubscriptionModal subscription={selectedFile as Subscription} />
-      {subscriptions && (
+      {subscriptions && subscriptions.data.length > 0 && (
         <DataTable
           data={subscriptions.data}
           columns={columns}
