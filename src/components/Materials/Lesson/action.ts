@@ -6,6 +6,7 @@ export const createLesson = async (
   lessons: LessonDocItem[],
   lessonTitle: string,
   cover?: string,
+  coverPublicId?: string,
   categoryIds?: string[],
   moduleIds?: string[]
 ) => {
@@ -13,6 +14,7 @@ export const createLesson = async (
     title: lessonTitle,
     blocks: lessons,
     cover,
+    publicImgId:coverPublicId,
     categoryIds,
     moduleIds,
   };
@@ -27,6 +29,7 @@ export const updateLesson = async (
   lessons: LessonDocItem[],
   lessonTitle: string,
   cover?: string,
+  coverPublicId?: string,
   categoryIds?: string[],
   moduleIds?: string[]
 ) => {
@@ -34,6 +37,7 @@ export const updateLesson = async (
     title: lessonTitle,
     blocks: lessons,
     cover,
+    publicImgId:coverPublicId,
     categoryIds,
     moduleIds,
   };

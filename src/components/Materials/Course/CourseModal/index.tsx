@@ -1,8 +1,7 @@
-import { Dispatch, FormEvent, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, FormEvent, SetStateAction, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import AvatarEditor from 'react-avatar-editor';
-import { Course, LessonItemType, ModuleDTO } from '@/components/Materials/utils/interfaces';
+import { Course, ModuleDTO } from '@/components/Materials/utils/interfaces';
 import { getCategories } from '@/components/Materials/Categories/action';
 import {
   closestCenter,
@@ -25,13 +24,13 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import MultiSelect from '@/common/MultiSelect';
 import { Button } from '@/components/ui/button';
-import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
 import ChooseListModal from '@/common/MaterialsCommon/ChooseListModal';
 import SortableModule from '@/components/Materials/Course/CourseModal/SortableModule';
 import { createCourse, updateCourse } from '@/components/Materials/Course/action';
 import { Plus } from 'lucide-react';
 import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 import { useUser } from '@/providers/UserContext';
+import { uploadPhoto } from '@/components/Materials/Photo/action';
 
 interface Props {
   open: boolean;
@@ -39,10 +38,21 @@ interface Props {
   course?: Course | null;
 }
 
+function dataURLtoFile(dataurl: string, filename: string) {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
 export default function CourseModal({ open, setOpen, course }: Props) {
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
-  const editorRef = useRef<AvatarEditor | null>(null);
   const { user } = useUser();
   const [name, setName] = useState<string>('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -50,7 +60,6 @@ export default function CourseModal({ open, setOpen, course }: Props) {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [openModuleModal, setOpenModuleModal] = useState<boolean>(false);
-  const [openPhotoBank, setOpenPhotoBank] = useState<boolean>(false);
 
   useEffect(() => {
     if (open) {
@@ -83,10 +92,6 @@ export default function CourseModal({ open, setOpen, course }: Props) {
     if (!newCategories) return;
     setCategoryIds(prev => Array.from(new Set([...prev, ...newCategories])));
     setIsCategoryModalOpen(false);
-  };
-
-  const handleAddImage = async (type: LessonItemType, content?: string | File, bankId?: number) => {
-    setImageSrc(content as string);
   };
 
   const sensors = useSensors(
@@ -140,9 +145,30 @@ export default function CourseModal({ open, setOpen, course }: Props) {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    let finalImageSrc = imageSrc;
+    let finalImagePublicId = '';
+
+    if (imageSrc && imageSrc.startsWith('data:image')) {
+      try {
+        const file = dataURLtoFile(imageSrc, 'course_cover.jpg');
+        const res = await uploadPhoto({
+          content: file,
+          title: name || 'Course Cover',
+          categories: [],
+          isOther: true,
+
+        });
+        finalImageSrc = res.url;
+        finalImagePublicId = res.publicId;
+      } catch (error) {
+        console.error('Photo upload failed', error);
+      }
+    }
+
     const data = {
       title: name,
-      url: imageSrc ?? '',
+      url: finalImageSrc ?? '',
+      publicImgId: finalImagePublicId,
       modules: modules.map(l => ({ id: l.id })),
       categories: categoryIds ?? [],
     };
@@ -179,8 +205,6 @@ export default function CourseModal({ open, setOpen, course }: Props) {
             <PhotoEditor
               setImage={setImageSrc}
               externalImage={imageSrc}
-              onOpenPhotoBank={() => setOpenPhotoBank(true)}
-              editorRef={editorRef}
             />
 
             <Label>{t('name')}</Label>
@@ -255,11 +279,6 @@ export default function CourseModal({ open, setOpen, course }: Props) {
         </form>
       </DialogContent>
 
-      <ChoosePhotoModal
-        open={openPhotoBank}
-        closeModal={() => setOpenPhotoBank(false)}
-        handleAdd={handleAddImage}
-      />
       <ChooseListModal
         open={openModuleModal}
         closeModal={() => setOpenModuleModal(false)}

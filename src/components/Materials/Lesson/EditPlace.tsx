@@ -57,6 +57,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
     try {
       setLoading(true);
       let coverUrl = typeof cover === 'string' ? cover : undefined;
+      let coverPublicId = '';
 
       if (cover instanceof File) {
         const res = await uploadPhoto({
@@ -65,11 +66,11 @@ export default function EditPlace({ setIsEditPlace }: Props) {
           categories: [],
           isOther: true,
         });
-        console.log('res', res);
-        coverUrl = res;
+        coverUrl = res.url;
+        coverPublicId = res.publicId;
       }
 
-      await createLesson(lessonDoc, lessonTitle, coverUrl, selectedCategories, selectedModules);
+      await createLesson(lessonDoc, lessonTitle, coverUrl, coverPublicId, selectedCategories, selectedModules);
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch (error) {
       console.error('Error saving lesson:', error);

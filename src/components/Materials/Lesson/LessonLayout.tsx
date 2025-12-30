@@ -16,6 +16,7 @@ import Cover from '@/components/Materials/Lesson/components/Cover';
 import ConfirmModal from '@/common/ConfirmModal';
 import LessonSaveModal from '@/components/Materials/Lesson/components/LessonSaveModal';
 import { useUser } from '@/providers/UserContext';
+import { uploadPhoto } from '../Photo/action';
 
 export default function LessonLayout({ id }: { id: number }) {
   const [isEditPlace, setIsEditPlace] = useState(false);
@@ -61,7 +62,20 @@ export default function LessonLayout({ id }: { id: number }) {
   const handleUpdateLesson = async () => {
     try {
       setLoading(true);
-      await updateLesson(id, lessonDoc, lessonTitle, cover as string, selectedCategories, selectedModules);
+      let coverUrl = typeof cover === 'string' ? cover : undefined;
+      let coverPublicId = '';
+
+      if (cover instanceof File) {
+        const res = await uploadPhoto({
+          content: cover,
+          title: 'Lesson Cover',
+          categories: [],
+          isOther: true,
+        });
+        coverUrl = res.url;
+        coverPublicId = res.publicId;
+      }
+      await updateLesson(id, lessonDoc, lessonTitle, coverUrl, coverPublicId, selectedCategories, selectedModules);
       await queryClient.invalidateQueries({ queryKey: ['lesson', id] });
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch (e) {

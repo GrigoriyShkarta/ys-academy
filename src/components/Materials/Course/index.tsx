@@ -57,7 +57,7 @@ export default function CourseLayout() {
         {t('create_course')}
       </Button>
 
-      {courses && (
+      {courses && courses?.length > 0 && (
         <MediaGallery
           data={courses}
           handleEdit={(item: IFile) => {

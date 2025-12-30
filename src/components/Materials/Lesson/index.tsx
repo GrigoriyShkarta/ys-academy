@@ -225,6 +225,7 @@ export default function LessonsLayout() {
           {t('createLesson')}
         </Button>
       )}
+      
 
       {isEditPlace && <EditPlace setIsEditPlace={setIsEditPlace} />}
       {!isEditPlace && lessons?.data?.length > 0 && (

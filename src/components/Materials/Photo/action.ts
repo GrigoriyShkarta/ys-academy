@@ -23,6 +23,9 @@ export const uploadPhoto = async (form: ContentFormValues) => {
   if (form.content) {
     formData.append('file', finalFile);
   }
+  if (form.isOther) {
+    formData.append('isOther', String(form.isOther));
+  }
 
   const { data } = await axiosInstance.post('/photo/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

@@ -61,6 +61,7 @@ export interface LessonBlockType {
 export interface ModuleDTO {
   title: string;
   url?: string;
+  publicImgId?: string;
   lessons?: {
     id: number;
     order: number;

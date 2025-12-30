@@ -156,7 +156,7 @@ export default function CategoriesLayout() {
   return (
     <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
       <CategoryModal category={selectedFile} closeModal={() => setSelectedFile(undefined)} />
-      {categories && (
+      {categories && categories?.data?.length > 0 && (
         <DataTable
           data={categories.data}
           columns={columns}

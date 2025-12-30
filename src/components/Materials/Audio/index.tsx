@@ -248,7 +248,7 @@ export default function AudioLayout() {
         setUploadedFiles={setAddFiles}
       />
 
-      {audios && (
+      {audios && audios?.data?.length > 0 && (
         <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
           <DrugOverflow dragActive={dragActive} />
 

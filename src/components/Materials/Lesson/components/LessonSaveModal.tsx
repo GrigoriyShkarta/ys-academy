@@ -18,6 +18,7 @@ import MultiSelect from '@/common/MultiSelect';
 import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 import { FormFooter } from '@/common/ModalFooter';
 import { useUser } from '@/providers/UserContext';
+import ModuleModal from '../../Modules/ModuleModal';
 
 interface Props {
   open: boolean;
@@ -41,6 +42,8 @@ export default function LessonSaveModal({
   isLoading,
 }: Props) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
+  const [selectedModule, setSelectedModule] = useState<string[]>([]);
   const { user } = useUser();
 
   const t = useTranslations('Materials');
@@ -66,6 +69,8 @@ export default function LessonSaveModal({
     value: String(c.id),
     label: c.title,
   }));
+
+  console.log('selectedModules', selectedModules)
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -102,7 +107,20 @@ export default function LessonSaveModal({
           </div>
 
           <div>
-            <Label className="mb-3">{t('add_to_module')}</Label>
+            <div className="flex items-center justify-between mb-1.5">
+              <Label className="mb-3">{t('add_to_module')}</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs text-primary hover:text-primary"
+                onClick={() => setIsModuleModalOpen(true)}
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                {t('create_module')}
+              </Button>
+            </div>
+            
             <MultiSelect
               options={moduleOptions}
               selected={selectedModules}
@@ -134,6 +152,14 @@ export default function LessonSaveModal({
           setSelectedCategories(prev => Array.from(new Set([...prev, ...next])))
         }
         hideTrigger
+      />
+
+      <ModuleModal
+        open={isModuleModalOpen}
+        setOpen={() => {
+          setIsModuleModalOpen(false);
+        }}
+        selectModule={next => setSelectedModules(prev =>[...prev, String(next)])}
       />
     </Dialog>
   );

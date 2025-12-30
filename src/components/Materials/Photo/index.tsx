@@ -64,7 +64,7 @@ export default function PhotoLayout() {
         setUploadedFiles={setAddFiles}
       />
 
-      {photos.data && (
+      {photos.data && photos.data.length > 0 && (
         <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
           <DrugOverflow dragActive={dragActive} />
 

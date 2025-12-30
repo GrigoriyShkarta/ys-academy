@@ -57,7 +57,7 @@ export default function ModulesLayout() {
         {t('create_module')}
       </Button>
 
-      {modules && (
+      {modules && modules?.length > 0 && (
         <MediaGallery
           data={modules}
           handleEdit={(item: IFile) => {

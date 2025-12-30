@@ -64,7 +64,7 @@ export default function VideoLayout() {
         setNewFiles={setAddFiles}
       />
 
-      {videos.data && (
+      {videos.data && videos.data.length > 0 && (
         <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
           <DrugOverflow dragActive={dragActive} />
 

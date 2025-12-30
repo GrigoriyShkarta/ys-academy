@@ -1,4 +1,4 @@
-import { Dispatch, FormEvent, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, FormEvent, SetStateAction, useEffect, useState } from 'react';
 import {
   closestCenter,
   DndContext,
@@ -14,12 +14,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import AvatarEditor from 'react-avatar-editor';
-import { LessonItemType, Module, ModuleDTO } from '@/components/Materials/utils/interfaces';
+import { Module, ModuleDTO } from '@/components/Materials/utils/interfaces';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
 import PhotoEditor from '@/components/Materials/Modules/ModuleModal/PhotoEditor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,25 +30,38 @@ import { getCategories } from '@/components/Materials/Categories/action';
 import { Plus } from 'lucide-react';
 import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 import { useUser } from '@/providers/UserContext';
+import { uploadPhoto } from '@/components/Materials/Photo/action';
 
 interface Props {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   module?: Module | null;
+  selectModule?: (modules: string[]) => void;
 }
 
-export default function ModuleModal({ open, setOpen, module }: Props) {
+function dataURLtoFile(dataurl: string, filename: string) {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
+export default function ModuleModal({ open, setOpen, selectModule, module }: Props) {
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
-  const editorRef = useRef<AvatarEditor | null>(null);
 
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState<string>('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [lessons, setLessons] = useState<{ id: number; title: string; index: number }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [openLessonModal, setOpenLessonModal] = useState<boolean>(false);
-  const [openPhotoBank, setOpenPhotoBank] = useState<boolean>(false);
   const { user } = useUser();
 
   // Сброс при открытии
@@ -87,10 +98,6 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
     setIsCategoryModalOpen(false);
   };
 
-  const handleAddImage = async (type: LessonItemType, content?: string | File, bankId?: number) => {
-    setImageSrc(content as string);
-  };
-
   // DND Sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -114,43 +121,55 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
     });
   };
 
-  const mutation = useMutation({
-    mutationFn: async (form: ModuleDTO) => {
-      if (module) {
-        await updateModule(form, module.id);
-      } else {
-        await createModule(form);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['modules'] });
-      if (module?.id) {
-        queryClient.invalidateQueries({ queryKey: ['module'] });
-      }
-      setOpen(false);
-    },
-    onError: error => {
-      console.error('Ошибка:', error);
-      alert(t('save_error'));
-    },
-    onSettled: () => {
-      setName('');
-      setLessons([]);
-      setImageSrc('');
-    },
-  });
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    let finalImageSrc = imageSrc;
+    let publicImgId = '';
+
+    if (imageSrc && imageSrc.startsWith('data:image')) {
+      try {
+        const file = dataURLtoFile(imageSrc, 'module_cover.jpg');
+        const res = await uploadPhoto({
+          content: file,
+          title: name || 'Module Cover',
+          categories: [],
+          isOther: true,
+        });
+        finalImageSrc = res.url;
+        publicImgId = res.publicId;
+      } catch (error) {
+        console.error('Photo upload failed', error);
+      }
+    }
 
     const data = {
       title: name,
-      url: imageSrc ?? '',
+      url: finalImageSrc ?? '',
+      publicImgId: publicImgId ?? '',
       lessons: lessons.map(l => ({ id: l.id, order: l.index })),
       categories: categoryIds ?? [],
     };
 
-    mutation.mutate(data);
+    try {
+      if (module) {
+        await updateModule(data, module.id);
+        queryClient.invalidateQueries({ queryKey: ['module', module.id] });
+      } else {
+        const newModule = await createModule(data);
+        console.log('newModule', newModule)
+        if (newModule && selectModule) {
+          selectModule(newModule.id);
+        }
+        queryClient.invalidateQueries({ queryKey: ['modules'] });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setOpen(false);
+      setIsLoading(false);
+    }
   };
 
   const addLesson = (newLessons: { id: number; title: string }[]) => {
@@ -185,8 +204,6 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
             <PhotoEditor
               setImage={setImageSrc}
               externalImage={imageSrc}
-              onOpenPhotoBank={() => setOpenPhotoBank(true)}
-              editorRef={editorRef}
             />
 
             <Label>{t('name')}</Label>
@@ -253,19 +270,14 @@ export default function ModuleModal({ open, setOpen, module }: Props) {
               <Button variant="outline" onClick={handleClose} type="button">
                 {t('cancel')}
               </Button>
-              <Button type="submit" disabled={mutation.isPending} className="bg-accent">
-                {mutation.isPending ? t('submeeting') : t('save')}
+              <Button type="submit" disabled={isLoading} className="bg-accent">
+                {isLoading ? t('submeeting') : t('save')}
               </Button>
             </div>
           </div>
         </form>
       </DialogContent>
 
-      <ChoosePhotoModal
-        open={openPhotoBank}
-        closeModal={() => setOpenPhotoBank(false)}
-        handleAdd={handleAddImage}
-      />
       <ChooseListModal
         open={openLessonModal}
         closeModal={() => setOpenLessonModal(false)}
