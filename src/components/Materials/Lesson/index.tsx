@@ -14,7 +14,6 @@ import {
   ChevronsUpDownIcon,
   CircleChevronRight,
   ClipboardList,
-  Loader,
 } from 'lucide-react';
 import { deleteLesson, getAllLessons } from '@/components/Materials/Lesson/action';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -28,6 +27,7 @@ import LessonsListModal from '@/common/LessonsListModal';
 import CategoryListModal from '@/common/CategoryListModal';
 import { getCategories } from '@/components/Materials/Categories/action';
 import { useUser } from '@/providers/UserContext';
+import Loader from '@/common/Loader';
 
 export default function LessonsLayout() {
   const [page, setPage] = useState(1);

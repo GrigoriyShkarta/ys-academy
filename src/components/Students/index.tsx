@@ -7,6 +7,7 @@ import { Student } from '@/components/Students/interface';
 import StudentsTable from '@/components/Students/StudentTable';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import Loader from '@/common/Loader';
 
 export default function StudentsLayout() {
   const {
@@ -18,7 +19,7 @@ export default function StudentsLayout() {
     queryFn: () => getStudents(),
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Loader />;
   if (students?.lenght > 0) return null;
 
   const columns = [
