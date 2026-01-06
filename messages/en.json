@@ -8,13 +8,13 @@
     "logging_in": "Signing in...",
     "professional_vocal_education": "Professional vocal education",
     "all_rights_reserved": "All rights reserved",
+    "smth_wrong": "Something went wrong, try again later",
 
     "validation": {
       "invalid_email_or_password": "Invalid email or password",
       "required_field": "Required field",
       "invalid_email": "Invalid email address",
-      "user_is_not_active": "Access to the platform is closed",
-      "smth_wrong": "Something went wrong, try again later"
+      "user_is_not_active": "Access to the platform is closed"
     }
   },
 

@@ -8,13 +8,13 @@
     "logging_in": "Вхід...",
     "professional_vocal_education": "Професійна вокальна освіта",
     "all_rights_reserved": "Усі права захищені",
+    "smth_wrong": "Щось пішло не так, спробуй пізніше",
 
     "validation": {
       "invalid_email_or_password": "Невірний email або пароль",
       "required_field": "Обов’язкове поле",
       "invalid_email": "Некоректна адреса електронної пошти",
-      "user_is_not_active": "Доступ до платформи закрито",
-      "smth_wrong": "Щось пішло не так, спробуй пізніше"
+      "user_is_not_active": "Доступ до платформи закрито"
     }
   },
 
