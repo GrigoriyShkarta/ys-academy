@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import Loader from '@/common/Loader';
 import { useTranslations } from 'next-intl';
+import { formatDateTime } from '@/lib/utils';
+import { getLastLessonDate, shouldHighlightLesson } from '@/components/Students/utils';
 
 export default function StudentsLayout() {
   const t = useTranslations('Students');
@@ -53,6 +55,25 @@ export default function StudentsLayout() {
       key: 'email',
       label: 'Email',
       render: (student: Student) => <span>{student.email}</span>,
+    },
+    {
+      key: 'last_lesson',
+      label: 'Останній урок',
+      render: (student: Student) => {
+        const lastLessonDate = getLastLessonDate(student);
+
+        if (!lastLessonDate) {
+          return <span className="text-gray-400">-</span>;
+        }
+
+        const shouldHighlight = shouldHighlightLesson(student, lastLessonDate) && student.isActive;
+
+        return (
+          <span className={shouldHighlight ? 'text-red-500 font-semibold' : ''}>
+            {formatDateTime(lastLessonDate)}
+          </span>
+        );
+      },
     },
   ];
 
