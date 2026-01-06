@@ -85,6 +85,11 @@ export default function Sidebar() {
       icon: <User className="w-5 h-5" />,
       href: '/main/profile',
     },
+    {
+      name: 'my_courses',
+      icon: <Layers className="w-4 h-4" />,
+      href: '/main/courses',
+    },
   ];
 
   const adminMenu: MenuItem[] = [

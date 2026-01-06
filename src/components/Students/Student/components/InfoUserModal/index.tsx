@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FormProvider, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -19,6 +19,14 @@ import { useUser } from '@/providers/UserContext';
 import { updateStudent } from '@/components/Students/Student/actions';
 import { generatePassword } from '@/components/Students/utils';
 import { Student } from '@/components/Students/interface';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 interface Props {
   open: boolean;
@@ -51,6 +59,7 @@ export default function InfoUserModal({ open, close, student }: Props) {
       vocalExperience: student.vocalExperience ?? '',
       goals: student.goals ?? '',
       photo: student.photo ?? '',
+      isActive: student.isActive,
       password: '',
     },
   });
@@ -70,6 +79,7 @@ export default function InfoUserModal({ open, close, student }: Props) {
       vocalExperience: student.vocalExperience ?? '',
       goals: student.goals ?? '',
       photo: student.photo ?? '',
+      isActive: student.isActive,
       password: '',
     });
     setPreview((student.photo as string) ?? null);
@@ -165,6 +175,32 @@ export default function InfoUserModal({ open, close, student }: Props) {
               <Field label={t('email')} required error={formState.errors.email?.message}>
                 <Input type="email" {...register('email')} />
               </Field>
+
+              {user?.role === 'super_admin' && (
+                <Controller
+                  control={control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <div className="space-y-2">
+                      <Label className="">{t('status')}</Label>
+
+                      <Select
+                        value={field.value ? 'active' : 'inactive'}
+                        onValueChange={value => field.onChange(value === 'active')}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('selectStatus')} />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          <SelectItem value="active">{t('active')}</SelectItem>
+                          <SelectItem value="inactive">{t('inactive')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                />
+              )}
 
               {/* City */}
               <Field label={t('city')}>

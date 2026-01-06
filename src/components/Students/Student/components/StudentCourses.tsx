@@ -19,7 +19,7 @@ export default function StudentCourses({
   const { user } = useUser();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full box-border">
+    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full h-fit box-border">
       {courses &&
         courses.map(course => {
           if (course.access || user?.role === 'super_admin') {

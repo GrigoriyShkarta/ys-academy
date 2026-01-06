@@ -13,9 +13,11 @@ import InfoUserModal from '@/components/Students/Student/components/InfoUserModa
 import { useTranslations } from 'next-intl';
 import Loader from '@/common/Loader';
 import Subscriptions from '@/components/Students/Student/components/Subscriptions/Subscriptions';
+import { useUser } from '@/providers/UserContext';
 
 export default function Student({ id }: { id: number }) {
   const [open, setOpen] = useState(false);
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState<'profile' | 'courses' | 'subscriptions'>('profile');
   const t = useTranslations('Students');
 
@@ -30,7 +32,7 @@ export default function Student({ id }: { id: number }) {
   if (!student) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full space-y-8 mt-18 sm:mt-0">
       {/* Header: Avatar + Name + Contacts */}
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
@@ -48,6 +50,13 @@ export default function Student({ id }: { id: number }) {
           </Button>
         </div>
         <h1 className="text-4xl font-semibold text-center">{student.name}</h1>
+        {user?.role === 'super_admin' && (
+          <span
+            className={`px-2 py-1 rounded-full ${student.isActive ? 'bg-green-500' : 'bg-red-500'}`}
+          >
+            {student.isActive ? t('active') : t('inactive')}
+          </span>
+        )}
       </div>
 
       {/* Tabs */}

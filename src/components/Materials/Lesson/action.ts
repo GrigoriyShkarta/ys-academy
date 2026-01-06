@@ -14,7 +14,7 @@ export const createLesson = async (
     title: lessonTitle,
     blocks: lessons,
     cover,
-    publicImgId:coverPublicId,
+    publicImgId: coverPublicId,
     categoryIds,
     moduleIds,
   };
@@ -37,7 +37,7 @@ export const updateLesson = async (
     title: lessonTitle,
     blocks: lessons,
     cover,
-    publicImgId:coverPublicId,
+    publicImgId: coverPublicId,
     categoryIds,
     moduleIds,
   };

@@ -75,7 +75,15 @@ export default function LessonLayout({ id }: { id: number }) {
         coverUrl = res.url;
         coverPublicId = res.publicId;
       }
-      await updateLesson(id, lessonDoc, lessonTitle, coverUrl, coverPublicId, selectedCategories, selectedModules);
+      await updateLesson(
+        id,
+        lessonDoc,
+        lessonTitle,
+        coverUrl,
+        coverPublicId,
+        selectedCategories,
+        selectedModules
+      );
       await queryClient.invalidateQueries({ queryKey: ['lesson', id] });
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch (e) {

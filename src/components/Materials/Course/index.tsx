@@ -46,16 +46,22 @@ export default function CourseLayout() {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
-      <Button
-        className="bg-accent w-[240px] mx-auto"
-        onClick={() => {
-          setSelectedFile(null);
-          setIsCreateCourse(true);
-        }}
-      >
-        {t('create_course')}
-      </Button>
+    <div
+      className={`flex flex-col gap-4 p-4 mt-18 sm:mt-0 ${
+        user?.role === 'student' ? 'max-w-7xl mx-auto' : ''
+      }`}
+    >
+      {user?.role === 'super_admin' && (
+        <Button
+          className="bg-accent w-[240px] mx-auto"
+          onClick={() => {
+            setSelectedFile(null);
+            setIsCreateCourse(true);
+          }}
+        >
+          {t('create_course')}
+        </Button>
+      )}
 
       {courses && courses?.length > 0 && (
         <MediaGallery

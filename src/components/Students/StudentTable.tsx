@@ -11,13 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-
-interface Student {
-  id: number;
-  name: string;
-  email: string;
-  avatar?: string;
-}
+import { Student } from '@/components/Students/interface';
 
 interface Column {
   key: string;

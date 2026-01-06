@@ -8,6 +8,7 @@ export interface User {
   role: Role;
   name: string;
   id: number;
+  isActive: boolean;
 }
 
 interface UserContextType {

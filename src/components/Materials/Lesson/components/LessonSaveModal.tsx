@@ -70,8 +70,6 @@ export default function LessonSaveModal({
     label: c.title,
   }));
 
-  console.log('selectedModules', selectedModules)
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[750px] max-h-[90vh] min-h-[400px] overflow-y-auto">

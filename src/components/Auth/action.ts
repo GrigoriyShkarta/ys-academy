@@ -32,7 +32,12 @@ export async function onSubmit(
     } else {
       localStorage.setItem(YS_TOKEN, responseData.access_token);
       localStorage.setItem(YS_REFRESH_TOKEN, responseData.refresh_token);
-      setUser({ role: responseData.role as Role, id: responseData.id, name: responseData.name });
+      setUser({
+        role: responseData.role as Role,
+        id: responseData.id,
+        name: responseData.name,
+        isActive: responseData.isActive,
+      });
       window.location.href = '/main';
     }
   } catch (error) {

@@ -3,6 +3,7 @@ import { Category } from '@/components/Materials/utils/interfaces';
 export interface Student {
   id: number;
   name: string;
+  isActive: boolean;
   email: string;
   photo?: File | string | null;
   telegram?: string;

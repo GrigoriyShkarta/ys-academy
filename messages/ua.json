@@ -12,13 +12,14 @@
     "validation": {
       "invalid_email_or_password": "Невірний email або пароль",
       "required_field": "Обов’язкове поле",
-      "invalid_email": "Некоректна адреса електронної пошти"
+      "invalid_email": "Некоректна адреса електронної пошти",
+      "user_is_not_active": "Доступ до платформи закрито"
     }
   },
 
   "Main": {
     "my_profile": "Мій профіль",
-    "welcome_back": "З поверненням",
+    "welcome_back": "Вітаю",
     "continue_learning_prompt": "Готові продовжити навчання? Перегляньте ваші останні курси",
     "welcome_title": "Ласкаво просимо до YS Academy",
     "welcome_description": "Ваша універсальна платформа для управління освітою та навчанням.",
@@ -47,6 +48,9 @@
   },
 
   "Students": {
+    "status": "Статус",
+    "active": "Активний",
+    "inactive": "Неактивний",
     "create_student": "Створити учня",
     "creating_student": "Створення учня",
     "fill_student_info": "Заповніть інформацію про учня для додавання до бази.",

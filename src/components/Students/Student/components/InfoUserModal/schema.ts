@@ -13,6 +13,7 @@ export const studentSchema = z.object({
   vocalExperience: z.string().optional().or(z.literal('')),
   goals: z.string().optional().or(z.literal('')),
   photo: z.any().optional().or(z.literal('')),
+  isActive: z.boolean(),
 });
 
 export type StudentFormValues = z.infer<typeof studentSchema>;

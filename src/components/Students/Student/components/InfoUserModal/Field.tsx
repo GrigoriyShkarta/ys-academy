@@ -14,7 +14,7 @@ export function Field({ label, error, required, children, className }: Props) {
     <div className={cn('space-y-2', className)}>
       <Label className="flex items-center gap-1">
         {label}
-        {required && <span className="text-destructive text-sm">*</span>}
+        {required && <span className="text-destructive text-sm leading-[14px]">*</span>}
       </Label>
 
       {children}

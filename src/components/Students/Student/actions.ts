@@ -29,6 +29,7 @@ export const updateStudent = async (student: Student) => {
   formData.append('telegram', student?.telegram ?? '');
   formData.append('instagram', student?.instagram ?? '');
   formData.append('city', student?.city ?? '');
+  formData.append('isActive', student.isActive.toString());
   formData.append(
     'birthDate',
     student?.birthDate

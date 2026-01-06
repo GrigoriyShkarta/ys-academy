@@ -16,7 +16,12 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
 
   useEffect(() => {
     if (userData) {
-      setUser({ role: userData.role, id: userData.id, name: userData.name });
+      setUser({
+        role: userData.role,
+        id: userData.id,
+        name: userData.name,
+        isActive: userData.isActive,
+      });
     }
   }, [userData]);
 

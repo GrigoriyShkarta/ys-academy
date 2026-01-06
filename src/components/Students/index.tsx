@@ -8,8 +8,10 @@ import StudentsTable from '@/components/Students/StudentTable';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import Loader from '@/common/Loader';
+import { useTranslations } from 'next-intl';
 
 export default function StudentsLayout() {
+  const t = useTranslations('Students');
   const {
     data: students,
     isLoading,
@@ -34,6 +36,17 @@ export default function StudentsLayout() {
           </Avatar>
           <span>{student.name}</span>
         </Link>
+      ),
+    },
+    {
+      key: 'is_active',
+      label: t('status'),
+      render: (student: Student) => (
+        <span
+          className={`px-2 py-1 rounded-full ${student.isActive ? 'bg-green-500' : 'bg-red-500'}`}
+        >
+          {student.isActive ? t('active') : t('inactive')}
+        </span>
       ),
     },
     {
