@@ -13,7 +13,8 @@
       "invalid_email_or_password": "Невірний email або пароль",
       "required_field": "Обов’язкове поле",
       "invalid_email": "Некоректна адреса електронної пошти",
-      "user_is_not_active": "Доступ до платформи закрито"
+      "user_is_not_active": "Доступ до платформи закрито",
+      "smth_wrong": "Щось пішло не так, спробуй пізніше"
     }
   },
 

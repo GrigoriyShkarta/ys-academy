@@ -25,9 +25,16 @@ export async function onSubmit(
     const responseData = await response.json();
 
     if (!response.ok) {
-      form.setError('root', {
-        message: responseData.message,
-      });
+      if (response.status === 500) {
+        form.setError('root', {
+          message: 'smth_wrong',
+        });
+      } else {
+        form.setError('root', {
+          message: responseData.message,
+        });
+      }
+
       return;
     } else {
       localStorage.setItem(YS_TOKEN, responseData.access_token);

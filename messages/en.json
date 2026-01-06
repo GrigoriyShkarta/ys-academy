@@ -13,7 +13,8 @@
       "invalid_email_or_password": "Invalid email or password",
       "required_field": "Required field",
       "invalid_email": "Invalid email address",
-      "user_is_not_active": "Access to the platform is closed"
+      "user_is_not_active": "Access to the platform is closed",
+      "smth_wrong": "Something went wrong, try again later"
     }
   },
 
