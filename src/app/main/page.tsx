@@ -78,8 +78,8 @@ export default function MainPage() {
           </h1>
           <p className="text-xl text-muted-foreground">{t('continue_learning_prompt')}</p>
           <div className="flex gap-4 justify-center pt-4">
-            <Link href="/main/profile">
-              <Button className="bg-accent">{t('my_profile')}</Button>
+            <Link href="/main/courses">
+              <Button className="bg-accent">{t('my_courses')}</Button>
             </Link>
           </div>
         </motion.div>

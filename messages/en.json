@@ -26,7 +26,8 @@
     "welcome_description": "Your comprehensive platform for education management and learning.",
     "courses": "Courses",
     "lessons": "Lessons",
-    "students": "Students"
+    "students": "Students",
+    "my_courses": "My courses"
   },
 
   "SideBar": {
