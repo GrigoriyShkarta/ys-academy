@@ -16,3 +16,8 @@ export const createStudent = async (form: CreateStudentFormValues) => {
   const { data } = await axiosInstance.post('/user', form);
   return data;
 };
+
+export const deleteUser = async (id: number) => {
+  const { data } = await axiosInstance.delete(`/user/${id}`);
+  return data;
+};
