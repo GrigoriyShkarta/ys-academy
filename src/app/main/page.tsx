@@ -42,7 +42,7 @@ export default function MainPage() {
     {
       title: 'courses',
       icon: BookOpen,
-      href: '/main/materials/course',
+      href: '/main/materials/courses',
       color: 'text-blue-500',
       bgColor: 'bg-blue-500/10',
     },

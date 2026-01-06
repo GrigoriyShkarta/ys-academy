@@ -252,7 +252,7 @@ export default function Sidebar() {
         >
           {!collapsed && (
             <Link href="/main" className="text-lg font-bold">
-              YS Vocal Coach
+              YS Vocal Academy
             </Link>
           )}
           <Button variant="ghost" size="icon" onClick={handleCollapse}>
