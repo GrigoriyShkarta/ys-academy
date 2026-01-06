@@ -46,6 +46,9 @@ export const updateStudent = async (student: Student) => {
   if (student.photo instanceof File) {
     formData.append('photo', student.photo);
   }
+  if (student?.password) {
+    formData.append('password', student.password);
+  }
 
   const { data } = await axiosInstance.patch(`/user/${student.id}`, formData, {
     headers: {

@@ -64,7 +64,7 @@ export default function MainPage() {
 
   if (user?.role === 'student') {
     return (
-      <div className="p-8 mt-18 sm:mt-0 w-full max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[80vh] space-y-8 text-center">
+      <div className="p-8 mt-18 sm:mt-0 max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[80vh] space-y-8 text-center w-full h-screen max-h-screen overflow-auto">
         <Image src={ava.src} alt="avatar" width={580} height={580} className="rounded-full" />
 
         <motion.div

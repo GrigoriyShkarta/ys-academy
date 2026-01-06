@@ -87,7 +87,7 @@ export default function Sidebar() {
     },
     {
       name: 'my_courses',
-      icon: <Layers className="w-4 h-4" />,
+      icon: <Layers className="w-5 h-5" />,
       href: '/main/courses',
     },
   ];

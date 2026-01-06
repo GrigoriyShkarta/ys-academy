@@ -16,6 +16,7 @@ export interface Student {
   modules?: StudentModule[];
   courses?: StudentCourse[];
   subscriptions?: StudentSubscription[];
+  password?: string;
 }
 
 export interface StudentModule {
