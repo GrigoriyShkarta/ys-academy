@@ -30,6 +30,7 @@ export const updateStudent = async (student: Student) => {
   formData.append('instagram', student?.instagram ?? '');
   formData.append('city', student?.city ?? '');
   formData.append('isActive', student.isActive.toString());
+  formData.append('accessExpiryDate', student?.accessExpiryDate ?? '');
   formData.append(
     'birthDate',
     student?.birthDate

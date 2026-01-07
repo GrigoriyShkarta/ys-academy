@@ -45,9 +45,35 @@ export const isPastDate = (date: Date): boolean => {
   return lessonDate < today;
 };
 
+// Проверка находится ли дата в пределах 2 дней от сегодня или уже прошла
+export const isWithinTwoDaysOrPast = (date: Date): boolean => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const twoDaysFromNow = new Date(today);
+  twoDaysFromNow.setDate(today.getDate() + 2);
+
+  const lessonDate = new Date(date);
+  lessonDate.setHours(0, 0, 0, 0);
+
+  return lessonDate <= twoDaysFromNow;
+};
+
 // Проверка нужно ли выделять красным
 export const shouldHighlightLesson = (student: Student, lessonDate: Date | null): boolean => {
   if (!lessonDate || !student.isActive) return false;
 
-  return isToday(lessonDate) || isPastDate(lessonDate);
+  return isWithinTwoDaysOrPast(lessonDate);
+};
+
+// Получить последний абонемент студента
+export const getLastSubscription = (student: Student) => {
+  if (!student.subscriptions || student.subscriptions.length === 0) {
+    return null;
+  }
+
+  // Сортируем по id (чем больше id, тем новее абонемент)
+  const sortedSubscriptions = [...student.subscriptions].sort((a, b) => b.id - a.id);
+
+  return sortedSubscriptions[0];
 };

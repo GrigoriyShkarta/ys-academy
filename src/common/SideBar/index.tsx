@@ -20,6 +20,7 @@ import {
   Layers,
   LogOut,
   Menu,
+  MonitorPlay,
   Moon,
   Music,
   PanelLeftClose,
@@ -90,6 +91,11 @@ export default function Sidebar() {
       icon: <Layers className="w-5 h-5" />,
       href: '/main/courses',
     },
+    {
+      name: 'lesson_recordings',
+      icon: <MonitorPlay className="w-5 h-5" />,
+      href: '/main/lesson-recording',
+    },
   ];
 
   const adminMenu: MenuItem[] = [
@@ -97,17 +103,6 @@ export default function Sidebar() {
       name: 'students_database',
       icon: <Users className="w-5 h-5" />,
       href: '/main/students',
-    },
-    {
-      name: 'my_finance',
-      icon: <Banknote className="w-5 h-5" />,
-      submenu: [
-        {
-          name: 'subscriptions',
-          href: '/main/finance/subscriptions',
-          icon: <CreditCard className="w-4 h-4" />,
-        },
-      ],
     },
     {
       name: 'my_materials',
@@ -122,6 +117,11 @@ export default function Sidebar() {
           icon: <TagsIcon className="w-4 h-4" />,
         },
         {
+          name: 'lesson_recordings',
+          href: '/main/materials/lesson-recordings',
+          icon: <MonitorPlay className="w-4 h-4" />,
+        },
+        {
           name: 'lessons',
           href: '/main/materials/lessons',
           icon: <BookOpen className="w-4 h-4" />,
@@ -132,6 +132,17 @@ export default function Sidebar() {
           icon: <BookAudio className="w-4 h-4" />,
         },
         { name: 'courses', href: '/main/materials/courses', icon: <Layers className="w-4 h-4" /> },
+      ],
+    },
+    {
+      name: 'my_finance',
+      icon: <Banknote className="w-5 h-5" />,
+      submenu: [
+        {
+          name: 'subscriptions',
+          href: '/main/finance/subscriptions',
+          icon: <CreditCard className="w-4 h-4" />,
+        },
       ],
     },
   ];
@@ -241,7 +252,7 @@ export default function Sidebar() {
     <>
       {/* DESKTOP */}
       <aside
-        className={`hidden md:flex h-screen flex-col border-r bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300
+        className={`hidden min-w-[255px] md:flex h-screen flex-col border-r bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300
           ${collapsed ? 'w-20' : 'w-64'}
         `}
       >

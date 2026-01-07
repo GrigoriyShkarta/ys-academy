@@ -151,6 +151,7 @@ export default function ChooseListModal({ open, closeModal, handleAdd, array, is
                   data={list?.data ? list.data : list}
                   columns={columns}
                   multiSelectOptions={categoryOptions}
+                  showAddButton
                   onMultiSelectChange={onMultiSelectChange}
                   onSearchChange={newSearch => {
                     setSearch(newSearch);

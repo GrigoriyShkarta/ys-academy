@@ -4,30 +4,32 @@ import CreateStudentModal from '@/components/Students/CreateStudentModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteUser, getStudents } from '@/components/Students/actions';
 import { Student } from '@/components/Students/interface';
-import StudentsTable, { Column } from '@/components/Students/StudentTable';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import Loader from '@/common/Loader';
 import { useTranslations } from 'next-intl';
 import { formatDateTime } from '@/lib/utils';
-import { getLastLessonDate, shouldHighlightLesson } from '@/components/Students/utils';
+import { getLastLessonDate, shouldHighlightLesson, getLastSubscription } from '@/components/Students/utils';
 import TableActionMenu from '@/common/TableActioMenu';
 import { IFile } from '@/components/Materials/utils/interfaces';
 import { useState } from 'react';
 import ConfirmModal from '@/common/ConfirmModal';
+import DataTable from '@/common/Table';
+import { keepPreviousData } from '@tanstack/query-core';
+import { useUser } from '@/providers/UserContext';
 
 export default function StudentsLayout() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const client = useQueryClient();
   const t = useTranslations('Students');
-  const {
-    data: students,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['students'],
-    queryFn: () => getStudents(),
+  const { user } = useUser();
+  const { data: students, isLoading } = useQuery({
+    queryKey: ['students', page, search],
+    queryFn: () => getStudents(search, page),
+    placeholderData: keepPreviousData,
   });
 
   const deleteStudent = async () => {
@@ -89,6 +91,46 @@ export default function StudentsLayout() {
       render: (student: Student) => <span>{student.email}</span>,
     },
     {
+      key: 'payment_status',
+      label: t('payment_status'),
+      render: (student: Student) => {
+        const lastSubscription = getLastSubscription(student);
+
+        if (!lastSubscription) {
+          return <span className="text-gray-400">-</span>;
+        }
+
+        const { paymentStatus, amount, subscription } = lastSubscription;
+        const totalPrice = subscription.price;
+
+        if (paymentStatus === 'paid') {
+          return (
+            <span className="px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
+              {t('paid')}
+            </span>
+          );
+        }
+
+        if (paymentStatus === 'unpaid') {
+          return (
+            <span className="px-2 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-medium">
+              {t('unpaid')}
+            </span>
+          );
+        }
+
+        if (paymentStatus === 'partially_paid') {
+          return (
+            <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-xs font-medium">
+              {amount.toLocaleString('uk-UA')}/{totalPrice.toLocaleString('uk-UA')} грн
+            </span>
+          );
+        }
+
+        return <span className="text-gray-400">-</span>;
+      },
+    },
+    {
       key: 'last_lesson',
       label: 'Останній урок',
       render: (student: Student) => {
@@ -102,7 +144,7 @@ export default function StudentsLayout() {
 
         return (
           <span className={shouldHighlight ? 'text-red-500 font-semibold' : ''}>
-            {formatDateTime(lastLessonDate)}
+            {formatDateTime(lastLessonDate, true)}
           </span>
         );
       },
@@ -113,7 +155,20 @@ export default function StudentsLayout() {
     <div className="flex flex-col gap-4 w-full items-center p-8">
       <CreateStudentModal />
 
-      {students && <StudentsTable data={students.data} columns={columns as Column[]} />}
+      {students && (
+        <DataTable
+          //@ts-ignore
+          columns={columns}
+          data={students.data}
+          totalPages={students.meta.totalPages}
+          currentPage={page}
+          onPageChange={newPage => setPage(newPage)}
+          onSearchChange={newSearch => {
+            setPage(1);
+            setSearch(newSearch);
+          }}
+        />
+      )}
 
       {selectedId && (
         <ConfirmModal

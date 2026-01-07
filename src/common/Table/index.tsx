@@ -37,6 +37,7 @@ interface DataTableProps<T> {
   currentPage?: number;
   selectedIds?: number[];
   showFromDevice?: boolean;
+  showAddButton?: boolean;
   onPageChange?: (page: number) => void;
   onSearchChange?: (search: string) => void;
   handleDelete?: () => void;
@@ -55,6 +56,7 @@ export default function DataTable<T extends Record<string, any>>({
   totalPages,
   showDeleteIcon,
   showFromDevice,
+  showAddButton,
   selectedIds,
   onPageChange,
   onSearchChange,
@@ -140,6 +142,7 @@ export default function DataTable<T extends Record<string, any>>({
             {t('from_device')}
           </Button>
         )}
+        {showAddButton && <Button className="bg-accent hover:bg-accent/80">{t('add')}</Button>}
       </div>
 
       {/* Таблица */}

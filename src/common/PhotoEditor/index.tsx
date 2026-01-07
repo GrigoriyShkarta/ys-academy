@@ -21,6 +21,7 @@ export default function PhotoEditor({
   const [zoom, setZoom] = useState(1);
   const [isCropping, setIsCropping] = useState(false);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -83,13 +84,61 @@ export default function PhotoEditor({
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // Drag and Drop handlers
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isCropping) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (isCropping) return;
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        return;
+      }
+
+      const imageDataUrl = await readFile(file);
+      setImageSrc(imageDataUrl);
+      setIsCropping(true);
+    }
+  };
+
   return (
     <div
-      className="mx-auto relative border rounded overflow-hidden select-none bg-muted"
+      className={`mx-auto relative border rounded overflow-hidden select-none bg-muted transition-all ${
+        isDragging ? 'border-primary border-2 bg-primary/10' : ''
+      }`}
       style={{
         width: `${cropSize}px`,
         height: `${cropSize}px`,
       }}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       {isCropping && imageSrc ? (
         <div className="absolute inset-0 z-10 bg-background w-full h-full">
@@ -149,13 +198,28 @@ export default function PhotoEditor({
           />
 
           {!imageSrc && (
-            <Button
-              className="bg-accent w-[200px]"
-              onClick={() => fileInputRef.current?.click()}
-              type="button"
-            >
-              {t('add_cover') || 'Select Photo'}
-            </Button>
+            <div className="flex flex-col items-center justify-center gap-3 p-4">
+              {isDragging ? (
+                <div className="text-center">
+                  <p className="text-sm font-medium text-primary">
+                    {t('drop_file_here') || 'Drop file here'}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <Button
+                    className="bg-accent w-[200px]"
+                    onClick={() => fileInputRef.current?.click()}
+                    type="button"
+                  >
+                    {t('add_cover') || 'Select Photo'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    {t('or_drag_and_drop') || 'or drag and drop'}
+                  </p>
+                </>
+              )}
+            </div>
           )}
         </div>
       )}

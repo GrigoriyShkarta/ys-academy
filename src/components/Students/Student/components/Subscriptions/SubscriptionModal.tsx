@@ -195,7 +195,7 @@ export default function SubscriptionModal({ subscription, open, close, studentId
       if (subscription) {
         await updateSubscribeStudent({
           userSubscriptionId: Number(subscription.id),
-          subscriptionId: Number(subscription.subscription.id),
+          subscriptionId: Number(selectedAbonementId),
           slots: slots.map(s => s.dateTime.toISOString()),
           amount: subscription?.amount,
           paymentStatus: subscription.paymentStatus,
@@ -236,7 +236,7 @@ export default function SubscriptionModal({ subscription, open, close, studentId
               <SelectContent>
                 {abonements.map(a => (
                   <SelectItem key={a.id} value={String(a.id)}>
-                    {a.title} ({a.lessons_count} {t('lessons')}, {a.price} ₽)
+                    {a.title} ({a.lessons_count} {t('lessons')}, {a.price} грн)
                   </SelectItem>
                 ))}
               </SelectContent>

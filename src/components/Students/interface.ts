@@ -17,6 +17,7 @@ export interface Student {
   courses?: StudentCourse[];
   subscriptions?: StudentSubscription[];
   password?: string;
+  accessExpiryDate?: string;
 }
 
 export interface StudentModule {
@@ -64,4 +65,5 @@ export interface StudentSubscriptionLesson {
   id: number;
   scheduledAt: string;
   status: string;
+  recordingUrl?: string;
 }

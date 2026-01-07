@@ -22,7 +22,7 @@
     "my_profile": "Мій профіль",
     "welcome_back": "Вітаю",
     "continue_learning_prompt": "Хочеш продовжити навчання? Переглянь свої курси",
-    "welcome_title": "Ласкаво просимо до YS Academy",
+    "welcome_title": "Ласкаво просимо до YS Vocal Academy",
     "welcome_description": "Ваша універсальна платформа для управління освітою та навчанням.",
     "courses": "Курси",
     "lessons": "Уроки",
@@ -46,7 +46,8 @@
     "courses": "Курси",
     "my_profile": "Мій профіль",
     "subscriptions": "Абонементи",
-    "my_finance": "Мої фінанси"
+    "my_finance": "Мої фінанси",
+    "lesson_recordings": "Записи уроків"
   },
 
   "Students": {
@@ -93,8 +94,8 @@
     "partially_paid": "Частково сплачено",
     "expired": "Згорів",
     "transfer": "Перенос",
-    "pending": "Не проведен",
-    "completed": "Проведен",
+    "pending": "Не проведено",
+    "completed": "Проведено",
     "data_saved": "Дані збережено",
     "amount": "Сума",
     "send_email": "Надіслати лист",
@@ -104,6 +105,14 @@
     "collapse": "Згорнути",
     "subscription_deleted": "Абонемент видален",
     "subscription_renewal_message_copied": "Повідомлення про поновлення абонемента скопійовано в буфер обміну",
+    "renewal_reminder": "Нагадування про поновлення абонемента",
+    "subscription_expired": "Абонемент закінчився",
+    "and_more": "та ще {count}",
+    "subscription_renewal_needed": "Необхідно оновити абонемент",
+    "subscription_renewal_message": "Ваш абонемент закінчується протягом 2 днів або вже закінчився. Будь ласка, зв'яжіться з викладачем для поновлення.",
+    "last_lesson": "Останній урок",
+    "access_data": "Дата доступа",
+    "payment_status": "Статус оплати",
 
     "validation": {
       "required_field": "Обов’язкове поле",
@@ -171,6 +180,8 @@
     "downloaded": "Завантажено",
     "change_cover": "Змінити обкладинку",
     "add_cover": "Додати обкладинку",
+    "drop_file_here": "Перетягніть файл сюди",
+    "or_drag_and_drop": "або перетягніть файл",
     "confirm_lesson": "Ви впевнені, що хочете покинути сторінку? Уся введена інформація не буде збережена.",
     "add_photo_from_device": "Загрузити з пристрою",
     "take_from_photo_bank": "Загрузити з фотобанку",
@@ -206,7 +217,9 @@
     "select_dates": "Виберіть дати",
     "set_lesson_times": "Встановіть час для уроків",
     "select_subscription": "Виберіть абонемент",
-    "no_dates_selected": "Дати не вибрані"
+    "no_dates_selected": "Дати не вибрані",
+    "add_link": "Додати посилання",
+    "no_link": "Немає запису"
   },
 
   "Validation": {

@@ -11,14 +11,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const formatDateTime = (value?: string | Date | null) => {
+export const formatDateTime = (value?: string | Date | null, dateOnly?: boolean) => {
   if (!value) return '';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value);
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+  const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+  if (dateOnly) {
+    return dateStr;
+  }
+
+  return `${dateStr} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
 export const getYouTubeId = (url: string): string | null => {

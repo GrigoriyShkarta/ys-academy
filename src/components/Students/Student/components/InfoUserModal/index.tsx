@@ -60,6 +60,7 @@ export default function InfoUserModal({ open, close, student }: Props) {
       goals: student.goals ?? '',
       photo: student.photo ?? '',
       isActive: student.isActive,
+      accessExpiryDate: student?.accessExpiryDate,
       password: '',
     },
   });
@@ -80,6 +81,7 @@ export default function InfoUserModal({ open, close, student }: Props) {
       goals: student.goals ?? '',
       photo: student.photo ?? '',
       isActive: student.isActive,
+      accessExpiryDate: student?.accessExpiryDate,
       password: '',
     });
     setPreview((student.photo as string) ?? null);
@@ -166,6 +168,14 @@ export default function InfoUserModal({ open, close, student }: Props) {
                         {t('generate')}
                       </Button>
                     </div>
+                  </Field>
+                )}
+                {user?.role === 'super_admin' && (
+                  <Field
+                    label={t('access_data')}
+                    error={formState.errors?.accessExpiryDate?.message}
+                  >
+                    <Input type="date" {...register('accessExpiryDate')} />
                   </Field>
                 )}
               </div>

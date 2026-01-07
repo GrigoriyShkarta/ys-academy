@@ -19,7 +19,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import PhotoEditor from '@/components/Materials/Modules/ModuleModal/PhotoEditor';
+import PhotoEditor from '@/common/PhotoEditor';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import MultiSelect from '@/common/MultiSelect';
@@ -156,7 +156,6 @@ export default function CourseModal({ open, setOpen, course }: Props) {
           title: name || 'Course Cover',
           categories: [],
           isOther: true,
-
         });
         finalImageSrc = res.url;
         finalImagePublicId = res.publicId;
@@ -202,10 +201,7 @@ export default function CourseModal({ open, setOpen, course }: Props) {
 
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 p-2">
-            <PhotoEditor
-              setImage={setImageSrc}
-              externalImage={imageSrc}
-            />
+            <PhotoEditor setImage={setImageSrc} externalImage={imageSrc} />
 
             <Label>{t('name')}</Label>
             <Input

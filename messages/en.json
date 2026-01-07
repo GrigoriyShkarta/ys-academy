@@ -22,7 +22,7 @@
     "my_profile": "My courses",
     "welcome_back": "Welcome",
     "continue_learning_prompt": "Ready to continue your learning journey? Check out your latest courses",
-    "welcome_title": "Welcome to YS Academy",
+    "welcome_title": "Welcome to YS Vocal Academy",
     "welcome_description": "Your comprehensive platform for education management and learning.",
     "courses": "Courses",
     "lessons": "Lessons",
@@ -46,7 +46,8 @@
     "courses": "Courses",
     "my_profile": "My profile",
     "subscriptions": "Subscriptions",
-    "my_finance": "My finance"
+    "my_finance": "My finance",
+    "lesson_recordings": "Lesson recordings"
   },
 
   "Students": {
@@ -103,7 +104,15 @@
     "delete": "Delete",
     "collapse": "Collapse",
     "subscription_deleted": "Subscription deleted",
-    "subscription_renewal_message_copied": "The subscription renewal message has been copied to the clipboard"
+    "subscription_renewal_message_copied": "The subscription renewal message has been copied to the clipboard",
+    "renewal_reminder": "Subscription Renewal Reminder",
+    "subscription_expired": "Subscription expired",
+    "and_more": "and {count} more",
+    "subscription_renewal_needed": "Subscription Renewal Required",
+    "subscription_renewal_message": "Your subscription expires within 2 days or has already expired. Please contact your teacher to renew it.",
+    "last_lesson": "Last lesson",
+    "access_data": "Access data",
+    "payment_status": "Payment status"
   },
 
   "Materials": {
@@ -166,6 +175,8 @@
     "downloaded": "Downloaded",
     "change_cover": "Change cover",
     "add_cover": "Add cover",
+    "drop_file_here": "Drop file here",
+    "or_drag_and_drop": "or drag and drop",
     "confirm_lesson": "Are you sure you want to leave the page? All entered information will not be saved.",
     "add_photo_from_device": "Add from device",
     "take_from_photo_bank": "Add from photobank",
@@ -200,7 +211,9 @@
     "select_dates": "Select dates",
     "set_lesson_times": "Set times for lessons",
     "select_subscription": "Select subscription",
-    "no_dates_selected": "No dates selected"
+    "no_dates_selected": "No dates selected",
+    "add_link": "Add link",
+    "no_link": "No link"
   },
 
   "Validation": {
