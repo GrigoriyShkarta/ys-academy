@@ -45,7 +45,9 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
       {children}
 
       {/* Напоминание о продлении абонемента для студента */}
-      {userData?.role !== 'super_admin' && <StudentSubscriptionReminder student={studentData} />}
+      {userData?.role !== 'super_admin' && studentData && (
+        <StudentSubscriptionReminder student={studentData} />
+      )}
     </div>
   );
 }
