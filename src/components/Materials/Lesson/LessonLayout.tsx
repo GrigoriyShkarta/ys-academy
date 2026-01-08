@@ -205,7 +205,7 @@ export default function LessonLayout({ id }: { id: number }) {
       {(cover || isEditPlace) && (
         <Cover updateCover={setCover} cover={cover} isEdit={isEditPlace} />
       )}
-      <div className="relative p-2 sm:p-0 max-w-7xl w-2/3 mx-auto">
+      <div className="relative p-2 sm:p-0 max-w-7xl sm:w-2/3 w-full mx-auto">
         {isEditPlace ? (
           <Input
             placeholder={t('lesson_title')}
