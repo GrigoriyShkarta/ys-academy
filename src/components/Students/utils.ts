@@ -45,25 +45,25 @@ export const isPastDate = (date: Date): boolean => {
   return lessonDate < today;
 };
 
-// Проверка находится ли дата в пределах 2 дней от сегодня или уже прошла
-export const isWithinTwoDaysOrPast = (date: Date): boolean => {
+// Проверка находится ли дата в пределах недели от сегодня или уже прошла
+export const isWithinWeekOrPast = (date: Date): boolean => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const twoDaysFromNow = new Date(today);
-  twoDaysFromNow.setDate(today.getDate() + 2);
+  const weekFromNow = new Date(today);
+  weekFromNow.setDate(today.getDate() + 7);
 
   const lessonDate = new Date(date);
   lessonDate.setHours(0, 0, 0, 0);
 
-  return lessonDate <= twoDaysFromNow;
+  return lessonDate <= weekFromNow;
 };
 
 // Проверка нужно ли выделять красным
 export const shouldHighlightLesson = (student: Student, lessonDate: Date | null): boolean => {
   if (!lessonDate || !student.isActive) return false;
 
-  return isWithinTwoDaysOrPast(lessonDate);
+  return isWithinWeekOrPast(lessonDate);
 };
 
 // Получить последний абонемент студента

@@ -13,9 +13,11 @@ import { useUser } from '@/providers/UserContext';
 export default function SubscriptionInfo({
   subscription,
   isExpanded,
+  studentId
 }: {
   subscription: StudentSubscription;
   isExpanded: boolean;
+  studentId: number;
 }) {
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const locale = useLocale();
@@ -112,7 +114,7 @@ export default function SubscriptionInfo({
       </div>
 
       {selectedLessonId && (
-        <UrlModal lessonId={selectedLessonId} closeModal={() => setSelectedLessonId(null)} />
+        <UrlModal lessonId={selectedLessonId} closeModal={() => setSelectedLessonId(null)} studentId={studentId} />
       )}
     </div>
   );

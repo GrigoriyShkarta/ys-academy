@@ -92,6 +92,7 @@ export interface Course {
 export interface LessonDocItem {
   blockId: number;
   content: Block[];
+  index?: number;
 }
 
 export interface Subscription {

@@ -164,13 +164,19 @@ export default function Sidebar() {
               key={item.name}
               href={item.href!}
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
                 ${active ? 'bg-white/20 text-white' : 'hover:bg-white/10'}
                 ${isCollapsed ? 'justify-center' : ''}
               `}
             >
-              {item.icon}
-              {!isCollapsed && <span>{t(item.name)}</span>}
+              <div className="shrink-0">{item.icon}</div>
+              {!isCollapsed && <span
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out
+                  ${isCollapsed ? 'w-0 max-w-0 opacity-0' : 'w-auto max-w-[300px] opacity-100'}
+                `}
+              >
+                {t(item.name)}
+              </span>}
             </Link>
           );
         }
@@ -179,58 +185,79 @@ export default function Sidebar() {
           <div key={item.name}>
             <button
               onClick={() => toggleSubmenu(item.name)}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
+              className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
                 ${active ? 'bg-white/20 text-white' : 'hover:bg-white/10'}
                 ${isCollapsed ? 'justify-center' : 'justify-between'}
               `}
             >
-              <div className="flex items-center gap-3">
-                {item.icon}
-                {!isCollapsed && <span>{t(item.name)}</span>}
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="shrink-0">{item.icon}</div>
+                {!isCollapsed &&
+                  (<span
+                  className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out
+                    ${isCollapsed ? 'w-0 max-w-0 opacity-0' : 'w-auto max-w-[300px] opacity-100'}
+                  `}
+                >
+                  {t(item.name)}
+                </span>)
+                }
+                
               </div>
               {!isCollapsed &&
-                (open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)}
+              <div
+                className={`shrink-0 transition-all duration-300 ease-in-out ${
+                  isCollapsed ? 'w-0 opacity-0' : 'w-4 opacity-100'
+                }`}
+              >
+                {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
+              }
             </button>
 
-            {!isCollapsed && (
-              <div
-                className={`overflow-hidden transition-all duration-300
-                  ${open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
-                `}
-              >
-                <div className="ml-10 mt-1 space-y-1 pb-2">
-                  {item.submenu!.map(sub => {
-                    const subActive = isActive(sub.href);
-                    return (
-                      <Link
-                        key={sub.name}
-                        href={sub.href!}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors
-                          ${subActive ? 'bg-white/20 text-white' : 'hover:bg-white/10'}
-                        `}
-                      >
-                        {sub.icon}
-                        <span>{t(sub.name)}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out
+                ${!isCollapsed && open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+              `}
+            >
+              <div className="ml-10 mt-1 space-y-1 pb-2">
+                {item.submenu!.map(sub => {
+                  const subActive = isActive(sub.href);
+                  return (
+                    <Link
+                      key={sub.name}
+                      href={sub.href!}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors
+                        ${subActive ? 'bg-white/20 text-white' : 'hover:bg-white/10'}
+                      `}
+                    >
+                      <div className="shrink-0">{sub.icon}</div>
+                      <span>{t(sub.name)}</span>
+                    </Link>
+                  );
+                })}
               </div>
-            )}
+            </div>
           </div>
         );
       })}
 
-      <div className="mt-6 space-y-2 border-t border-white/10 pt-4">
+      <div className="mt-auto space-y-2 border-t border-white/10 pt-4">
         <button
           onClick={toggleTheme}
           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm hover:bg-white/10
             ${isCollapsed ? 'justify-center' : ''}
           `}
         >
-          {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-          {!isCollapsed && <span>{t('change_theme')}</span>}
+          <div className="shrink-0">
+            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          </div>
+          <span
+            className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out
+            ${isCollapsed ? 'w-0 max-w-0 opacity-0' : 'w-auto max-w-[300px] opacity-100'}`}
+          >
+            {t('change_theme')}
+          </span>
         </button>
 
         <button
@@ -239,9 +266,25 @@ export default function Sidebar() {
             ${isCollapsed ? 'justify-center' : ''}
           `}
         >
-          <LogOut className="w-5 h-5" />
-          {!isCollapsed && <span>{t('logout')}</span>}
+          <div className="shrink-0">
+            <LogOut className="w-5 h-5" />
+          </div>
+          <span
+            className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out
+            ${isCollapsed ? 'w-0 max-w-0 opacity-0' : 'w-auto max-w-[300px] opacity-100'}`}
+          >
+            {t('logout')}
+          </span>
         </button>
+
+        <div
+          className={`mt-4 flex flex-col items-center justify-center overflow-hidden text-center text-[10px] text-white/40 pb-2 transition-all duration-300 ease-in-out
+             ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-20 opacity-100'}
+          `}
+        >
+          <p className="mb-1 whitespace-nowrap">© {new Date().getFullYear()} YS Vocal Academy</p>
+          <p className="whitespace-nowrap">{t('all_rights_reserved')}</p>
+        </div>
       </div>
     </>
   );
@@ -252,26 +295,30 @@ export default function Sidebar() {
     <>
       {/* DESKTOP */}
       <aside
-        className={`hidden min-w-[255px] md:flex h-screen flex-col border-r bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300
-          ${collapsed ? 'w-20' : 'w-64'}
+        className={`hidden sticky top-0 md:flex h-screen flex-col border-r bg-gradient-to-b from-gray-900 to-gray-800 text-white transition-all duration-300 ease-in-out shrink-0
+          ${collapsed ? 'w-20' : 'w-66'}
         `}
       >
         <div
           className={`flex items-center ${
             collapsed ? 'justify-center' : 'justify-between'
-          } border-b border-white/10 p-4`}
+          } border-b border-white/10 p-4 transition-all duration-300`}
         >
-          {!collapsed && (
+          <div
+            className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out
+              ${collapsed ? 'w-0 max-w-0 opacity-0' : 'w-auto max-w-[300px] opacity-100'}
+            `}
+          >
             <Link href="/main" className="text-lg font-bold">
               YS Vocal Academy
             </Link>
-          )}
-          <Button variant="ghost" size="icon" onClick={handleCollapse}>
+          </div>
+          <Button variant="ghost" size="icon" onClick={handleCollapse} className="shrink-0">
             {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
           </Button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        <nav className="flex-1 flex flex-col space-y-1 overflow-y-auto overflow-x-hidden p-3 scrollbar-thin scrollbar-thumb-white/10">
           <MenuContent isCollapsed={collapsed} />
         </nav>
       </aside>
@@ -290,7 +337,7 @@ export default function Sidebar() {
             ${mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}
           `}
         >
-          <nav className="space-y-3 p-4 pb-6">
+          <nav className="space-y-3 p-4 pb-4">
             <MenuContent />
           </nav>
         </div>

@@ -155,18 +155,18 @@ export default function ModuleModal({ open, setOpen, selectModule, module }: Pro
     try {
       if (module) {
         await updateModule(data, module.id);
-        queryClient.invalidateQueries({ queryKey: ['module', module.id] });
+        await queryClient.invalidateQueries({ queryKey: ['module', module.id] });
       } else {
         const newModule = await createModule(data);
         console.log('newModule', newModule);
         if (newModule && selectModule) {
           selectModule(newModule.id);
         }
-        queryClient.invalidateQueries({ queryKey: ['modules'] });
       }
     } catch (error) {
       console.error('Error:', error);
     } finally {
+      await queryClient.invalidateQueries({ queryKey: ['modules'] });
       setOpen(false);
       setIsLoading(false);
     }

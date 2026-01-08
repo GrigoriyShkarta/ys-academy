@@ -127,7 +127,7 @@ export default function CourseModal({ open, setOpen, course }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       if (course?.id) {
-        queryClient.invalidateQueries({ queryKey: ['course'] });
+        queryClient.invalidateQueries({ queryKey: ['course', course.id] });
       }
       setOpen(false);
     },

@@ -27,7 +27,8 @@
     "courses": "Курси",
     "lessons": "Уроки",
     "students": "Студенти",
-    "my_courses": "Мої курси"
+    "my_courses": "Мої курси",
+    "my_lesson_recordings": "Мої записи уроків"
   },
 
   "SideBar": {
@@ -47,7 +48,8 @@
     "my_profile": "Мій профіль",
     "subscriptions": "Абонементи",
     "my_finance": "Мої фінанси",
-    "lesson_recordings": "Записи уроків"
+    "lesson_recordings": "Записи уроків",
+    "all_rights_reserved": "Всі права захищені"
   },
 
   "Students": {
@@ -109,10 +111,12 @@
     "subscription_expired": "Абонемент закінчився",
     "and_more": "та ще {count}",
     "subscription_renewal_needed": "Необхідно оновити абонемент",
-    "subscription_renewal_message": "Ваш абонемент закінчується протягом 2 днів або вже закінчився. Будь ласка, зв'яжіться з викладачем для поновлення.",
+    "subscription_renewal_message": "Ваш абонемент закінчується {date}. Будь ласка, вчасно оновіть абонемнт та надішліть квитанцію викладачу",
+    "expired_renewal_message": "Доступ до навчальної платформи закінчеться {date}. Для продовження навчання зв'яжіться з викладачем",
     "last_lesson": "Останній урок",
     "access_data": "Дата доступа",
     "payment_status": "Статус оплати",
+    "my_lesson_recordings": "Мої записи уроків",
 
     "validation": {
       "required_field": "Обов’язкове поле",

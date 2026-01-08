@@ -71,11 +71,13 @@ export default function ModuleLayout({ moduleId }: { moduleId?: number }) {
       {/* Title + Categories */}
       <div className="mb-8">
         <h1 className="text-4xl md:text-5xl font-bold mb-3">{module.title}</h1>
-        <div className="flex gap-2 flex-wrap">
-          {module?.categories?.map((c: any) => (
-            <Chip key={c.id} category={c} />
-          ))}
-        </div>
+        {user?.role === 'super_admin' && (
+          <div className="flex gap-2 flex-wrap">
+            {module?.categories?.map((c: any) => (
+              <Chip key={c.id} category={c} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Unified Lessons List */}

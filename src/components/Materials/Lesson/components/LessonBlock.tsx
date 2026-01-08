@@ -17,7 +17,7 @@ import ChooseVideoModal from '@/common/MaterialsCommon/ChooseVideoModal';
 import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal';
 import { schema } from '@/components/Materials/utils/utils';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, GripVertical } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface Props {
@@ -29,6 +29,8 @@ interface Props {
   selectBlock?: (blockId: number) => void;
   onUpdate?: (blockId: number, content: Block[]) => void;
   deleteSection?: (blockId: number) => void;
+  attributes?: any;
+  listeners?: any;
 }
 
 export default function LessonBlock({
@@ -40,6 +42,8 @@ export default function LessonBlock({
   selectBlock,
   isSelectBlock,
   deleteSection,
+  attributes,
+  listeners,
 }: Props) {
   const [openChoosePhoto, setOpenChoosePhoto] = useState(false);
   const [openChooseAudio, setOpenChooseAudio] = useState(false);
@@ -54,7 +58,7 @@ export default function LessonBlock({
     dictionary: {
       ...locales.uk,
     },
-    initialContent: lesson,
+    initialContent: lesson && lesson.length > 0 ? lesson : undefined,
   });
 
   const getCustomSlashMenuItems = (editor: BlockNoteEditor): DefaultReactSuggestionItem[] => {
@@ -186,7 +190,10 @@ export default function LessonBlock({
   return (
     <>
       {editable && (
-        <div className="flex w-full justify-end px-4">
+        <div className="flex w-full justify-end px-4 gap-2">
+          <Button variant="ghost" className="cursor-grab touch-none" {...attributes} {...listeners}>
+            <GripVertical />
+          </Button>
           <Button
             variant="destructive"
             className="cursor-pointer"

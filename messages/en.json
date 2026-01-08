@@ -27,7 +27,8 @@
     "courses": "Courses",
     "lessons": "Lessons",
     "students": "Students",
-    "my_courses": "My courses"
+    "my_courses": "My courses",
+    "my_lesson_recordings": "My lesson recordings"
   },
 
   "SideBar": {
@@ -47,7 +48,8 @@
     "my_profile": "My profile",
     "subscriptions": "Subscriptions",
     "my_finance": "My finance",
-    "lesson_recordings": "Lesson recordings"
+    "lesson_recordings": "Lesson recordings",
+    "all_rights_reserved": "All rights reserved"
   },
 
   "Students": {
@@ -112,7 +114,8 @@
     "subscription_renewal_message": "Your subscription expires within 2 days or has already expired. Please contact your teacher to renew it.",
     "last_lesson": "Last lesson",
     "access_data": "Access data",
-    "payment_status": "Payment status"
+    "payment_status": "Payment status",
+    "my_lesson_recordings": "My lesson Recordings"
   },
 
   "Materials": {

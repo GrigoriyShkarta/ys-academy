@@ -17,7 +17,7 @@ export const formatDateTime = (value?: string | Date | null, dateOnly?: boolean)
   if (Number.isNaN(d.getTime())) return String(value);
   const pad = (n: number) => String(n).padStart(2, '0');
 
-  const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const dateStr = `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
 
   if (dateOnly) {
     return dateStr;

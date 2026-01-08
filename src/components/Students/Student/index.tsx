@@ -66,9 +66,11 @@ export default function Student({ id }: { id: number }) {
             <TabsTrigger value="profile" className="px-4 py-2 rounded-t-lg shadow-sm">
               {t('profile')}
             </TabsTrigger>
-            <TabsTrigger value="courses" className="px-4 py-2 rounded-t-lg shadow-sm">
-              {t('courses')}
-            </TabsTrigger>
+            {user?.role === 'super_admin' && (
+              <TabsTrigger value="courses" className="px-4 py-2 rounded-t-lg shadow-sm">
+                {t('courses')}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="subscriptions" className="px-4 py-2 rounded-t-lg shadow-sm">
               {t('subscriptions')}
             </TabsTrigger>

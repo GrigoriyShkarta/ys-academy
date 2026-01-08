@@ -6,9 +6,13 @@ import { useState } from 'react';
 import Loader from '@/common/Loader';
 import { Card } from '@/components/ui/card';
 import SubscriptionInfo from '@/components/Materials/LessonRecordings/SubscriptionInfo';
+import { useUser } from '@/providers/UserContext';
+import { useTranslations } from 'next-intl';
 
 export default function LessonRecordingsLayout({ id }: { id: number }) {
   const [showMore, setShowMore] = useState<number[]>([]);
+  const {user} = useUser();
+  const t = useTranslations('Students')
 
   const { data: student, isLoading } = useQuery({
     queryKey: ['student', id],
@@ -28,7 +32,7 @@ export default function LessonRecordingsLayout({ id }: { id: number }) {
 
   return (
     <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0 w-full max-h-screen overflow-auto">
-      <h1 className="text-4xl">{student.name}</h1>
+      {user?.role === 'super_admin' ? <h1 className="text-4xl">{student.name}</h1> : <h1 className="text-4xl text-center">{t('my_lesson_recordings')}</h1>}
       {student?.subscriptions
         ?.sort((a, b) => b.id - a.id)
         .map((sub, idx) => {
@@ -42,7 +46,7 @@ export default function LessonRecordingsLayout({ id }: { id: number }) {
                 !isExpanded || idx > 0 ? 'cursor-pointer hover:bg-muted/50' : ''
               }`}
             >
-              <SubscriptionInfo subscription={sub} isExpanded={isExpanded} />
+              <SubscriptionInfo subscription={sub} isExpanded={isExpanded} studentId={student.id} />
             </Card>
           );
         })}

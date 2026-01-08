@@ -8,17 +8,20 @@ import { addLessonRecording } from '@/components/Materials/LessonRecordings/acti
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { checkYouTubeVideoExists } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Props {
   lessonId: number;
+  studentId: number;
   closeModal: () => void;
 }
 
-export default function UrlModal({ lessonId, closeModal }: Props) {
+export default function UrlModal({ lessonId, studentId, closeModal }: Props) {
   const [loading, setLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [url, setUrl] = useState('');
   const t = useTranslations('Materials');
+  const client = useQueryClient();
 
   useEffect(() => {
     const validateUrl = async () => {
@@ -33,6 +36,7 @@ export default function UrlModal({ lessonId, closeModal }: Props) {
     try {
       setLoading(true);
       await addLessonRecording(lessonId, url);
+      client.invalidateQueries({ queryKey: ['student', studentId] });
       closeModal();
     } catch (e) {
       console.log('Error adding url:', e);

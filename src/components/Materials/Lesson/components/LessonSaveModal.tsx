@@ -96,9 +96,7 @@ export default function LessonSaveModal({
             <MultiSelect
               options={categoryOptions}
               selected={selectedCategories}
-              onChange={next =>
-                setSelectedCategories(prev => Array.from(new Set([...prev, ...next])))
-              }
+              onChange={next => setSelectedCategories(next)}
               placeholder={t('select_categories')}
               className="w-full"
             />
@@ -122,7 +120,7 @@ export default function LessonSaveModal({
             <MultiSelect
               options={moduleOptions}
               selected={selectedModules}
-              onChange={next => setSelectedModules(prev => Array.from(new Set([...prev, ...next])))}
+              onChange={next => setSelectedModules(next)}
               placeholder={t('select_categories')}
               className="w-full"
             />

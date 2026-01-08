@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Category } from '@/components/Materials/utils/interfaces';
 import CategoryListModal from '@/common/CategoryListModal';
 import { useUser } from '@/providers/UserContext';
+import { useTranslations } from 'next-intl';
 
 export default function StudentCourses({
   courses,
@@ -17,9 +18,14 @@ export default function StudentCourses({
 }) {
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const { user } = useUser();
+  const t = useTranslations('SideBar')
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full h-fit box-border">
+    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0 w-full max-h-screen overflow-auto">
+      <h1 className="text-4xl text-center">{t('my_courses')}</h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full h-fit box-border">
+      
       {courses &&
         courses.map(course => {
           if (course.access || user?.role === 'super_admin') {
@@ -45,19 +51,6 @@ export default function StudentCourses({
                 >
                   {course.title}
                 </div>
-                {course?.categories && course?.categories?.length > 0 && (
-                  <div className="flex gap-1 m-2 justify-center">
-                    {course?.categories?.slice(0, 2).map(category => (
-                      <Chip key={category.id} category={category} />
-                    ))}
-                    {course?.categories?.length > 2 && (
-                      <CircleChevronRight
-                        className="cursor-pointer"
-                        onClick={() => seCategoryList(course.categories)}
-                      />
-                    )}
-                  </div>
-                )}
               </Link>
             );
           } else {
@@ -97,5 +90,5 @@ export default function StudentCourses({
 
       <CategoryListModal list={categoryList} close={() => seCategoryList(undefined)} />
     </div>
-  );
+  </div>);
 }

@@ -12,7 +12,7 @@ export const createLesson = async (
 ) => {
   const formatedLesson = {
     title: lessonTitle,
-    blocks: lessons,
+    blocks: lessons.map((l, i) => ({ ...l, index: i })),
     cover,
     publicImgId: coverPublicId,
     categoryIds,
@@ -35,7 +35,7 @@ export const updateLesson = async (
 ) => {
   const formatedLesson = {
     title: lessonTitle,
-    blocks: lessons,
+    blocks: lessons.map((l, i) => ({ ...l, index: i })),
     cover,
     publicImgId: coverPublicId,
     categoryIds,
