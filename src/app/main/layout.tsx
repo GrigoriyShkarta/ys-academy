@@ -8,6 +8,8 @@ import Loader from '@/common/Loader';
 import { useUser } from '@/providers/UserContext';
 import { getStudent } from '@/components/Students/Student/actions';
 import StudentSubscriptionReminder from '@/common/Reminder';
+import { MetronomeProvider } from '@/providers/MetronomeContext';
+import MetronomeWidget from '@/common/MetronomWidget';
 
 export default function MainLayout({ children }: Readonly<{ children: ReactNode }>) {
   const { setUser, user } = useUser();
@@ -39,15 +41,18 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
   }
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <MetronomeProvider>
+      <MetronomeWidget />
+      <div className="flex">
+        <Sidebar />
 
-      {children}
+        {children}
 
-      {/* Напоминание о продлении абонемента для студента */}
-      {userData?.role !== 'super_admin' && studentData && (
-        <StudentSubscriptionReminder student={studentData} />
-      )}
-    </div>
+        {/* Напоминание о продлении абонемента для студента */}
+        {userData?.role !== 'super_admin' && studentData && (
+          <StudentSubscriptionReminder student={studentData} />
+        )}
+      </div>
+    </MetronomeProvider>
   );
 }

@@ -12,6 +12,7 @@ import {
   Banknote,
   BookAudio,
   BookOpen,
+  Component,
   ChevronDown,
   ChevronUp,
   CreditCard,
@@ -26,6 +27,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Sun,
+  Timer,
   TagsIcon,
   User,
   Users,
@@ -96,6 +98,17 @@ export default function Sidebar() {
       icon: <MonitorPlay className="w-5 h-5" />,
       href: '/main/lesson-recording',
     },
+    {
+      name: 'my_widgets',
+      icon: <Component className="w-5 h-5" />,
+      submenu: [
+        {
+          name: 'metronome',
+          href: '/main/widgets/metronome',
+          icon: <Timer className="w-4 h-4" />,
+        },
+      ],
+    },  
   ];
 
   const adminMenu: MenuItem[] = [
@@ -145,6 +158,17 @@ export default function Sidebar() {
         },
       ],
     },
+    {
+      name: 'my_widgets',
+      icon: <Component className="w-5 h-5" />,
+      submenu: [
+        {
+          name: 'metronome',
+          href: '/main/widgets/metronome',
+          icon: <Timer className="w-4 h-4" />,
+        },
+      ],
+    },  
   ];
 
   const menu = user?.role === 'super_admin' ? adminMenu : studentMenu;
