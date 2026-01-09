@@ -17,6 +17,7 @@ interface Props {
 
 export default function PhotoPreviewList({ fetchingIdx, uploadedFiles, setUploadedFiles }: Props) {
   const t = useTranslations('Materials');
+  const [globalCategories, setGlobalCategories] = useState<string[]>([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null);
 
@@ -31,6 +32,18 @@ export default function PhotoPreviewList({ fetchingIdx, uploadedFiles, setUpload
     label: c.title,
     color: c.color,
   }));
+
+  const handleGlobalCategoryChange = (next: string[]) => {
+    setGlobalCategories(next);
+    setUploadedFiles(prev => {
+      const copy = [...prev];
+      return copy.map(file => {
+        const currentCats = (file as any).categories || [];
+        (file as any).categories = [...new Set([...currentCats, ...next])];
+        return file;
+      });
+    });
+  };
 
   const handleTitleChange = (index: number, value: string) => {
     setUploadedFiles(prev => {
@@ -79,9 +92,19 @@ export default function PhotoPreviewList({ fetchingIdx, uploadedFiles, setUpload
   return (
     <>
       <div className="mt-6 space-y-5">
-        <p className="text-sm font-medium text-foreground">
-          {t('uploaded_photos')}: <span className="font-bold">{uploadedFiles.length}</span>/9
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">
+            {t('uploaded_photos')}: <span className="font-bold">{uploadedFiles.length}</span>/9
+          </p>
+
+          <MultiSelect
+            options={categoryOptions}
+            selected={globalCategories}
+            onChange={handleGlobalCategoryChange}
+            placeholder={t('select_categories')}
+            className="w-full max-w-[300px]"
+          />
+        </div>
 
         <div
           className={`grid gap-4 auto-rows-fr ${
