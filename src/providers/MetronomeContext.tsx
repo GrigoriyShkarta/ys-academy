@@ -47,6 +47,10 @@ export function MetronomeProvider({ children }: { children: ReactNode }) {
         
         Tone.Draw.schedule(() => {
           setIsBeat(true);
+          // Notify tuner about metronome beat
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('metronome-beat'));
+          }
         }, time);
         
         Tone.Draw.schedule(() => {

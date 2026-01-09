@@ -167,6 +167,11 @@ export default function Sidebar() {
           href: '/main/widgets/metronome',
           icon: <Timer className="w-4 h-4" />,
         },
+        {
+          name: 'tuner',
+          href: '/main/widgets/tuner',
+          icon: <Music className="w-4 h-4" />,
+        },
       ],
     },  
   ];

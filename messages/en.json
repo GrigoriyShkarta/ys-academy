@@ -51,7 +51,8 @@
     "lesson_recordings": "Lesson recordings",
     "all_rights_reserved": "All rights reserved",
     "my_widgets": "My widgets",
-    "metronome": "Metronome"
+    "metronome": "Metronome",
+    "tuner": "Tuner"
   },
 
   "Students": {
@@ -260,6 +261,14 @@
     "select_category": "Select category",
     "delete_files_confirm": "Are you sure you want to delete the file(s)?",
     "files_used_in_lessons_warning": "If the file(s) are used in lessons, they will also be removed from those lessons.",
-    "add":"Add new module"
+    "add":"Add new module",
+    "start": "Start",
+    "stop": "Stop",
+    "tuned": "✓ Tuned",
+    "almost": "~ Almost",
+    "higher": "↑ Higher",
+    "lower": "↓ Lower",
+    "tolerance": "Tolerance",
+    "cents": "cents"
   }
 }
