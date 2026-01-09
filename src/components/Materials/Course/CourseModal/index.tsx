@@ -31,6 +31,7 @@ import { Plus } from 'lucide-react';
 import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 import { useUser } from '@/providers/UserContext';
 import { uploadPhoto } from '@/components/Materials/Photo/action';
+import ModuleModal from '@/components/Materials/Modules/ModuleModal';
 
 interface Props {
   open: boolean;
@@ -60,6 +61,7 @@ export default function CourseModal({ open, setOpen, course }: Props) {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [openModuleModal, setOpenModuleModal] = useState<boolean>(false);
+  const [openCreateModuleModal, setOpenCreateModuleModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (open) {
@@ -192,6 +194,8 @@ export default function CourseModal({ open, setOpen, course }: Props) {
     setOpen(false);
   };
 
+  console.log('modules', modules);
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-full sm:max-w-[850px] max-h-[90vh] overflow-y-auto">
@@ -281,6 +285,8 @@ export default function CourseModal({ open, setOpen, course }: Props) {
         handleAdd={addLesson}
         array={modules}
         isCourse
+        showAddButton
+        onAddClick={() => setOpenCreateModuleModal(true)}
       />
 
       <CategoryModal
@@ -288,6 +294,11 @@ export default function CourseModal({ open, setOpen, course }: Props) {
         closeModal={() => setIsCategoryModalOpen(false)}
         selectCategory={handleNewCategoriesForFile}
         hideTrigger
+      />
+
+      <ModuleModal
+        open={openCreateModuleModal}
+        setOpen={setOpenCreateModuleModal}
       />
     </Dialog>
   );

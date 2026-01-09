@@ -156,8 +156,12 @@ export default function ModuleModal({ open, setOpen, selectModule, module }: Pro
       if (module) {
         await updateModule(data, module.id);
         await queryClient.invalidateQueries({ queryKey: ['module', module.id] });
+        await queryClient.invalidateQueries({ queryKey: ['modules'] });
+        await queryClient.invalidateQueries({ queryKey: ['lessons', 'modules'] }); 
       } else {
         const newModule = await createModule(data);
+        await queryClient.invalidateQueries({ queryKey: ['modules'] });
+        await queryClient.invalidateQueries({ queryKey: ['lessons', 'modules'] });
         console.log('newModule', newModule);
         if (newModule && selectModule) {
           selectModule(newModule.id);
@@ -166,7 +170,7 @@ export default function ModuleModal({ open, setOpen, selectModule, module }: Pro
     } catch (error) {
       console.error('Error:', error);
     } finally {
-      await queryClient.invalidateQueries({ queryKey: ['modules'] });
+      
       setOpen(false);
       setIsLoading(false);
     }

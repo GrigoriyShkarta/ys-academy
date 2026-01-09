@@ -257,6 +257,7 @@
     "nothing_found": "Nothing found",
     "select_category": "Select category",
     "delete_files_confirm": "Are you sure you want to delete the file(s)?",
-    "files_used_in_lessons_warning": "If the file(s) are used in lessons, they will also be removed from those lessons."
+    "files_used_in_lessons_warning": "If the file(s) are used in lessons, they will also be removed from those lessons.",
+    "add":"Add new module"
   }
 }
