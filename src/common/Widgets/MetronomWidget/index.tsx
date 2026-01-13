@@ -2,6 +2,7 @@
 
 import { useMetronome } from '@/providers/MetronomeContext';
 import { useTuner } from '@/providers/TunerContext';
+import { usePiano } from '@/providers/PianoContext';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Play, Pause, Minus, Plus, X } from 'lucide-react';
@@ -12,6 +13,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 export default function MetronomeWidget() {
   const { isPlaying, bpm, isBeat, isWidgetVisible, togglePlay, setBpm, changeBpm, hideWidget } = useMetronome();
   const { isWidgetVisible: isTunerVisible } = useTuner();
+  const { isWidgetVisible: isPianoVisible } = usePiano();
   const t = useTranslations('SideBar');
 
   if (!isWidgetVisible) return null;
@@ -23,20 +25,20 @@ export default function MetronomeWidget() {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className={cn(
-          "fixed left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t border-border shadow-lg transition-all duration-300",
-          isTunerVisible ? "bottom-[60px]" : "bottom-0"
-        )}
+        className="fixed left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t border-border shadow-lg transition-all duration-300"
+        style={{
+          bottom: `${isPianoVisible ? 144 : 0}px`
+        }}
       >
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             {/* Left: Title and Beat Indicator */}
             <div className="flex items-center gap-3 sm:w-[160px]">
+              <span className="text-sm font-medium hidden sm:block">{t('metronome')}</span>
               <div className={cn(
                 "w-3 h-3 rounded-full transition-colors duration-100 shrink-0",
                 isBeat ? "bg-accent shadow-[0_0_10px_theme(colors.accent.DEFAULT)]" : "bg-muted"
               )} />
-              <span className="text-sm font-medium hidden sm:block">{t('metronome')}</span>
             </div>
 
             {/* Center: Controls */}

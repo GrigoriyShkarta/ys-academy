@@ -170,7 +170,7 @@ export default function LessonLayout({ id }: { id: number }) {
   if (!lesson) return <div>Lesson not found</div>;
 
   return (
-    <div className="space-y-6 pb-4 relative">
+    <div className="space-y-6 pb-4 relative py-10 md:py-0">
       <div className="flex justify-between items-center md:p-4 sm:p-0">
         <button
           type="button"

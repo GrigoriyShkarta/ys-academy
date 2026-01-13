@@ -240,7 +240,7 @@ export default function AudioLayout() {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
+    <div className="flex flex-col gap-4 p-4 mt-18 md:mt-0">
       <AudioModal
         audio={selectedFile}
         setSelectedFile={setSelectedFile}

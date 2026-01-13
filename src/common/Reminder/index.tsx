@@ -9,30 +9,43 @@ import { getLastLessonDate, shouldHighlightLesson, isWithinWeekOrPast } from '@/
 import { formatDateTime } from '@/lib/utils';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useMetronome } from '@/providers/MetronomeContext';
+import { useTuner } from '@/providers/TunerContext';
+import { usePiano } from '@/providers/PianoContext';
 
 interface StudentSubscriptionReminderProps {
   student: Student | null;
+  isVisible: boolean;
+  setIsVisible: (visible: boolean) => void;
+  shouldShow: boolean;
 }
 
 export default function Remider({
   student,
+  isVisible,
+  setIsVisible,
+  shouldShow,
 }: StudentSubscriptionReminderProps) {
   const t = useTranslations('Students');
-  const [isVisible, setIsVisible] = useState(true);
   const today = new Date();
 
   if (!student) return null;
 
   const lastLessonDate = getLastLessonDate(student);
-
-  console.log('isVisible', isVisible)
-
   const needsRenewal = lastLessonDate && shouldHighlightLesson(student, lastLessonDate);
-  const isExpired = lastLessonDate ? formatDateTime(lastLessonDate, true) < formatDateTime(today, true) : false;
+  const isExpired = lastLessonDate ? new Date(lastLessonDate) < new Date(today) : false;
   const accessExpiryDate = student?.accessExpiryDate ?? '';
   const isAccessExpiryNear = accessExpiryDate ? isWithinWeekOrPast(new Date(accessExpiryDate)) : false;
 
-  const showReminder = !needsRenewal || !isAccessExpiryNear
+  const { isWidgetVisible: isMetronomeVisible } = useMetronome();
+  const { isWidgetVisible: isTunerVisible } = useTuner();
+  const { isWidgetVisible: isPianoVisible } = usePiano();
+
+  const widgetsHeight = 
+    (isTunerVisible ? 60 : 0) + 
+    (isMetronomeVisible ? 64 : 0) + 
+    (isPianoVisible ? 144 : 0);
+  const showReminder = shouldShow;
   const text = () => {
     if (isExpired || accessExpiryDate) {
       const deadlineDate = new Date(lastLessonDate!);
@@ -49,14 +62,20 @@ export default function Remider({
       <Link
         href="https://t.me/yana_vocalcoach"
         target="_blank"
-        className={`fixed flex items-center justify-center right-6 sm:w-18 sm:h-18 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 hover:scale-105 hover:shadow-xl transition-all duration-300 z-50 ${
-          showReminder && isVisible ? 'bottom-42' : 'bottom-6'
-        }`}
+        className="fixed hidden md:flex items-center justify-center right-6 sm:w-18 sm:h-18 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 hover:scale-105 hover:shadow-xl transition-all duration-300 z-50"
+        style={{
+          bottom: `${(showReminder && isVisible ? 168 : 24) + widgetsHeight}px`
+        }}
       >
         <MessageCircle width={28} height={28} fill='white' />
       </Link>  
-      {showReminder && isVisible && (
-        <Card className="fixed bottom-6 right-6 w-80 sm:w-96 p-4 shadow-2xl z-50 border-orange-500 border-2 animate-in slide-in-from-bottom-5 bg-orange-50 dark:bg-orange-950/20">
+      {showReminder && isVisible  && (
+        <Card 
+          className="fixed hidden md:block right-6 w-80 sm:w-96 p-4 shadow-2xl z-50 border-orange-500 border-2 animate-in slide-in-from-bottom-5 bg-orange-50 dark:bg-orange-950/20"
+          style={{
+            bottom: `${24 + widgetsHeight}px`
+          }}
+        >
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-1">
               <AlertCircle className="w-6 h-6 text-orange-500" />

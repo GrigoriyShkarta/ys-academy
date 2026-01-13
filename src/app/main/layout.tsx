@@ -10,11 +10,17 @@ import { getStudent } from '@/components/Students/Student/actions';
 import StudentSubscriptionReminder from '@/common/Reminder';
 import { MetronomeProvider } from '@/providers/MetronomeContext';
 import { TunerProvider } from '@/providers/TunerContext';
+import { PianoProvider } from '@/providers/PianoContext';
 import MetronomeWidget from '@/common/Widgets/MetronomWidget';
 import TunerWidget from '@/common/Widgets/TunerWidget';
+import PianoWidget from '@/common/Widgets/PianoWidget';
+import WidgetHub from '@/common/Widgets/WidgetHub';
+import { getLastLessonDate, shouldHighlightLesson, isWithinWeekOrPast } from '@/components/Students/utils';
+import { useState } from 'react';
 
 export default function MainLayout({ children }: Readonly<{ children: ReactNode }>) {
   const { setUser, user } = useUser();
+  const [isReminderVisible, setIsReminderVisible] = useState(true);
   const { data: userData, isLoading } = useQuery({
     queryKey: ['user'],
     queryFn: getMe,
@@ -42,21 +48,42 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
     return <Loader />;
   }
 
+  // Должно ли отображаться напоминание
+  const shouldShowReminder = () => {
+    if (userData?.role === 'super_admin' || !studentData) return false;
+    const lastLessonDate = getLastLessonDate(studentData);
+    const needsRenewal = lastLessonDate && shouldHighlightLesson(studentData, lastLessonDate);
+    const accessExpiryDate = studentData?.accessExpiryDate ?? '';
+    const isAccessExpiryNear = accessExpiryDate ? isWithinWeekOrPast(new Date(accessExpiryDate)) : false;
+    return !!(needsRenewal || isAccessExpiryNear);
+  };
+
+  const isShiftedByReminder = shouldShowReminder() && isReminderVisible;
+
   return (
     <MetronomeProvider>
       <TunerProvider>
-        <TunerWidget />
-        <MetronomeWidget />
-        <div className="flex">
-          <Sidebar />
+        <PianoProvider>
+          <TunerWidget />
+          <MetronomeWidget />
+          <PianoWidget />
+          <WidgetHub isShiftedByReminder={isShiftedByReminder} />
+          <div className="flex">
+            <Sidebar />
 
-          {children}
+            {children}
 
-          {/* Напоминание о продлении абонемента для студента */}
-          {userData?.role !== 'super_admin' && studentData && (
-            <StudentSubscriptionReminder student={studentData} />
-          )}
-        </div>
+            {/* Напоминание о продлении абонемента для студента */}
+            {userData?.role !== 'super_admin' && studentData && (
+              <StudentSubscriptionReminder 
+                student={studentData} 
+                isVisible={isReminderVisible}
+                setIsVisible={setIsReminderVisible}
+                shouldShow={shouldShowReminder()}
+              />
+            )}
+          </div>
+        </PianoProvider>
       </TunerProvider>
     </MetronomeProvider>
   );

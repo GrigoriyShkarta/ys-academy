@@ -12,9 +12,11 @@ interface TunerContextType {
   cents: number;
   tolerance: number;
   isWidgetVisible: boolean;
+  analyserRef: React.RefObject<AnalyserNode | null>;
   startListening: () => Promise<void>;
   stopListening: () => void;
   setTolerance: (tolerance: number) => void;
+  showWidget: () => void;
   hideWidget: () => void;
 }
 
@@ -168,6 +170,10 @@ export function TunerProvider({ children }: { children: ReactNode }) {
     setIsWidgetVisible(false);
   };
 
+  const showWidget = () => {
+    setIsWidgetVisible(true);
+  };
+
   useEffect(() => {
     return () => {
       stopListening();
@@ -183,9 +189,11 @@ export function TunerProvider({ children }: { children: ReactNode }) {
         cents,
         tolerance,
         isWidgetVisible,
+        analyserRef,
         startListening,
         stopListening,
         setTolerance,
+        showWidget,
         hideWidget,
       }}
     >

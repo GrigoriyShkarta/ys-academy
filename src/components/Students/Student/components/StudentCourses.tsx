@@ -21,7 +21,7 @@ export default function StudentCourses({
   const t = useTranslations('SideBar')
 
   return (
-    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0 w-full max-h-screen overflow-auto">
+    <div className="flex flex-col gap-4 p-4 mt-18 md:mt-0 w-full max-h-screen overflow-auto">
       <h1 className="text-4xl text-center">{t('my_courses')}</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full h-fit box-border">

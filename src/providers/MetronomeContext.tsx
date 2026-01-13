@@ -11,6 +11,7 @@ interface MetronomeContextType {
   togglePlay: () => Promise<void>;
   setBpm: (bpm: number) => void;
   changeBpm: (delta: number) => void;
+  showWidget: () => void;
   hideWidget: () => void;
 }
 
@@ -96,8 +97,12 @@ export function MetronomeProvider({ children }: { children: ReactNode }) {
     setIsPlaying(false);
   };
 
+  const showWidget = () => {
+    setIsWidgetVisible(true);
+  };
+
   return (
-    <MetronomeContext.Provider value={{ isPlaying, bpm, isBeat, isWidgetVisible, togglePlay, setBpm, changeBpm, hideWidget }}>
+    <MetronomeContext.Provider value={{ isPlaying, bpm, isBeat, isWidgetVisible, togglePlay, setBpm, changeBpm, showWidget, hideWidget }}>
       {children}
     </MetronomeContext.Provider>
   );

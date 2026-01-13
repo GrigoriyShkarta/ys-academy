@@ -52,7 +52,9 @@
     "all_rights_reserved": "All rights reserved",
     "my_widgets": "My widgets",
     "metronome": "Metronome",
-    "tuner": "Tuner"
+    "tuner": "Tuner",
+    "piano": "Piano",
+    "tracker": "Tracker"
   },
 
   "Students": {
@@ -269,6 +271,8 @@
     "higher": "↑ Higher",
     "lower": "↓ Lower",
     "tolerance": "Tolerance",
-    "cents": "cents"
+    "cents": "cents",
+    "standard": "Standard",
+    "oscilloscope": "Oscilloscope"
   }
 }

@@ -43,7 +43,7 @@ export default function ModuleLayout({ moduleId }: { moduleId?: number }) {
   const lessons = module?.lessons || [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-8 md:py-6 py-10">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 mb-6">
         <button

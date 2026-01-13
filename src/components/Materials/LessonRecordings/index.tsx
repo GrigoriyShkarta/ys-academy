@@ -31,7 +31,7 @@ export default function LessonRecordingsLayout({ id }: { id: number }) {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0 w-full max-h-screen overflow-auto">
+    <div className="flex flex-col gap-4 p-4 mt-18 md:mt-0 w-full max-h-screen overflow-auto">
       {user?.role === 'super_admin' ? <h1 className="text-4xl">{student.name}</h1> : <h1 className="text-4xl text-center">{t('my_lesson_recordings')}</h1>}
       {student?.subscriptions
         ?.sort((a, b) => b.id - a.id)

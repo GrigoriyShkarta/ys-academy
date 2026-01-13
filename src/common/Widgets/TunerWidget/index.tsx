@@ -1,15 +1,30 @@
 'use client';
 
 import { useTuner } from '@/providers/TunerContext';
+import { useMetronome } from '@/providers/MetronomeContext';
+import { usePiano } from '@/providers/PianoContext';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { X } from 'lucide-react';
+import { X, Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export default function TunerWidget() {
-  const { isWidgetVisible, note, frequency, cents, tolerance, setTolerance, hideWidget } = useTuner();
+  const { 
+    isWidgetVisible, 
+    note, 
+    frequency, 
+    cents, 
+    tolerance, 
+    isListening,
+    startListening,
+    stopListening,
+    setTolerance, 
+    hideWidget 
+  } = useTuner();
+  const { isWidgetVisible: isMetronomeVisible } = useMetronome();
+  const { isWidgetVisible: isPianoVisible } = usePiano();
   const t = useTranslations('SideBar');
   const tCommon = useTranslations('Common');
 
@@ -34,7 +49,10 @@ export default function TunerWidget() {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed bottom-0 left-0 right-0 z-[60] bg-card/95 backdrop-blur-md border-t border-border shadow-lg"
+        className="fixed left-0 right-0 z-[60] bg-card/95 backdrop-blur-md border-t border-border shadow-lg transition-all duration-300"
+        style={{
+          bottom: `${(isPianoVisible ? 144 : 0) + (isMetronomeVisible ? 64 : 0)}px`
+        }}
       >
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
@@ -43,18 +61,15 @@ export default function TunerWidget() {
               <span className="text-sm font-medium hidden sm:block">{t('tuner')}</span>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-primary tabular-nums">
-                  {note || '—'}
+                  {isListening ? (note || '—') : '—'}
                 </span>
-                {/* <span className={cn("text-xs font-semibold", status.color)}>
-                  {status.text}
-                </span> */}
               </div>
             </div>
 
             {/* Center: Frequency and Cents */}
             <div className="flex items-center gap-4 flex-1 max-w-md">
               <div className="text-sm text-muted-foreground hidden sm:block">
-                {frequency > 0 ? `${frequency} Hz` : '—'}
+                {isListening && frequency > 0 ? `${frequency} Hz` : '—'}
               </div>
 
               {/* Deviation Indicator */}
@@ -73,7 +88,7 @@ export default function TunerWidget() {
                   />
 
                   {/* Indicator */}
-                  {cents !== 0 && (
+                  {isListening && cents !== 0 && (
                     <div
                       className={cn(
                         'absolute top-0 h-full w-1.5 transition-all',
@@ -88,14 +103,26 @@ export default function TunerWidget() {
                 </div>
               </div>
 
-              <div className="text-xs text-center text-muted-foreground mt-1">
-                  {cents > 0 ? `+${cents}` : cents}¢
+              <div className="text-xs text-center text-muted-foreground mt-1 min-w-[30px]">
+                  {isListening ? `${cents > 0 ? `+${cents}` : cents}¢` : '—'}
                 </div>
             </div>
 
-            {/* Right: Tolerance and Close */}
+            {/* Right: Controls, Tolerance and Close */}
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-2 min-w-[120px]">
+              <Button
+                onClick={isListening ? stopListening : startListening}
+                size="sm"
+                variant={isListening ? 'destructive' : 'default'}
+                className={cn('h-8', !isListening && 'bg-accent hover:bg-accent/90')}
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                <span className="ml-2 hidden xs:inline">
+                  {isListening ? tCommon('stop') : tCommon('start')}
+                </span>
+              </Button>
+
+              <div className="hidden md:flex items-center gap-2 min-w-[120px]">
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   ±{tolerance}¢
                 </span>

@@ -52,7 +52,9 @@
     "all_rights_reserved": "Всі права захищені",
     "my_widgets": "Мої віджети",
     "metronome": "Метроном",
-    "tuner": "Тюнер"
+    "tuner": "Тюнер",
+    "piano": "Піаніно",
+    "tracker": "Трекер"
   },
 
   "Students": {
@@ -276,6 +278,8 @@
     "higher": "↑ Вище",
     "lower": "↓ Нижче",
     "tolerance": "Похибка",
-    "cents": "центів"
+    "cents": "центів",
+    "standard": "Стандартний",
+    "oscilloscope": "Осцилограф"
   }
 }

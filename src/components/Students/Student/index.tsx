@@ -32,7 +32,7 @@ export default function Student({ id }: { id: number }) {
   if (!student) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full space-y-8 mt-18 sm:mt-0">
+    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full space-y-8 mt-18 md:mt-0">
       {/* Header: Avatar + Name + Contacts */}
       <div className="flex flex-col items-center gap-4">
         <div className="relative">

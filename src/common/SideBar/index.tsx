@@ -9,31 +9,15 @@ import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/UserContext';
 import { YS_TOKEN } from '@/lib/consts';
 import {
-  Banknote,
-  BookAudio,
-  BookOpen,
-  Component,
-  ChevronDown,
-  ChevronUp,
-  CreditCard,
-  Folder,
-  Image,
-  Layers,
-  LogOut,
-  Menu,
-  MonitorPlay,
-  Moon,
-  Music,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Sun,
-  Timer,
-  TagsIcon,
-  User,
-  Users,
-  Video,
-  X,
+  Timer, Music, LayoutGrid, Piano, MessageCircle,
+  Banknote, BookAudio, BookOpen, Component, ChevronDown, ChevronUp,
+  CreditCard, Folder, Image, Layers, LogOut, Menu, MonitorPlay,
+  Moon, PanelLeftClose, PanelLeftOpen, Sun, TagsIcon, User, Users, Video, X
 } from 'lucide-react';
+import { useMetronome } from '@/providers/MetronomeContext';
+import { useTuner } from '@/providers/TunerContext';
+import { usePiano } from '@/providers/PianoContext';
+import { cn } from '@/lib/utils';
 
 /* ===================== TYPES ===================== */
 
@@ -55,6 +39,10 @@ export default function Sidebar() {
   const { theme, setTheme } = useTheme();
   const { user } = useUser();
   const t = useTranslations('SideBar');
+
+  const { isWidgetVisible: isMetronomeVisible, showWidget: showMetronome, hideWidget: hideMetronome } = useMetronome();
+  const { isWidgetVisible: isTunerVisible, showWidget: showTuner, hideWidget: hideTuner } = useTuner();
+  const { isWidgetVisible: isPianoVisible, showWidget: showPiano, hideWidget: hidePiano } = usePiano();
 
   /* ===================== HELPERS ===================== */
 
@@ -112,6 +100,11 @@ export default function Sidebar() {
           href: '/main/widgets/tuner',
           icon: <Music className="w-4 h-4" />,
         },
+        {
+          name: 'piano',
+          href: '/main/widgets/piano',
+          icon: <Piano className="w-4 h-4" />,
+        }
       ],
     },  
   ];
@@ -177,6 +170,11 @@ export default function Sidebar() {
           href: '/main/widgets/tuner',
           icon: <Music className="w-4 h-4" />,
         },
+        {
+          name: 'piano',
+          href: '/main/widgets/piano',
+          icon: <Piano className="w-4 h-4" />,
+        }
       ],
     },  
   ];
@@ -361,9 +359,36 @@ export default function Sidebar() {
       <header className="fixed top-0 z-50 w-full bg-gradient-to-b from-gray-900 to-gray-800 text-white md:hidden">
         <div className="flex items-center justify-between p-4">
           <span className="text-lg font-bold">YS Vocal Coach</span>
-          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(v => !v)}>
-            {mobileMenuOpen ? <X /> : <Menu />}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="https://t.me/yana_vocalcoach"
+              target="_blank"
+              className="p-2 text-white hover:text-blue-400 transition-colors"
+            >
+              <MessageCircle className="w-6 h-6" />
+            </Link>
+            <button
+              onClick={() => isPianoVisible ? hidePiano() : showPiano()}
+              className={cn("p-2 transition-colors", isPianoVisible ? "text-blue-400" : "text-white")}
+            >
+              <Piano className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => isTunerVisible ? hideTuner() : showTuner()}
+              className={cn("p-2 transition-colors", isTunerVisible ? "text-emerald-400" : "text-white")}
+            >
+              <Music className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => isMetronomeVisible ? hideMetronome() : showMetronome()}
+              className={cn("p-2 transition-colors", isMetronomeVisible ? "text-orange-400" : "text-white")}
+            >
+              <Timer className="w-6 h-6" />
+            </button>
+            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(v => !v)}>
+              {mobileMenuOpen ? <X /> : <Menu />}
+            </Button>
+          </div>
         </div>
 
         <div
