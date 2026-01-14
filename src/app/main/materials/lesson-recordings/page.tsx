@@ -1,5 +1,5 @@
-import StudentList from '@/components/Materials/LessonRecordings/StudentList';
+import StudentList from '@/common/StudentList';
 
 export default function LessonRecordingsPage() {
-  return <StudentList />;
+  return <StudentList link='lesson-recordings' />;
 };

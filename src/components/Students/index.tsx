@@ -156,7 +156,11 @@ export default function StudentsLayout() {
       <CreateStudentModal />
 
       {students && (
-        <DataTable
+        <>
+          <div className="w-full">
+            <span className="text-gray-500 text-start">Усього активних студентів: {students.meta.activeStudentsCount}</span>
+         </div>  
+          <DataTable
           //@ts-ignore
           columns={columns}
           data={students.data}
@@ -168,6 +172,7 @@ export default function StudentsLayout() {
             setSearch(newSearch);
           }}
         />
+        </>
       )}
 
       {selectedId && (

@@ -11,7 +11,7 @@ import { YS_TOKEN } from '@/lib/consts';
 import {
   Timer, Music, LayoutGrid, Piano, MessageCircle,
   Banknote, BookAudio, BookOpen, Component, ChevronDown, ChevronUp,
-  CreditCard, Folder, Image, Layers, LogOut, Menu, MonitorPlay,
+  CreditCard, Folder, Image, Layers, LogOut, LayoutList, Menu, MonitorPlay,
   Moon, PanelLeftClose, PanelLeftOpen, Sun, TagsIcon, User, Users, Video, X
 } from 'lucide-react';
 import { useMetronome } from '@/providers/MetronomeContext';
@@ -87,6 +87,11 @@ export default function Sidebar() {
       href: '/main/lesson-recording',
     },
     {
+      name: 'tracker',
+      icon: <LayoutList className="w-5 h-5" />,
+      href: '/main/tracker',
+    },
+    {
       name: 'my_widgets',
       icon: <Component className="w-5 h-5" />,
       submenu: [
@@ -114,6 +119,11 @@ export default function Sidebar() {
       name: 'students_database',
       icon: <Users className="w-5 h-5" />,
       href: '/main/students',
+    },
+    {
+      name: 'tracker',
+      icon: <LayoutList className="w-5 h-5" />,
+      href: '/main/tracker',
     },
     {
       name: 'my_materials',

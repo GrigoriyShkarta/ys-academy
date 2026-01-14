@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import DataTable from '@/common/Table';
 
-export default function StudentList() {
+export default function StudentList({link}: {link: string}) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
 
@@ -28,7 +28,7 @@ export default function StudentList() {
       key: 'name',
       label: 'Студент',
       render: (student: Student) => (
-        <Link href={`lesson-recordings/${student.id}`} className="flex items-center gap-2">
+        <Link href={`${link}/${student.id}`} className="flex items-center gap-2">
           <Avatar className="w-8 h-8">
             <AvatarImage src={student?.photo ?? ''} alt={student.name} />
             <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
