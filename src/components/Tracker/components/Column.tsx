@@ -30,11 +30,11 @@ export default function Column({
   const {user} = useUser();
 
   return (
-    <div className="flex flex-col h-full min-h-[500px]">
+    <div className="flex flex-col h-fit">
       <div 
         ref={setNodeRef}
         className={cn(
-          "flex-1 bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-4 transition-all duration-200 shadow-sm",
+          "flex-1 bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-4 transition-all duration-200 shadow-sm flex flex-col min-h-0",
           isOver && "bg-primary/5 border-primary/30 ring-2 ring-primary/10 scale-[1.01]"
         )}
       >
@@ -63,7 +63,7 @@ export default function Column({
         </div>
 
         <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-3">
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar pt-1">
             {tasks.map(task => (
               <TaskCard
                 key={task.id}

@@ -25,3 +25,8 @@ export const moveTask = async ( taskId: number, {userId, columnId, newOrder}: {u
   const {data} = await axiosInstance.patch(`/trackers/${taskId}/move`, {columnId, newOrder, userId});
   return data;
 };
+
+export const toggleSubtask = async (taskId: number, subtaskId: number, userId: number, completed: boolean) => {
+  const {data} = await axiosInstance.patch('/trackers/toggle', {taskId, subtaskId, userId, completed});
+  return data;
+};

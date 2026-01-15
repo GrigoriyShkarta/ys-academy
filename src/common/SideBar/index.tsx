@@ -84,7 +84,7 @@ export default function Sidebar() {
     {
       name: 'lesson_recordings',
       icon: <MonitorPlay className="w-5 h-5" />,
-      href: '/main/lesson-recording',
+      href: '/main/lesson-recordings',
     },
     {
       name: 'tracker',
@@ -126,6 +126,11 @@ export default function Sidebar() {
       href: '/main/tracker',
     },
     {
+      name: 'lesson_recordings',
+      href: '/main/lesson-recordings',
+      icon: <MonitorPlay className="w-5 h-5" />,
+    },
+    {
       name: 'my_materials',
       icon: <Folder className="w-5 h-5" />,
       submenu: [
@@ -136,11 +141,6 @@ export default function Sidebar() {
           name: 'categories',
           href: '/main/materials/categories',
           icon: <TagsIcon className="w-4 h-4" />,
-        },
-        {
-          name: 'lesson_recordings',
-          href: '/main/materials/lesson-recordings',
-          icon: <MonitorPlay className="w-4 h-4" />,
         },
         {
           name: 'lessons',

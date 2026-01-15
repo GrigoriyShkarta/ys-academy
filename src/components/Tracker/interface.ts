@@ -1,4 +1,4 @@
-export type ColumnId = 'homework' | 'songs' | 'in-progress' | 'completed' | 'plans';
+export type ColumnId = 'homework' | 'songs' | 'in_progress' | 'completed' | 'plans' | 'song_plans' | 'song_in_progress' | 'song_ready';
 
 export interface Subtask {
   id: number;

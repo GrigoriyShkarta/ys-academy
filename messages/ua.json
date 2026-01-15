@@ -58,6 +58,8 @@
   },
 
   "Students": {
+    "tracker": "Трекер",
+    "lesson-recordings": "Записи уроків",
     "status": "Статус",
     "active": "Активний",
     "inactive": "Неактивний",

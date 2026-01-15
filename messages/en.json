@@ -58,6 +58,8 @@
   },
 
   "Students": {
+    "tracker": "Tracker",
+    "lesson-recordings": "Lesson Recordings",
     "status": "Status",
     "active": "Active",
     "inactive": "Inactive",

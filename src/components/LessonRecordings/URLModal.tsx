@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { addLessonRecording } from '@/components/Materials/LessonRecordings/actions';
+import { addLessonRecording } from '@/components/LessonRecordings/actions';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { checkYouTubeVideoExists } from '@/lib/utils';

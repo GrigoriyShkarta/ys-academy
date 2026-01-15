@@ -14,6 +14,8 @@ import { useTranslations } from 'next-intl';
 import Loader from '@/common/Loader';
 import Subscriptions from '@/components/Students/Student/components/Subscriptions/Subscriptions';
 import { useUser } from '@/providers/UserContext';
+import TrackerLayout from '@/components/Tracker';
+import LessonRecordings from '@/components/LessonRecordings';
 
 export default function Student({ id }: { id: number }) {
   const [open, setOpen] = useState(false);
@@ -71,9 +73,19 @@ export default function Student({ id }: { id: number }) {
                 {t('courses')}
               </TabsTrigger>
             )}
+            {user?.role === 'super_admin' && (
+              <TabsTrigger value="tracker" className="px-4 py-2 rounded-t-lg shadow-sm">
+                {t('tracker')}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="subscriptions" className="px-4 py-2 rounded-t-lg shadow-sm">
               {t('subscriptions')}
             </TabsTrigger>
+            {user?.role === 'super_admin' && (
+              <TabsTrigger value="lesson-recordings" className="px-4 py-2 rounded-t-lg shadow-sm">
+                {t('lesson-recordings')}
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="profile">
@@ -84,8 +96,16 @@ export default function Student({ id }: { id: number }) {
             <StudentCourses courses={student.courses} userId={id} />
           </TabsContent>
 
+          <TabsContent value="tracker">
+            <TrackerLayout id={id} isProfile/>
+          </TabsContent>
+
           <TabsContent value="subscriptions">
             <Subscriptions student={student} />
+          </TabsContent>
+
+          <TabsContent value="lesson-recordings">
+            <LessonRecordings id={id} isProfile />
           </TabsContent>
         </Tabs>
       </div>

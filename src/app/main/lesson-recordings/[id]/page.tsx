@@ -1,4 +1,4 @@
-import LessonRecordingsLayout from '@/components/Materials/LessonRecordings';
+import LessonRecordingsLayout from '@/components/LessonRecordings';
 
 export default async function LessonRecordingsPage({
   params,

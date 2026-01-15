@@ -5,11 +5,11 @@ import { getStudent } from '@/components/Students/Student/actions';
 import { useState } from 'react';
 import Loader from '@/common/Loader';
 import { Card } from '@/components/ui/card';
-import SubscriptionInfo from '@/components/Materials/LessonRecordings/SubscriptionInfo';
+import SubscriptionInfo from '@/components/LessonRecordings/SubscriptionInfo';
 import { useUser } from '@/providers/UserContext';
 import { useTranslations } from 'next-intl';
 
-export default function LessonRecordingsLayout({ id }: { id: number }) {
+export default function LessonRecordingsLayout({ id, isProfile }: { id: number, isProfile?: boolean }) {
   const [showMore, setShowMore] = useState<number[]>([]);
   const {user} = useUser();
   const t = useTranslations('Students')
@@ -31,8 +31,8 @@ export default function LessonRecordingsLayout({ id }: { id: number }) {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 mt-18 md:mt-0 w-full max-h-screen overflow-auto">
-      {user?.role === 'super_admin' ? <h1 className="text-4xl">{student.name}</h1> : <h1 className="text-4xl text-center">{t('my_lesson_recordings')}</h1>}
+    <div className={`max-w-7xl mx-auto ${isProfile ? 'px-0' : 'px-4'} flex flex-col gap-4 p-4 mt-18 md:mt-0 w-full max-h-screen overflow-auto`}>
+      {!isProfile && (user?.role === 'super_admin' ? <h1 className="text-4xl">{student.name}</h1> : <h1 className="text-4xl text-center">{t('my_lesson_recordings')}</h1>)}
       {student?.subscriptions
         ?.sort((a, b) => b.id - a.id)
         .map((sub, idx) => {

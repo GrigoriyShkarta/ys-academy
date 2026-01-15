@@ -6,7 +6,7 @@ import { StudentSubscription } from '@/components/Students/interface';
 import { getYouTubeId } from '@/lib/utils';
 import { CirclePlus } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import UrlModal from '@/components/Materials/LessonRecordings/URLModal';
+import UrlModal from '@/components/LessonRecordings/URLModal';
 import { useTranslations } from 'next-intl';
 import { useUser } from '@/providers/UserContext';
 
