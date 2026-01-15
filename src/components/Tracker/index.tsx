@@ -227,7 +227,31 @@ export default function TrackerLayout({id, isProfile}: {id?: number, isProfile?:
     }
 
       {/* Board Section */}
-      <div className="flex-1 min-h-0">
+      {isProfile && (
+        <div className="flex bg-muted p-1 rounded-xl w-fit mx-auto">
+              <button
+                onClick={() => setCurrentTab('tasks')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  currentTab === 'tasks' 
+                    ? 'bg-background text-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Завдання
+              </button>
+              <button
+                onClick={() => setCurrentTab('songs')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  currentTab === 'songs' 
+                    ? 'bg-background text-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Пісні
+              </button>
+            </div>
+      )}
+        <div className="flex-1 min-h-0">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}

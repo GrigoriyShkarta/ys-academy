@@ -43,7 +43,6 @@ export default function LessonSaveModal({
 }: Props) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
-  const [selectedModule, setSelectedModule] = useState<string[]>([]);
   const { user } = useUser();
 
   const t = useTranslations('Materials');

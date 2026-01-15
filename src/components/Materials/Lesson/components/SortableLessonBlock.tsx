@@ -31,7 +31,7 @@ export function SortableLessonBlock({ id, ...props }: SortableLessonBlockProps) 
     transition,
     opacity: isDragging ? 0.5 : 1,
     position: 'relative' as const,
-    zIndex: isDragging ? 1000 : 1,
+    zIndex: isDragging ? 1000 : 0.5,
   };
 
   return (

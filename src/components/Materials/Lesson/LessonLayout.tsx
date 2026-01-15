@@ -18,12 +18,17 @@ import { useUser } from '@/providers/UserContext';
 import { uploadPhoto } from '../Photo/action';
 import {
   DndContext,
-  closestCenter,
+  closestCorners,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  defaultDropAnimationSideEffects,
+  MeasuringStrategy,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -32,6 +37,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { SortableLessonBlock } from '@/components/Materials/Lesson/components/SortableLessonBlock';
+import LessonBlock from '@/components/Materials/Lesson/components/LessonBlock';
 
 export default function LessonLayout({ id }: { id: number }) {
   const [isEditPlace, setIsEditPlace] = useState(false);
@@ -43,6 +49,7 @@ export default function LessonLayout({ id }: { id: number }) {
   const [openSaveModal, setOpenSaveModal] = useState(false);
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
   const [open, setOpen] = useState(false);
+  const [activeId, setActiveId] = useState<number | null>(null);
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -57,11 +64,25 @@ export default function LessonLayout({ id }: { id: number }) {
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -71,9 +92,12 @@ export default function LessonLayout({ id }: { id: number }) {
         const oldIndex = items.findIndex(item => item.blockId === active.id);
         const newIndex = items.findIndex(item => item.blockId === over.id);
 
+        if (oldIndex === -1 || newIndex === -1) return items;
+
         return arrayMove(items, oldIndex, newIndex);
       });
     }
+    setActiveId(null);
   };
 
   useEffect(() => {
@@ -136,6 +160,7 @@ export default function LessonLayout({ id }: { id: number }) {
     );
   };
 
+
   const handleDeleteLesson = async () => {
     await deleteLesson([id]);
     await queryClient.invalidateQueries({ queryKey: ['lessons'] });
@@ -145,7 +170,8 @@ export default function LessonLayout({ id }: { id: number }) {
   const addBlock = () => {
     // @ts-ignore
     setLessonDoc(prev => {
-      const newBlockId = prev.length > 0 ? prev[prev.length - 1].blockId + 1 : 1;
+      const maxId = prev.length > 0 ? Math.max(...prev.map(item => item.blockId)) : 0;
+      const newBlockId = maxId + 1;
 
       return [
         ...prev,
@@ -171,7 +197,7 @@ export default function LessonLayout({ id }: { id: number }) {
 
   return (
     <div className="space-y-6 pb-4 relative py-10 md:py-0">
-      <div className="flex justify-between items-center md:p-4 sm:p-0">
+      <div className="flex justify-between items-center md:p-4 sm:p-0 z-10 relative">
         <button
           type="button"
           onClick={() => router.back()}
@@ -220,8 +246,18 @@ export default function LessonLayout({ id }: { id: number }) {
         {lessonDoc.length > 0 && (
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
+            onDragCancel={() => setActiveId(null)}
+            measuring={{
+              droppable: {
+                strategy: MeasuringStrategy.Always,
+              },
+            }}
+            // autoScroll={{
+            //   threshold: 0.3,
+            // }}
           >
             <SortableContext
               items={lessonDoc.map(item => item.blockId)}
@@ -239,6 +275,18 @@ export default function LessonLayout({ id }: { id: number }) {
                 />
               ))}
             </SortableContext>
+            <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }) }}>
+              {activeId ? (
+                 <div className="bg-background border rounded-lg shadow-xl opacity-90 overflow-hidden">
+                    <LessonBlock
+                      blockId={activeId}
+                      lesson={lessonDoc.find(i => i.blockId === activeId)?.content || []}
+                      editable={true} // Keep editable true so handle renders, but interaction is effectively disabled by overlay
+                      isSelectBlock={false}
+                    />
+                 </div>
+              ) : null}
+            </DragOverlay>
           </DndContext>
         )}
 

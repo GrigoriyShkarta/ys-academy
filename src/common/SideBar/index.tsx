@@ -120,16 +120,16 @@ export default function Sidebar() {
       icon: <Users className="w-5 h-5" />,
       href: '/main/students',
     },
-    {
-      name: 'tracker',
-      icon: <LayoutList className="w-5 h-5" />,
-      href: '/main/tracker',
-    },
-    {
-      name: 'lesson_recordings',
-      href: '/main/lesson-recordings',
-      icon: <MonitorPlay className="w-5 h-5" />,
-    },
+    // {
+    //   name: 'tracker',
+    //   icon: <LayoutList className="w-5 h-5" />,
+    //   href: '/main/tracker',
+    // },
+    // {
+    //   name: 'lesson_recordings',
+    //   href: '/main/lesson-recordings',
+    //   icon: <MonitorPlay className="w-5 h-5" />,
+    // },
     {
       name: 'my_materials',
       icon: <Folder className="w-5 h-5" />,
