@@ -21,7 +21,7 @@
   "Main": {
     "my_profile": "Мій профіль",
     "welcome_back": "Вітаю",
-    "continue_learning_prompt": "Хочеш продовжити навчання? Переглянь свої курси",
+    "continue_learning_prompt": "Хочеш продовжити навчання? Переглянь свої матеріали",
     "welcome_title": "Ласкаво просимо до YS Vocal Academy",
     "welcome_description": "Ваша універсальна платформа для управління освітою та навчанням.",
     "courses": "Курси",
@@ -282,6 +282,8 @@
     "tolerance": "Похибка",
     "cents": "центів",
     "standard": "Стандартний",
-    "oscilloscope": "Осцилограф"
+    "oscilloscope": "Осцилограф",
+    "notifications": "Повідомлення",
+    "no_notifications": "Немає повідомлень"
   }
 }

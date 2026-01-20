@@ -35,7 +35,7 @@ export default function UrlModal({ lessonId, studentId, closeModal }: Props) {
   const handleAddUrl = async () => {
     try {
       setLoading(true);
-      await addLessonRecording(lessonId, url);
+      await addLessonRecording(lessonId, url, studentId);
       client.invalidateQueries({ queryKey: ['student', studentId] });
       closeModal();
     } catch (e) {

@@ -126,3 +126,13 @@ export const updateLessonStatusInSubscription = async (
 
   return data;
 };
+
+export const readNotifications = async (notificationsIds: number[]) => {
+  const { data } = await axiosInstance.patch(`/user/notifications/`, { notificationsIds });
+  return data;
+};
+
+export const deleteNotification = async (notificationId: number) => {
+  const { data } = await axiosInstance.delete(`/user/notifications/${notificationId}`);
+  return data;
+};

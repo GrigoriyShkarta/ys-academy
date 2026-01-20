@@ -17,6 +17,7 @@ import PianoWidget from '@/common/Widgets/PianoWidget';
 import WidgetHub from '@/common/Widgets/WidgetHub';
 import { getLastLessonDate, shouldHighlightLesson, isWithinWeekOrPast } from '@/components/Students/utils';
 import { useState } from 'react';
+import NotificationBell from '@/components/Students/NotificationBell';
 
 export default function MainLayout({ children }: Readonly<{ children: ReactNode }>) {
   const { setUser, user } = useUser();
@@ -70,6 +71,12 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
           <WidgetHub isShiftedByReminder={isShiftedByReminder} />
           <div className="flex">
             <Sidebar />
+
+            <div className="absolute top-4 right-6 z-50 hidden md:block">
+              {userData?.role !== 'super_admin' && studentData && (
+                 <NotificationBell notifications={studentData.notifications ?? []} />
+              )}
+            </div>
 
             {children}
 

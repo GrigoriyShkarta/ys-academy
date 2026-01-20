@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -18,6 +18,10 @@ import { useMetronome } from '@/providers/MetronomeContext';
 import { useTuner } from '@/providers/TunerContext';
 import { usePiano } from '@/providers/PianoContext';
 import { cn } from '@/lib/utils';
+import NotificationBell from '@/components/Students/NotificationBell';
+import { getMe } from '@/services/profile';
+import { getStudent } from '@/components/Students/Student/actions';
+import { useQuery } from '@tanstack/react-query';
 
 /* ===================== TYPES ===================== */
 
@@ -33,6 +37,7 @@ type MenuItem = {
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showWidgetsMenu, setShowWidgetsMenu] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
 
   const pathname = usePathname() || '/';
@@ -43,8 +48,32 @@ export default function Sidebar() {
   const { isWidgetVisible: isMetronomeVisible, showWidget: showMetronome, hideWidget: hideMetronome } = useMetronome();
   const { isWidgetVisible: isTunerVisible, showWidget: showTuner, hideWidget: hideTuner } = useTuner();
   const { isWidgetVisible: isPianoVisible, showWidget: showPiano, hideWidget: hidePiano } = usePiano();
+  
+  const { data: userData } = useQuery({
+    queryKey: ['user'],
+    queryFn: getMe,
+  });
+
+  const { data: studentData } = useQuery({
+    queryKey: ['student', userData?.id],
+    queryFn: () => getStudent(userData!.id),
+    enabled: !!userData?.id && userData?.role !== 'super_admin',
+  });
 
   /* ===================== HELPERS ===================== */
+  
+  const widgetRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (widgetRef.current && !widgetRef.current.contains(event.target as Node)) {
+        setShowWidgetsMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const isActive = (href?: string) =>
     !!href && (pathname === href || pathname.startsWith(`${href}/`));
@@ -368,7 +397,7 @@ export default function Sidebar() {
       {/* MOBILE */}
       <header className="fixed top-0 z-50 w-full bg-gradient-to-b from-gray-900 to-gray-800 text-white md:hidden">
         <div className="flex items-center justify-between p-4">
-          <span className="text-lg font-bold">YS Vocal Coach</span>
+          <span className="text-lg font-bold">YS Vocal Academy</span>
           <div className="flex items-center gap-2">
             <Link
               href="https://t.me/yana_vocalcoach"
@@ -377,24 +406,44 @@ export default function Sidebar() {
             >
               <MessageCircle className="w-6 h-6" />
             </Link>
-            <button
-              onClick={() => isPianoVisible ? hidePiano() : showPiano()}
-              className={cn("p-2 transition-colors", isPianoVisible ? "text-blue-400" : "text-white")}
-            >
-              <Piano className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => isTunerVisible ? hideTuner() : showTuner()}
-              className={cn("p-2 transition-colors", isTunerVisible ? "text-emerald-400" : "text-white")}
-            >
-              <Music className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => isMetronomeVisible ? hideMetronome() : showMetronome()}
-              className={cn("p-2 transition-colors", isMetronomeVisible ? "text-orange-400" : "text-white")}
-            >
-              <Timer className="w-6 h-6" />
-            </button>
+
+            <div className="relative group" ref={widgetRef}>
+              <button
+                onClick={() => setShowWidgetsMenu(v => !v)}
+                className="p-2 text-white hover:text-blue-400 transition-colors"
+              >
+                <LayoutGrid className="w-6 h-6" />
+              </button>
+              
+              {showWidgetsMenu && <div className="absolute right-0 top-[40px] left-[-18px] flex flex-col gap-2 p-2 bg-gray-900/95 backdrop-blur-sm rounded-xl border border-white/10 shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
+                <button
+                  onClick={() => isPianoVisible ? hidePiano() : showPiano()}
+                  className={cn("p-2 transition-all hover:bg-white/10 rounded-lg", isPianoVisible ? "text-blue-400 bg-white/5" : "text-white")}
+                  title={t('piano')}
+                >
+                  <Piano className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => isTunerVisible ? hideTuner() : showTuner()}
+                  className={cn("p-2 transition-all hover:bg-white/10 rounded-lg", isTunerVisible ? "text-emerald-400 bg-white/5" : "text-white")}
+                  title={t('tuner')}
+                >
+                  <Music className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => isMetronomeVisible ? hideMetronome() : showMetronome()}
+                  className={cn("p-2 transition-all hover:bg-white/10 rounded-lg", isMetronomeVisible ? "text-orange-400 bg-white/5" : "text-white")}
+                  title={t('metronome')}
+                >
+                  <Timer className="w-5 h-5" />
+                </button>
+              </div>}
+            </div>
+
+            {userData?.role !== 'super_admin' && studentData && (
+                <NotificationBell notifications={studentData.notifications ?? []} />
+            )}
+            
             <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(v => !v)}>
               {mobileMenuOpen ? <X /> : <Menu />}
             </Button>

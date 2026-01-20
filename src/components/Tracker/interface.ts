@@ -13,6 +13,7 @@ export interface Task {
   columnId: ColumnId;
   order: number;
   subtasks: Subtask[];
+  createdAt: string;
 }
 
 export interface IColumn {

@@ -18,6 +18,14 @@ export interface Student {
   subscriptions?: StudentSubscription[];
   password?: string;
   accessExpiryDate?: string;
+  notifications?: Notification[];
+}
+
+export interface Notification {
+  id: number;
+  title: string;
+  read: boolean;
+  createdAt: string;
 }
 
 export interface StudentModule {

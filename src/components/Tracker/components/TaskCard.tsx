@@ -9,6 +9,7 @@ import { Task } from "../interface";
 import { cn } from "@/lib/utils";
 import TaskDialog from "./TaskModal";
 import { useUser } from "@/providers/UserContext";
+import { format } from "date-fns";
 
 interface TaskCardProps {
   task: Task;
@@ -145,7 +146,7 @@ export default function TaskCard({
 
         {totalSubtasks > 0 && (
           <CardContent 
-            className="px-4 pb-4 pt-1 space-y-1.5"
+            className="px-4 pb-0 pt-1 space-y-1.5"
             onPointerDown={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-1 p-2 rounded-xl bg-muted/30 border border-border/10">
@@ -190,6 +191,8 @@ export default function TaskCard({
             </div>
           </CardContent>
         )}
+
+        <span className="text-[10px] text-muted-foreground p-3">{format(new Date(task.createdAt), 'dd.MM.yyyy HH:mm')}</span>
 
         {(user!.role === 'super_admin') && (
           <div 

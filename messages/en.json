@@ -275,6 +275,8 @@
     "tolerance": "Tolerance",
     "cents": "cents",
     "standard": "Standard",
-    "oscilloscope": "Oscilloscope"
+    "oscilloscope": "Oscilloscope",
+    "notifications": "Notifications",
+    "no_notifications": "No notifications"
   }
 }
