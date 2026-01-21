@@ -54,7 +54,9 @@
     "metronome": "Metronome",
     "tuner": "Tuner",
     "piano": "Piano",
-    "tracker": "Tracker"
+    "tracker": "Tracker",
+    "my_boards": "My boards",
+    "boards": "Boards"
   },
 
   "Students": {

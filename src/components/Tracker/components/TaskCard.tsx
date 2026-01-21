@@ -61,7 +61,7 @@ export default function TaskCard({
       ref={setNodeRef} 
       style={style} 
       className={cn(
-        "mb-3 group outline-none select-none touch-none",
+        "mb-3 group outline-none select-none",
         isOverlay && "cursor-grabbing"
       )}
       {...attributes}

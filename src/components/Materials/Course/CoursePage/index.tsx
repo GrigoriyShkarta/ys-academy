@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { deleteCourse, getCourse } from '@/components/Materials/Course/action';
 import Loader from '@/common/Loader';
-import { ChevronLeft, CircleChevronRight, LockKeyhole } from 'lucide-react';
+import { ChevronLeft, CircleChevronRight, LockKeyhole, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Chip from '@/common/Chip';
 import CourseModal from '@/components/Materials/Course/CourseModal';
@@ -180,6 +180,62 @@ export default function CoursePageLayout({
             })}
         </div>
       )}
+
+      <div className="space-y-3 mt-4">
+        {course?.lessons &&course?.lessons?.length > 0 && (
+          course?.lessons?.map((lesson: any) => {
+            const hasAccess = !!lesson.access;
+
+            // Общий контейнер
+            const containerClasses = `
+              border rounded-lg p-4 transition-all
+              ${
+                hasAccess
+                  ? 'hover:shadow-md hover:bg-accent/5 cursor-pointer group'
+                  : 'bg-muted/30 border-muted opacity-75 cursor-not-allowed'
+              }
+            `;
+
+            const titleClasses = hasAccess
+              ? 'font-medium text-foreground group-hover:underline'
+              : 'font-medium text-muted-foreground';
+
+            const statusText = hasAccess ? t('let_access') : t('close');
+            const statusClasses = hasAccess
+              ? 'text-xs text-green-600 dark:text-green-400'
+              : 'text-xs text-muted-foreground';
+
+            return hasAccess ? (
+              // Доступный урок — кликабельный
+              <Link key={lesson.id} href={`/main/materials/lessons/${lesson.id}`} className="block">
+                <article className={containerClasses}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className={titleClasses}>{lesson.title}</h3>
+                      <p className={statusClasses}>{statusText}</p>
+                    </div>
+                    {/* Стрелка появляется при hover */}
+                    <ChevronLeft className="w-5 h-5 text-muted-foreground rotate-180 opacity-0 group-hover:opacity-100 transition" />
+                  </div>
+                </article>
+              </Link>
+            ) : (
+              // Закрытый урок
+              <article key={lesson.id} className={containerClasses}>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <h3 className={titleClasses}>{lesson.title}</h3>
+                      <p className={statusClasses}>{statusText}</p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
 
       <CourseModal open={openEditModal} setOpen={setOpenEditModal} course={course} />
       <ConfirmModal

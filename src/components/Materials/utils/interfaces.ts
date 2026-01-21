@@ -86,6 +86,11 @@ export interface Course {
   title: string;
   url?: string;
   modules: StudentModule[];
+  lessons?: {
+    id: number;
+    title: string;
+    order?: number;
+  }[];
   categories?: Category[];
 }
 

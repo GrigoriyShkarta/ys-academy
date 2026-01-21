@@ -45,6 +45,7 @@ export interface StudentLesson {
   access_blocks: number[];
   categories: Category[];
   accessBlocks: string;
+  accessString: string;
 }
 
 export interface StudentCourse {
@@ -55,6 +56,7 @@ export interface StudentCourse {
   modules: StudentModule[];
   categories: Category[];
   progress: number;
+  lessons?: StudentLesson[];
 }
 
 export interface StudentSubscription {

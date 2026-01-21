@@ -44,7 +44,7 @@ export function Auth() {
 
       <div className="mt-8 sm:mt-12 text-center">
         <p className="text-gray-400 text-xs sm:text-sm">
-          {`© 2025 YS Vocal Academy. ${t('all_rights_reserved')}`}
+          {`© 2026 YS Vocal Academy. ${t('all_rights_reserved')}`}
         </p>
       </div>
     </div>

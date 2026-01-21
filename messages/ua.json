@@ -54,7 +54,9 @@
     "metronome": "Метроном",
     "tuner": "Тюнер",
     "piano": "Піаніно",
-    "tracker": "Трекер"
+    "tracker": "Трекер",
+    "my_boards": "Мої дошки",
+    "boards": "Дошки"
   },
 
   "Students": {

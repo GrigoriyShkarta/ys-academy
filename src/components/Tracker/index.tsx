@@ -158,7 +158,7 @@ export default function TrackerLayout({id, isProfile}: {id?: number, isProfile?:
 
   return (
     <div className={`relative ${isProfile ? 'h-1/2' : 'h-screen'} bg-transparent w-full flex flex-col overflow-hidden`}>
-      {!isProfile && <div className="flex-none p-4 sm:p-8 md:p-10 pb-0">
+      {!isProfile && <div className="flex-none p-4 sm:p-8 md:p-10 pb-0 mt-18 md:mt-0">
         <button
           type="button"
           onClick={() => router.back()}
@@ -172,7 +172,7 @@ export default function TrackerLayout({id, isProfile}: {id?: number, isProfile?:
         {/* Header Section */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 max-sm:justify-center">
               <div className="p-2.5 bg-primary/10 rounded-xl">
                 <LayoutList className="w-8 h-8 text-primary" />
               </div>
@@ -182,7 +182,7 @@ export default function TrackerLayout({id, isProfile}: {id?: number, isProfile?:
             </div>
             </div>
             
-            <div className="flex bg-muted p-1 rounded-xl">
+            <div className="flex bg-muted p-1 rounded-xl max-sm:w-fit max-sm:mx-auto">
               <button
                 onClick={() => setCurrentTab('tasks')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${

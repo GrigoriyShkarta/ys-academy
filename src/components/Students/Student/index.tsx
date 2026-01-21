@@ -93,7 +93,7 @@ export default function Student({ id }: { id: number }) {
           </TabsContent>
 
           <TabsContent value="courses">
-            <StudentCourses courses={student.courses} userId={id} />
+            <StudentCourses courses={student.courses} userId={id} isProfile />
           </TabsContent>
 
           <TabsContent value="tracker">

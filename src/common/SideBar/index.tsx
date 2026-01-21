@@ -12,7 +12,7 @@ import {
   Timer, Music, LayoutGrid, Piano, MessageCircle,
   Banknote, BookAudio, BookOpen, Component, ChevronDown, ChevronUp,
   CreditCard, Folder, Image, Layers, LogOut, LayoutList, Menu, MonitorPlay,
-  Moon, PanelLeftClose, PanelLeftOpen, Sun, TagsIcon, User, Users, Video, X
+  Moon, PanelLeftClose, PanelLeftOpen, SquareKanban, Sun, TagsIcon, User, Users, Video, X
 } from 'lucide-react';
 import { useMetronome } from '@/providers/MetronomeContext';
 import { useTuner } from '@/providers/TunerContext';
@@ -120,6 +120,11 @@ export default function Sidebar() {
       icon: <LayoutList className="w-5 h-5" />,
       href: '/main/tracker',
     },
+    // {
+    //   name: 'my_boards',
+    //   href: '/main/boards',
+    //   icon: <SquareKanban className="w-5 h-5" />,
+    // },
     {
       name: 'my_widgets',
       icon: <Component className="w-5 h-5" />,
@@ -158,6 +163,11 @@ export default function Sidebar() {
     //   name: 'lesson_recordings',
     //   href: '/main/lesson-recordings',
     //   icon: <MonitorPlay className="w-5 h-5" />,
+    // },
+    // {
+    //   name: 'boards',
+    //   href: '/main/boards',
+    //   icon: <SquareKanban className="w-5 h-5" />,
     // },
     {
       name: 'my_materials',
