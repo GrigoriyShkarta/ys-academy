@@ -30,6 +30,9 @@ export default function CoursePageLayout({
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const { user } = useUser();
 
+  console.log('user', user);
+  
+
   const t = useTranslations('Common');
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -39,7 +42,7 @@ export default function CoursePageLayout({
   const { data: course, isLoading } = useQuery({
     queryKey: ['course', courseId],
     queryFn: () => getCourse(courseId, userId ? +userId : undefined),
-    enabled: !!courseId,
+    enabled: !!courseId && !!user,
   });
 
   const deleteMutation = useMutation({
@@ -83,11 +86,13 @@ export default function CoursePageLayout({
 
       <div className="flex-col flex gap-4 mb-6">
         <h1 className="text-5xl">{course.title}</h1>
-        <div className="flex gap-1 flex-wrap">
-          {course?.categories?.map(c => (
-            <Chip key={c.id} category={c} />
-          ))}
-        </div>
+        {user?.role === 'super_admin' && (
+          <div className="flex gap-1 flex-wrap">
+            {course?.categories?.map(c => (
+              <Chip key={c.id} category={c} />
+            ))}
+          </div>
+        )}
       </div>
 
       {isStudentPage && userId && course.modules.length > 0 && user?.role !== 'student' ? (
@@ -96,6 +101,8 @@ export default function CoursePageLayout({
         <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full box-border">
           {course?.modules &&
             course.modules.map(module => {
+              console.log('module', module);
+              
               if (module.access) {
                 return (
                   <Link
@@ -121,7 +128,7 @@ export default function CoursePageLayout({
                     </div>
                     {module?.categories && module?.categories?.length > 0 && (
                       <div className="flex gap-1 m-2 justify-center">
-                        {module?.categories?.slice(0, 2).map(category => (
+                        {user?.role === 'super_admin' && module?.categories?.slice(0, 2).map(category => (
                           <Chip key={category.id} category={category} />
                         ))}
                         {module?.categories?.length > 2 && (
@@ -152,7 +159,7 @@ export default function CoursePageLayout({
                     >
                       {module.title}
                     </div>
-                    {module?.categories && module?.categories?.length > 0 && (
+                    {user?.role === 'super_admin' && module?.categories && module?.categories?.length > 0 && (
                       <div className="flex gap-1 m-2 justify-center">
                         {module?.categories?.slice(0, 2).map(category => (
                           <Chip key={category.id} category={category} />
