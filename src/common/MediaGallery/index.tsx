@@ -2,26 +2,40 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { CircleChevronRight, ClipboardList, Edit, FunnelX, Trash2 } from 'lucide-react';
+import { FunnelX, Trash2, Edit, Check, X } from 'lucide-react';
 import Loader from '@/common/Loader';
 import { Category, IFile, Lesson } from '@/components/Materials/utils/interfaces';
 import PreviewModal from '@/common/PreviewModal';
 import ConfirmModal from '@/common/ConfirmModal';
 import Pagination from '@/common/Pagination';
-import { getYouTubeId } from '@/lib/utils';
-import logo from '../../../public/assets/logo.png';
-import Chip from '@/common/Chip';
 import LessonsListModal from '@/common/LessonsListModal';
 import CategoryListModal from '@/common/CategoryListModal';
 import MultiSelect from '@/common/MultiSelect';
 import ConfirmTextChild from '@/common/ConfirmTextChild';
 import { useUser } from '@/providers/UserContext';
+import {
+  DndContext, 
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import MediaItem from './MediaItem';
+import SortableMediaItem from './SortableMediaItem';
 
 interface MultiOption {
   value: string;
@@ -53,6 +67,7 @@ interface MediaGalleryProps {
   selectedMulti?: string[];
   onMultiSelectChange?: (selected: string[]) => void;
   isFiles?: boolean;
+  onReorder?: (newOrder: {id: number, order: number}[]) => void;
 }
 
 export default function MediaGallery({
@@ -80,6 +95,7 @@ export default function MediaGallery({
   selectedMulti = [],
   isFiles,
   onMultiSelectChange,
+  onReorder,
 }: MediaGalleryProps) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [selectedId, setSelectedId] = useState<number>();
@@ -89,10 +105,19 @@ export default function MediaGallery({
   const [lessonsList, setLessonsList] = useState<Lesson[] | undefined>([]);
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const [localSelected, setLocalSelected] = useState<string[]>([]);
+  const [items, setItems] = useState<IFile[]>([]);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const queryClient = useQueryClient();
   const { user } = useUser();
   const t = useTranslations('Common');
+
+  useEffect(() => {
+    if (data) {
+      setItems(data);
+    }
+  }, [data]);
 
   useEffect(() => {
     if (selectedMulti.length > 0) {
@@ -102,17 +127,17 @@ export default function MediaGallery({
 
   const toggleSelect = (id: number) => {
     if (handleClickItem) {
-      handleClickItem(data.find(item => item.id === id)!);
+      handleClickItem(items.find(item => item.id === id)!);
     } else {
       setSelectedIds(prev => (prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]));
     }
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === data.length) {
+    if (selectedIds.length === items.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(data.map(item => item.id));
+      setSelectedIds(items.map(item => item.id));
     }
   };
 
@@ -145,16 +170,95 @@ export default function MediaGallery({
     };
   }, []);
 
-  if (!data) return <Loader />;
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  const isVideoFileUrl = (url?: string) => !!url && /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (active.id !== over?.id) {
+      setItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over?.id);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        return newItems;
+      });
+    }
+  };
+
+  const saveOrder = () => {
+    if (onReorder) {
+        const payload = items.map((item, index) => ({ id: item.id, order: index }));
+        onReorder(payload);
+    }
+    setIsReordering(false);
+  }
+
+  const cancelOrder = () => {
+    setItems(data);
+    setIsReordering(false);
+  }
+
+  if (!items) return <Loader />;
+
+  // Common props for items
+  const itemProps = {
+    selectedIds,
+    toggleSelect,
+    isLink,
+    linkUrl,
+    isPhoto,
+    hiddenCheckbox,
+    hideLessons,
+    userRole: user?.role,
+    handleEdit,
+    setSelectedId,
+    setOpenConfirm,
+    setPreviewUrl,
+    seCategoryList,
+    setLessonsList,
+  };
+
+  const content = (
+    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full box-border">
+      {onReorder && user?.role === 'super_admin' ? (
+        <SortableContext items={items.map(i => i.id)} strategy={rectSortingStrategy} disabled={!isReordering}>
+          {items.map((item) => (
+            <SortableMediaItem
+              key={item.id}
+              item={item}
+              disabled={!isReordering}
+              isReordering={isReordering}
+              {...itemProps}
+            />
+          ))}
+        </SortableContext>
+      ) : (
+        items.map((item) => (
+          <MediaItem
+            key={item.id}
+            item={item}
+            {...itemProps}
+          />
+        ))
+      )}
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4 w-full min-h-[100px]">
       {/* Поиск и массовое удаление */}
-
       <div className="flex flex-col gap-3">
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center flex-wrap">
           {!hiddenSearch && (
             <Input
               placeholder={t('search')}
@@ -209,12 +313,32 @@ export default function MediaGallery({
               {t('from_device')}
             </Button>
           )}
+          
+          {/* Reorder controls */}
+          {onReorder && user?.role === 'super_admin' && (
+             <>
+               {!isReordering ? (
+                 <Button onClick={() => setIsReordering(true)} variant="outline" size="icon" title="Змінити порядок">
+                   <Edit className="w-4 h-4" />
+                 </Button>
+               ) : (
+                 <div className="flex gap-2 ml-auto sm:ml-0">
+                    <Button onClick={saveOrder} variant="default" size="icon" className="bg-green-600 hover:bg-green-700" title="Зберегти порядок">
+                        <Check className="w-4 h-4" />
+                    </Button>
+                    <Button onClick={cancelOrder} variant="destructive" size="icon" title="Скасувати">
+                        <X className="w-4 h-4" />
+                    </Button>
+                 </div>
+               )}
+             </>
+          )}
         </div>
 
-        {!isOneSelectItem && !hiddenClickAll && data.length > 0 && (
+        {!isOneSelectItem && !hiddenClickAll && items.length > 0 && !isReordering && (
           <div className="flex gap-2">
             <Checkbox
-              checked={selectedIds.length === data.length && data.length > 0}
+              checked={selectedIds.length === items.length && items.length > 0}
               onCheckedChange={toggleSelectAll}
             />
             <span className="text-sm text-muted-foreground">{t('select_all')}</span>
@@ -222,128 +346,24 @@ export default function MediaGallery({
         )}
       </div>
 
-      {/* Сетка медиа */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full box-border">
-        {data &&
-          data?.map((item: IFile) => (
-            <div
-              key={item.id}
-              className={`relative group rounded-lg overflow-hidden border hover:shadow-md transition ${
-                selectedIds.includes(item.id) ? 'ring-2 ring-orange-500' : ''
-              }`}
-            >
-              {/* Видео, YouTube или фото */}
-              {isLink ? (
-                <Link href={`${linkUrl}/${item.id}`} className="block">
-                  <img
-                    src={item?.url ? item.url : logo.src}
-                    alt={item.title}
-                    className="w-full h-48 object-cover cursor-pointer"
-                  />
-                </Link>
-              ) : getYouTubeId(item?.url ?? '') ? (
-                <iframe
-                  className="w-full h-48 object-cover cursor-pointer"
-                  src={`https://www.youtube.com/embed/${getYouTubeId(item?.url ?? '')}`}
-                  title={item.title}
-                  allowFullScreen
-                  onClick={() => setPreviewUrl(item?.url ?? '')}
-                />
-              ) : !isPhoto || isVideoFileUrl(item.url) ? (
-                <video
-                  src={item.url}
-                  controls
-                  className="w-full h-48 object-cover cursor-pointer"
-                  onClick={() => setPreviewUrl(item?.url ?? '')}
-                />
-              ) : (
-                <img
-                  src={item.url}
-                  alt={item.title}
-                  className="w-full h-48 object-cover cursor-pointer"
-                  onClick={() => setPreviewUrl(item?.url ?? '')}
-                />
-              )}
+      {/* Сетка медиа с DND или без */}
+      {onReorder && user?.role === 'super_admin' ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          {content}
+        </DndContext>
+      ) : (
+        content
+      )}
 
-              {/* Чекбокс выбора */}
-              {!hiddenCheckbox && (
-                <Checkbox
-                  checked={selectedIds.includes(item.id)}
-                  onCheckedChange={() => toggleSelect(item.id)}
-                  className="absolute top-2 left-2 bg-accent/80! w-6 h-6 rounded-sm"
-                />
-              )}
-
-              {/* Кнопки редактирования и удаления */}
-              {handleEdit && (
-                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      handleEdit(item);
-                    }}
-                    className="bg-accent/80 p-1 rounded-sm shadow hover:bg-accent text-white"
-                    type="button"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      setSelectedId(item.id);
-                      setOpenConfirm(true);
-                    }}
-                    className="bg-destructive/80 p-1 rounded-sm shadow hover:bg-destructive text-white"
-                    type="button"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              )}
-
-              {item?.progress && (
-                <div className="absolute left-2 top-2 p-1 bg-white/50 text-xs rounded-xl">
-                  {item.progress}%
-                </div>
-              )}
-
-              <div
-                className="p-2 text-center text-sm font-medium text-muted-foreground truncate"
-                title={item.title}
-              >
-                {item.title}
-              </div>
-              {item?.categories && item?.categories?.length > 0 && (
-                <div className="flex gap-1 m-2 justify-center">
-                  {item?.categories?.slice(0, 2).map(category => (
-                    <Chip key={category.id} category={category} />
-                  ))}
-                  {item?.categories?.length > 2 && (
-                    <CircleChevronRight
-                      className="cursor-pointer"
-                      onClick={() => seCategoryList(item.categories)}
-                    />
-                  )}
-                </div>
-              )}
-              {!hideLessons &&
-                user?.role === 'super_admin' &&
-                item?.lessons &&
-                item?.lessons?.length > 0 && (
-                  <div className="flex gap-1 m-2 justify-center">
-                    <ClipboardList
-                      onClick={() => setLessonsList(item.lessons)}
-                      className="cursor-pointer"
-                    />
-                  </div>
-                )}
-            </div>
-          ))}
-      </div>
-
-      {currentPage && totalPages && onPageChange && data.length > 0 ? (
+      {currentPage && totalPages && onPageChange && items.length > 0 ? (
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
       ) : null}
+      
       {previewUrl && (
         <PreviewModal
           open={!!previewUrl}
