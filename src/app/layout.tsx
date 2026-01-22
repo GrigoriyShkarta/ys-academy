@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     url: 'https://ys-academy.vercel.app/main',
     images: [
       {
-        url: 'https://ys-academy.vercel.app/assets/ys_ava.jpg',
+        url: 'https://ys-academy.vercel.app/assets/ys_ava.jpeg',
         width: 1200,
         height: 630,
         alt: 'Викладач вокалу Яна Сабада',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'YS Vocal Academy',
     description: 'Вокальна освіта, що виведе тебе на новий рівень',
-    images: ['https://ys-academy.vercel.app/assets/ys_ava.jpg'],
+    images: ['https://ys-academy.vercel.app/assets/ys_ava.jpeg'],
   },
   metadataBase: new URL('https://ys-academy.vercel.app/main'),
 };
