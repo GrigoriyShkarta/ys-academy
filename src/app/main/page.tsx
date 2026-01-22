@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/providers/UserContext';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import ava from '../../../public/assets/ys-ava.jpg';
+import ava from '../../../public/assets/ys_ava.jpg';
 import { useTranslations } from 'next-intl';
 
 export default function MainPage() {
