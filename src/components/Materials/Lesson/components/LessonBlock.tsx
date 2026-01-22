@@ -11,7 +11,7 @@ import {
 } from '@blocknote/react';
 import { multiColumnDropCursor } from '@blocknote/xl-multi-column';
 import { BlockNoteView } from '@blocknote/shadcn';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
 import ChooseVideoModal from '@/common/MaterialsCommon/ChooseVideoModal';
 import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal';
@@ -19,6 +19,7 @@ import { schema } from '@/components/Materials/utils/utils';
 import { Button } from '@/components/ui/button';
 import { Trash2, GripVertical } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import PreviewModal from '@/common/PreviewModal';
 
 interface Props {
   lesson?: Block[];
@@ -48,7 +49,30 @@ export default function LessonBlock({
   const [openChoosePhoto, setOpenChoosePhoto] = useState(false);
   const [openChooseAudio, setOpenChooseAudio] = useState(false);
   const [openChooseVideo, setOpenChooseVideo] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { theme } = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (editable) return;
+
+    const protectContent = () => {
+      if (!containerRef.current) return;
+      const mediaElements = containerRef.current.querySelectorAll('video, audio');
+      mediaElements.forEach((el) => {
+        el.setAttribute('controlsList', 'nodownload');
+      });
+    };
+
+    protectContent();
+
+    const observer = new MutationObserver(protectContent);
+    if (containerRef.current) {
+      observer.observe(containerRef.current, { childList: true, subtree: true });
+    }
+
+    return () => observer.disconnect();
+  }, [editable]);
 
   const editor = useCreateBlockNote({
     // @ts-ignore
@@ -187,6 +211,14 @@ export default function LessonBlock({
     };
   }, [editor]);
 
+  const handleContentClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG' && target.getAttribute('src')) {
+      e.stopPropagation();
+      setPreviewUrl(target.getAttribute('src'));
+    }
+  };
+
   return (
     <>
       {editable && (
@@ -212,17 +244,24 @@ export default function LessonBlock({
         />
       )}
 
-      <BlockNoteView
-        editor={editor}
-        onChange={handleEditorChange}
-        editable={editable}
-        theme={theme === 'light' ? 'light' : 'dark'}
+      <div 
+        ref={containerRef}
+        onClick={handleContentClick}
+        onContextMenu={(e) => !editable && e.preventDefault()}
+        className={!editable ? 'select-none' : undefined}
       >
-        <SuggestionMenuController
-          triggerCharacter={'/'}
-          getItems={async query => filterSuggestionItems(getCustomSlashMenuItems(editor), query)}
-        />
-      </BlockNoteView>
+        <BlockNoteView
+          editor={editor}
+          onChange={handleEditorChange}
+          editable={editable}
+          theme={theme === 'light' ? 'light' : 'dark'}
+        >
+          <SuggestionMenuController
+            triggerCharacter={'/'}
+            getItems={async query => filterSuggestionItems(getCustomSlashMenuItems(editor), query)}
+          />
+        </BlockNoteView>
+      </div>
 
       <ChoosePhotoModal
         open={openChoosePhoto}
@@ -249,6 +288,14 @@ export default function LessonBlock({
         }}
         handleAdd={(type, content, bankId) => handleAddAudio(content as string, bankId)}
       />
+
+      {previewUrl && (
+        <PreviewModal
+          open={!!previewUrl}
+          setOpen={() => setPreviewUrl(null)}
+          content={previewUrl}
+        />
+      )}
     </>
   );
 }

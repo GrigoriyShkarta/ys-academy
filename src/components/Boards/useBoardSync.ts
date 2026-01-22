@@ -33,9 +33,9 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
     socket.on('connect', () => {
       console.log(`Connected to board sync room: ${roomId}`);
       
-      // Send initial state when connected
-      const snapshot = editor.store.allRecords();
-      socket.emit('init', snapshot);
+      // Request the latest board state from the server
+      // Server should respond with 'init' event containing the data
+      socket.emit('get-board', { roomId });
     });
 
     // Receive updates from other clients
@@ -188,29 +188,68 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
 
     // Listen to local changes and send to server (automatic sync)
     const handleChange = (changes: any) => {
-      console.log('Local changes detected:', changes);
       if (isApplyingRemoteChange.current) return;
       if (!socket.connected) return;
 
-      // Collect all changed records (added + updated)
-      const changedRecords = [
-        ...Object.values(changes.changes.added),
-        ...Object.values(changes.changes.updated),
-      ];
+      const added = Object.values(changes.changes.added) as any[];
+      const updated = Object.values(changes.changes.updated) as any[];
+      const removed = Object.keys(changes.changes.removed);
 
-      // Collect removed record IDs
-      const removedIds = Object.keys(changes.changes.removed);
+      const updates = [...added, ...updated];
 
-      // Send additions/updates
-      if (changedRecords.length > 0) {
-        console.log('Sending update to server:', changedRecords.length, 'records');
-        socket.emit('update', changedRecords);
+      if (updates.length > 0) {
+        // Collect assetIds from image and video shapes to ensure associated assets are sent
+        const assetIds = new Set<string>();
+        updates.forEach((record: any) => {
+          if ((record.type === 'image' || record.type === 'video') && record.props?.assetId) {
+            assetIds.add(record.props.assetId);
+          }
+        });
+
+        // Get referenced asset records from store
+        const referencedAssets = Array.from(assetIds)
+          .map(assetId => editor.store.get(assetId as any))
+          .filter(Boolean);
+
+        // Combine updates and referenced assets, avoiding duplicates
+        const allRecords = [...updates];
+        referencedAssets.forEach((asset: any) => {
+          if (!allRecords.find(r => r.id === asset.id)) {
+            allRecords.push(asset);
+          }
+        });
+
+        // Process records asynchronously to convert blob URLs to base64
+        (async () => {
+          const processedRecords = await Promise.all(
+            allRecords.map(async (record: any) => {
+              // If it's an asset with a local blob URL, convert it to base64
+              if (record.typeName === 'asset' && record.props?.src?.startsWith('blob:')) {
+                try {
+                  const base64 = await blobToBase64(record.props.src);
+                  return {
+                    ...record,
+                    props: {
+                      ...record.props,
+                      src: base64,
+                    },
+                  };
+                } catch (error) {
+                  console.error('Failed to convert asset blob to base64:', error);
+                }
+              }
+              return record;
+            })
+          );
+          
+          console.log('Sending update to server:', processedRecords.length, 'records (including assets with data)');
+          socket.emit('update', processedRecords);
+        })();
       }
 
-      // Send deletions
-      if (removedIds.length > 0) {
-        console.log('Sending delete to server:', removedIds.length, 'records');
-        socket.emit('delete', removedIds);
+      if (removed.length > 0) {
+        // console.log('Sending delete to server:', removed.length, 'records');
+        socket.emit('delete', removed);
       }
     };
 
@@ -305,5 +344,16 @@ function getColorForUser(userId: string): string {
   }, 0);
   
   return colors[Math.abs(hash) % colors.length];
+}
+
+async function blobToBase64(url: string): Promise<string> {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 

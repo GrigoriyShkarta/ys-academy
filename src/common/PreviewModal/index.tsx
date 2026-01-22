@@ -27,7 +27,8 @@ export default function PreviewModal({ open, setOpen, content }: Props) {
         </DialogTitle>
 
         <div
-          className={`relative w-fit max-w-3xl max-h-[80vh] h-full mx-auto overflow-auto rounded-2xl p-4 ${
+          onContextMenu={(e) => e.preventDefault()}
+          className={`relative w-fit max-w-3xl max-h-[80vh] h-full mx-auto overflow-auto rounded-2xl p-4 select-none ${
             isHtmlContent() ? 'bg-white' : 'bg-transparent'
           }`}
         >

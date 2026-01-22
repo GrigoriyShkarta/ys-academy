@@ -12,7 +12,7 @@ import {
   TldrawUiMenuItem,
   useEditor,
   useIsToolSelected,
-  useTools,
+  useTools
 } from 'tldraw';
 import { useBoardSync } from './useBoardSync';
 import { useUser } from '@/providers/UserContext';
@@ -82,6 +82,7 @@ function CustomToolbar() {
     </DefaultToolbar>
   );
 }
+
 
 interface CustomUIProps {
   roomId: string;
@@ -189,12 +190,6 @@ function CustomUI({ roomId }: CustomUIProps) {
         },
       });
     }
-  };
-
-  const handleSave = () => {
-    const snapshot = editor.store.allRecords();
-    console.log('Emulation of request to Back (Body):');
-    console.log(JSON.stringify(snapshot, null, 2));
   };
 
   return (
