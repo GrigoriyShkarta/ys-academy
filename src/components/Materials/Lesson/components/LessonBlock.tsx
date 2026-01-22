@@ -212,6 +212,7 @@ export default function LessonBlock({
   }, [editor]);
 
   const handleContentClick = (e: React.MouseEvent) => {
+    if (editable) return;
     const target = e.target as HTMLElement;
     if (target.tagName === 'IMG' && target.getAttribute('src')) {
       e.stopPropagation();
@@ -248,7 +249,7 @@ export default function LessonBlock({
         ref={containerRef}
         onClick={handleContentClick}
         onContextMenu={(e) => !editable && e.preventDefault()}
-        className={!editable ? 'select-none' : undefined}
+        className={!editable ? 'select-none hide-btn' : undefined}
       >
         <BlockNoteView
           editor={editor}

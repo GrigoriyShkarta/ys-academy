@@ -242,5 +242,13 @@ button {
 .tl-watermark_SEE-LICENSE {
     display: none !important;
 }
+
+
+
+.hide-btn {
+  .bn-toolbar {
+    display: none !important;
+}
+}
     
 
