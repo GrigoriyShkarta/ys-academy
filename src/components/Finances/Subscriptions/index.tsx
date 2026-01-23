@@ -10,9 +10,9 @@ import TableActionMenu from '@/common/TableActioMenu';
 import { ArrowDown, ArrowUp, ChevronsUpDownIcon } from 'lucide-react';
 import DataTable from '@/common/Table';
 import ConfirmModal from '@/common/ConfirmModal';
-import { deleteSubscriptions, getSubscriptions } from '@/components/Materials/Subscriptions/action';
 import Loader from '@/common/Loader';
-import SubscriptionModal from '@/components/Materials/Subscriptions/SubscriptionModal';
+import { getSubscriptions, deleteSubscriptions } from './action';
+import SubscriptionModal from './SubscriptionModal';
 
 export default function SubscriptionsLayout() {
   const [page, setPage] = useState(1);
