@@ -309,7 +309,15 @@
       "no_sales": "No sales in selected period",
       "growth_factor": "Growth Factor",
       "sales_density": "Sales density check",
-      "generating_reports": "Generating your reports..."
+      "generating_reports": "Generating your reports...",
+      "forecast": "Payment Forecast",
+      "forecast_short": "Forecast",
+      "fact": "Real Payments",
+      "expected_payments": "Expected Payments",
+      "expected_sum": "Amount to Pay",
+      "renewal": "Renewal",
+      "extra_payment": "Extra payment",
+      "payment_date": "Payment Date"
     }
   }
 }

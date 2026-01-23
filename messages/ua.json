@@ -316,7 +316,15 @@
       "no_sales": "Немає продажів у вибраному періоді",
       "growth_factor": "Фактор росту",
       "sales_density": "Перевірка щільності продажів",
-      "generating_reports": "Генерація звітів..."
+      "generating_reports": "Генерація звітів...",
+      "forecast": "Прогноз оплат",
+      "forecast_short": "Прогноз",
+      "fact": "Реальні оплати",
+      "expected_payments": "Очікувані оплати",
+      "expected_sum": "Сума до оплати",
+      "renewal": "Поновлення",
+      "extra_payment": "Доплата",
+      "payment_date": "Дата оплати"
     }
   }
 }
