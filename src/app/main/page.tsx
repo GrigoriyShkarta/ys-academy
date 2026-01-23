@@ -73,7 +73,7 @@ export default function MainPage() {
     {
       title: 'my_lesson_recordings',
       icon: MonitorPlay,
-      href: '/main/lesson-recording',
+      href: '/main/lesson-recordings',
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/10',
     },
