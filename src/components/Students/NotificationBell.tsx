@@ -14,6 +14,7 @@ const NOTIFICATION_MESSAGES: Record<string, string> = {
   new_task: 'Вам назначено нове завдання, перейдіть в трекер щоб переглянути',
   lesson_record: 'Додано запис уроку',
   new_lesson: 'Відкрит доступ до нового уроку',
+  student_updated_task_column: 'оновив/оновила статус завдання',
 };
 
 export default function NotificationBell({ notifications }: Props) {
@@ -80,6 +81,14 @@ export default function NotificationBell({ notifications }: Props) {
     return a.read ? 1 : -1;
   });
 
+  const message = (notification: string) => {
+    const split_message = notification.split(' ')
+    if (split_message.length > 1) {
+      return `${split_message[1]} ${NOTIFICATION_MESSAGES[split_message[0]]}`
+    }
+    return NOTIFICATION_MESSAGES[notification]
+  }
+
   return (
     <div className="relative" ref={containerRef}>
       <button
@@ -112,7 +121,7 @@ export default function NotificationBell({ notifications }: Props) {
                   >
                     <div className="pr-8">
                        <p className="text-sm font-medium mb-1">
-                          {NOTIFICATION_MESSAGES[notification.title] || notification.title}
+                          {message(notification.title)}
                        </p>
                        <span className="text-xs text-muted-foreground">
                           {format(new Date(notification.createdAt), 'dd.MM.yyyy HH:mm')}

@@ -288,8 +288,6 @@ export default function BoardLayout({ studentId }: BoardLayoutProps) {
               headers: { 'Content-Type': 'multipart/form-data' },
             });
 
-            console.log('data', data);
-
             return {
               id: assetId as any,
               typeName: 'asset',

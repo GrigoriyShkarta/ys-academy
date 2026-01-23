@@ -27,6 +27,8 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
     queryFn: getMe,
   });
 
+  console.log('userData', userData)
+
   // Получаем полную информацию о студенте с абонементами
   const { data: studentData } = useQuery({
     queryKey: ['student', userData?.id],
@@ -73,9 +75,7 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
             <Sidebar />
 
             <div className="absolute top-4 right-6 z-50 hidden md:block">
-              {userData?.role !== 'super_admin' && studentData && (
-                 <NotificationBell notifications={studentData.notifications ?? []} />
-              )}
+              <NotificationBell notifications={user?.role === 'super_admin' ? userData?.notifications : studentData?.notifications ?? []} />
             </div>
 
             {children}

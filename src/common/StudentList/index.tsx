@@ -44,7 +44,7 @@ export default function StudentList({link}: {link: string}) {
       {students && (
         <DataTable
           columns={columns}
-          data={students.data}
+          data={link === 'boards' ? [{id: 1, name: 'Яна Сабада'}, ...students.data] : students.data}
           totalPages={students.meta.totalPages}
           currentPage={page}
           onPageChange={newPage => setPage(newPage)}
