@@ -17,11 +17,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { StudentSubscription } from '@/components/Students/interface';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getSubscriptions } from '@/components/Materials/Subscriptions/action';
 import { useLocale } from 'use-intl';
 import { subscribeStudent, updateSubscribeStudent } from '@/components/Students/Student/actions';
 import { dateLocales } from '@/lib/consts';
 import { useUser } from '@/providers/UserContext';
+import { getSubscriptions } from '@/components/Finances/Subscriptions/action';
 
 interface Abonement {
   id: number;

@@ -56,7 +56,8 @@
     "piano": "Піаніно",
     "tracker": "Трекер",
     "my_boards": "Мої дошки",
-    "boards": "Дошки"
+    "boards": "Дошки",
+    "reports": "Звіти"
   },
 
   "Students": {
@@ -286,6 +287,36 @@
     "standard": "Стандартний",
     "oscilloscope": "Осцилограф",
     "notifications": "Повідомлення",
-    "no_notifications": "Немає повідомлень"
+    "no_notifications": "Немає повідомлень",
+    "total": "Загалом"
+  },
+
+  "Finance": {
+    "reports": {
+      "title": "Фінансові звіти",
+      "description": "Детальний аналіз ваших доходів та вкладів студентів",
+      "range": "Період:",
+      "export": "Експорт",
+      "total_income": "Загальний дохід",
+      "active_students": "Усього студентів",
+      "avg_ticket": "Середній чек / Студент",
+      "total_sales": "Загальні продажі",
+      "subscriptions": "абонементів",
+      "in_period": "У вибраному періоді",
+      "lifetime_average": "Середнє за весь час",
+      "successful_payments": "Успішні платежі",
+      "vs_period": "пор. з періодом",
+      "revenue_per_student": "Дохід по студентах",
+      "revenue_per_student_desc": "Рейтинг на основі загальних внесків у вибраному періоді",
+      "sort_by": "Сортувати",
+      "income_per_subscription": "Дохід по абонементам",
+      "income_per_subscription_desc": "Розподіл доходів та частка ринку",
+      "units_sold": "продано",
+      "of_mix": "від загального",
+      "no_sales": "Немає продажів у вибраному періоді",
+      "growth_factor": "Фактор росту",
+      "sales_density": "Перевірка щільності продажів",
+      "generating_reports": "Генерація звітів..."
+    }
   }
 }

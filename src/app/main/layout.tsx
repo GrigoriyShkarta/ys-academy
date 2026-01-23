@@ -27,8 +27,6 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
     queryFn: getMe,
   });
 
-  console.log('userData', userData)
-
   // Получаем полную информацию о студенте с абонементами
   const { data: studentData } = useQuery({
     queryKey: ['student', userData?.id],

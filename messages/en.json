@@ -56,7 +56,8 @@
     "piano": "Piano",
     "tracker": "Tracker",
     "my_boards": "My boards",
-    "boards": "Boards"
+    "boards": "Boards",
+    "reports": "Reports"
   },
 
   "Students": {
@@ -279,6 +280,36 @@
     "standard": "Standard",
     "oscilloscope": "Oscilloscope",
     "notifications": "Notifications",
-    "no_notifications": "No notifications"
+    "no_notifications": "No notifications",
+    "total": "Total"
+  },
+
+  "Finance": {
+    "reports": {
+      "title": "Financial Reports",
+      "description": "Detailed analysis of your income streams and student contributions",
+      "range": "Range:",
+      "export": "Export",
+      "total_income": "Total Income",
+      "active_students": "Active Students",
+      "avg_ticket": "Avg. Ticket / Student",
+      "total_sales": "Total Sales",
+      "subscriptions": "subscriptions",
+      "in_period": "In selected period",
+      "lifetime_average": "Lifetime average",
+      "successful_payments": "Successful payments",
+      "vs_period": "vs period",
+      "revenue_per_student": "Revenue per Student",
+      "revenue_per_student_desc": "Performance ranking based on total contributions in period",
+      "sort_by": "Sort By",
+      "income_per_subscription": "Income / Subscription",
+      "income_per_subscription_desc": "Revenue mix and market share",
+      "units_sold": "units sold",
+      "of_mix": "of mix",
+      "no_sales": "No sales in selected period",
+      "growth_factor": "Growth Factor",
+      "sales_density": "Sales density check",
+      "generating_reports": "Generating your reports..."
+    }
   }
 }

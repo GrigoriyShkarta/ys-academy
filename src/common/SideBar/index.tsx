@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/UserContext';
 import { YS_TOKEN } from '@/lib/consts';
 import {
-  Timer, Music, LayoutGrid, Piano, MessageCircle,
+  ClipboardList, Timer, Music, LayoutGrid, Piano, MessageCircle,
   Banknote, BookAudio, BookOpen, Component, ChevronDown, ChevronUp,
   CreditCard, Folder, Image, Layers, LogOut, LayoutList, Menu, MonitorPlay,
   Moon, PanelLeftClose, PanelLeftOpen, SquareKanban, Sun, TagsIcon, User, Users, Video, X
@@ -202,6 +202,11 @@ export default function Sidebar() {
           name: 'subscriptions',
           href: '/main/finance/subscriptions',
           icon: <CreditCard className="w-4 h-4" />,
+        },
+        {
+          name: 'reports',
+          href: '/main/finance/reports',
+          icon: <ClipboardList className="w-4 h-4" />,
         },
       ],
     },
