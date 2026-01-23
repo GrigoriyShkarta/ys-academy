@@ -120,11 +120,11 @@ export default function Sidebar() {
       icon: <LayoutList className="w-5 h-5" />,
       href: '/main/tracker',
     },
-    // {
-    //   name: 'my_boards',
-    //   href: '/main/boards',
-    //   icon: <SquareKanban className="w-5 h-5" />,
-    // },
+    {
+      name: 'my_boards',
+      href: '/main/boards',
+      icon: <SquareKanban className="w-5 h-5" />,
+    },
     {
       name: 'my_widgets',
       icon: <Component className="w-5 h-5" />,
@@ -164,11 +164,11 @@ export default function Sidebar() {
     //   href: '/main/lesson-recordings',
     //   icon: <MonitorPlay className="w-5 h-5" />,
     // },
-    // {
-    //   name: 'boards',
-    //   href: '/main/boards',
-    //   icon: <SquareKanban className="w-5 h-5" />,
-    // },
+    {
+      name: 'boards',
+      href: '/main/boards',
+      icon: <SquareKanban className="w-5 h-5" />,
+    },
     {
       name: 'my_materials',
       icon: <Folder className="w-5 h-5" />,

@@ -16,6 +16,7 @@ import {
 } from 'tldraw';
 import { useBoardSync } from './useBoardSync';
 import { useUser } from '@/providers/UserContext';
+import axiosInstance from '@/services/axios';
 import 'tldraw/tldraw.css';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -103,25 +104,50 @@ function CustomUI({ roomId }: CustomUIProps) {
     userName: user?.name || 'Anonymous',
   });
 
-  const handleAddMedia = (type: LessonItemType, content?: string | File, bankId?: number) => {
-    if (!content || typeof content !== 'string') return;
+  const handleAddMedia = async (type: LessonItemType, content?: string | File, bankId?: number) => {
+    if (!content) return;
+
+    let src = '';
+    let publicId = '';
+    const assetId = `asset:${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    if (content instanceof File) {
+      const formData = new FormData();
+      formData.append('file', content);
+      formData.append('assetId', assetId);
+      formData.append('roomId', roomId);
+
+      try {
+        const { data } = await axiosInstance.post('/boards/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        src = data.url; // Use returned URL from Cloudinary
+        publicId = data.publicId;
+      } catch (error) {
+        console.error('Failed to upload board asset:', error);
+        return;
+      }
+    } else {
+      src = content;
+    }
 
     if (type === 'image') {
-      const assetId = `asset:${Date.now()}`;
       editor.createAssets([
         {
           id: assetId as any,
           typeName: 'asset',
           type: 'image',
           props: {
-            name: 'Image',
-            src: content,
+            name: content instanceof File ? content.name : 'Image',
+            src: src,
             w: 200,
             h: 200,
-            isAnimated: false,
-            mimeType: 'image/png',
+            isAnimated: content instanceof File ? content.type === 'image/gif' : false,
+            mimeType: content instanceof File ? content.type : 'image/png',
           },
-          meta: {},
+          meta: {
+            publicId: publicId ?? ''
+          },
         },
       ]);
 
@@ -136,7 +162,7 @@ function CustomUI({ roomId }: CustomUIProps) {
         },
       });
     } else if (type === 'video') {
-      const isYoutube = content.includes('youtube.com') || content.includes('youtu.be');
+      const isYoutube = typeof src === 'string' && (src.includes('youtube.com') || src.includes('youtu.be'));
       if (isYoutube) {
         editor.createShape({
           type: 'embed',
@@ -145,23 +171,22 @@ function CustomUI({ roomId }: CustomUIProps) {
           props: {
             w: 300,
             h: 200,
-            url: content,
+            url: src,
           },
         });
       } else {
-        const assetId = `asset:${Date.now()}`;
         editor.createAssets([
           {
             id: assetId as any,
             typeName: 'asset',
             type: 'video',
             props: {
-              name: 'Video',
-              src: content,
+              name: content instanceof File ? content.name : 'Video',
+              src: src,
               w: 300,
               h: 200,
               isAnimated: false,
-              mimeType: 'video/mp4',
+              mimeType: content instanceof File ? content.type : 'video/mp4',
             },
             meta: {},
           },
@@ -186,7 +211,7 @@ function CustomUI({ roomId }: CustomUIProps) {
         props: {
           w: 300,
           h: 54,
-          url: content,
+          url: src,
         },
       });
     }
@@ -252,6 +277,36 @@ export default function BoardLayout({ studentId }: BoardLayoutProps) {
         shapeUtils={customShapeUtils}
         components={{
           Toolbar: CustomToolbar,
+        }}
+        onMount={(editor) => {
+          editor.registerExternalAssetHandler('file', async ({ file }) => {
+            const assetId = `asset:${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const { data } = await axiosInstance.post('/boards/upload', formData, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            console.log('data', data);
+
+            return {
+              id: assetId as any,
+              typeName: 'asset',
+              type: file.type.startsWith('video/') ? 'video' : 'image',
+              props: {
+                name: file.name,
+                src: data.src,
+                w: 400,
+                h: 400,
+                mimeType: file.type,
+                isAnimated: file.type === 'image/gif',
+              },
+              meta: {
+                publicId: data.publicId,
+              },
+            };
+          });
         }}
       >
         <CustomUI roomId={roomId} />

@@ -61,15 +61,18 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
         return;
       }
       
+      // Filter out any invalid records that might cause validation errors
+      const validRecords = records.filter(r => r && r.id && r.typeName);
+      
       isApplyingRemoteChange.current = true;
       
       try {
         editor.store.mergeRemoteChanges(() => {
-          records.forEach((record: any) => {
+          validRecords.forEach((record: any) => {
             editor.store.put([record]);
           });
         });
-        console.log('Applied', records.length, 'remote changes');
+        console.log('Applied', validRecords.length, 'remote changes');
       } catch (error) {
         console.error('Error applying remote changes:', error);
       } finally {
@@ -98,15 +101,18 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
         return;
       }
       
+      // Filter out any invalid records that might cause validation errors
+      const validRecords = records.filter(r => r && r.id && r.typeName);
+      
       isApplyingRemoteChange.current = true;
       
       try {
         editor.store.mergeRemoteChanges(() => {
-          records.forEach((record: any) => {
+          validRecords.forEach((record: any) => {
             editor.store.put([record]);
           });
         });
-        console.log('Applied', records.length, 'init records');
+        console.log('Applied', validRecords.length, 'init records');
       } catch (error) {
         console.error('Error applying init state:', error);
       } finally {
@@ -119,14 +125,32 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
       if (data.userId === userId) return; // Ignore own cursor
       
       try {
-        const presenceId = `instance_presence:${data.userId}`;
+        const presenceId = `instance_presence:remote-${data.userId}`;
         const presence = {
           id: presenceId,
           typeName: 'instance_presence',
           userId: data.userId,
           userName: data.userName || `User ${data.userId}`,
-          cursor: data.cursor,
+          cursor: {
+            x: data.cursor.x,
+            y: data.cursor.y,
+            type: data.cursor.type || 'default',
+            rotation: data.cursor.rotation || 0,
+          },
+          camera: {
+            x: 0,
+            y: 0,
+            z: 1,
+          },
+          screenBounds: {
+            x: 0,
+            y: 0,
+            w: 1280,
+            h: 720,
+          },
+          selectedShapeIds: [],
           color: data.color || getColorForUser(data.userId),
+          lastActivityTimestamp: Date.now(),
           currentPageId: editor.getCurrentPageId(),
           followingUserId: null,
           brush: null,
@@ -135,7 +159,11 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
           meta: {},
         };
         
-        editor.store.put([presence as any]);
+        isApplyingRemoteChange.current = true;
+        editor.store.mergeRemoteChanges(() => {
+          editor.store.put([presence as any]);
+        });
+        isApplyingRemoteChange.current = false;
       } catch (error) {
         console.error('Error updating remote cursor:', error);
       }
@@ -219,38 +247,44 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
           }
         });
 
-        // Process records asynchronously to convert blob URLs to base64
-        (async () => {
-          const processedRecords = await Promise.all(
-            allRecords.map(async (record: any) => {
-              // If it's an asset with a local blob URL, convert it to base64
-              if (record.typeName === 'asset' && record.props?.src?.startsWith('blob:')) {
-                try {
-                  const base64 = await blobToBase64(record.props.src);
-                  return {
-                    ...record,
-                    props: {
-                      ...record.props,
-                      src: base64,
-                    },
-                  };
-                } catch (error) {
-                  console.error('Failed to convert asset blob to base64:', error);
-                }
-              }
-              return record;
-            })
-          );
-          
-          console.log('Sending update to server:', processedRecords.length, 'records (including assets with data)');
-          socket.emit('update', processedRecords);
-        })();
+        console.log('Sending update to server:', allRecords.length, 'records');
+        socket.emit('update', allRecords);
       }
 
       if (removed.length > 0) {
-        // console.log('Sending delete to server:', removed.length, 'records');
-        socket.emit('delete', removed);
+  const idsToDelete: string[] = [...removed];
+
+  // Для каждого удаленного shape проверяем, есть ли у него связанный asset
+  removed.forEach((removedId) => {
+    const record = Object.values(changes.changes.removed).find(
+      (r: any) => r.id === removedId
+    );
+
+    // Если это shape с изображением/видео и у него есть assetId
+    if (
+      record &&
+      // @ts-ignore
+      record.typeName === 'shape' &&
+      // @ts-ignore
+      (record.type === 'image' || record.type === 'video') &&
+      // @ts-ignore
+      record.props?.assetId
+    ) {
+      // @ts-ignore
+      console.log(`🔗 Shape ${record.id} references asset ${record.props.assetId}, deleting both`);
+      
+      // Добавляем assetId в список для удаления
+      // @ts-ignore
+      if (!idsToDelete.includes(record.props.assetId)) {
+        // @ts-ignore
+        idsToDelete.push(record.props.assetId);
       }
+    }
+  });
+
+  console.log('🗑️ Deleting records:', idsToDelete);
+  socket.emit('delete', idsToDelete);
+}
     };
 
     // Subscribe to store changes for automatic synchronization
@@ -280,6 +314,7 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
           x: pagePoint.x,
           y: pagePoint.y,
           type: 'default',
+          rotation: 0,
         },
         color: getColorForUser(userId),
       });
@@ -344,16 +379,5 @@ function getColorForUser(userId: string): string {
   }, 0);
   
   return colors[Math.abs(hash) % colors.length];
-}
-
-async function blobToBase64(url: string): Promise<string> {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 }
 
