@@ -2,17 +2,22 @@ import { useEffect, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { Editor } from 'tldraw'
 
-let socket: Socket | null = null
-
+// Храним инстансы сокетов вне компонента, но привязанные к roomId
+const socketInstances: Record<string, Socket> = {}
 
 export function getSocket(roomId: string, userId: string) {
-if (!socket) {
-socket = io(`${process.env.NEXT_PUBLIC_API_URL}/board-sync`, {
-query: { roomId, userId },
-transports: ['websocket'],
-})
-}
-return socket
+  const key = `${roomId}-${userId}`
+  
+  if (!socketInstances[key] || !socketInstances[key].connected) {
+    // Если сокета нет или он закрыт — создаем новый
+    socketInstances[key] = io(`${process.env.NEXT_PUBLIC_API_URL}/board-sync`, {
+      query: { roomId, userId },
+      transports: ['polling', 'websocket'], // Позволяем fallback на polling для стабильности
+      reconnection: true,
+      reconnectionAttempts: 10,
+    })
+  }
+  return socketInstances[key]
 }
 
 interface UseBoardSyncOptions {
@@ -21,9 +26,6 @@ interface UseBoardSyncOptions {
   userId: string
   userName?: string
 }
-
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
 
 export function useBoardSync({
   editor,
@@ -34,41 +36,47 @@ export function useBoardSync({
   const socketRef = useRef<Socket | null>(null)
   const isApplyingRemoteChange = useRef(false)
 
-  console.log('roomId:', roomId, 'userId:', userId)
-
-  /* ------------------------------------------------------------------
-   * 1️⃣ SOCKET — создаётся ОДИН РАЗ (НЕ зависит от editor)
-   * ------------------------------------------------------------------ */
+  // 1. Инициализация сокета и обработка подключения
   useEffect(() => {
-if (!roomId || !userId) return
+    if (!roomId || !userId) return
 
+    const socket = getSocket(roomId, userId)
+    socketRef.current = socket // КРИТИЧЕСКИ ВАЖНО: сохраняем в Ref
 
-const socket = getSocket(roomId, userId)
+    const onConnect = () => {
+      console.log('✅ Socket connected:', socket.id)
+      socket.emit('get-board', { roomId })
+    }
 
+    const onDisconnect = (reason: string) => {
+      console.warn('⚠️ Socket disconnected:', reason)
+    }
 
-socket.on('connect', () => {
-console.log('✅ Socket connected')
-socket.emit('get-board', { roomId })
-})
+    const onConnectError = (err: Error) => {
+      console.error('❌ Socket connect error:', err.message)
+    }
 
+    socket.on('connect', onConnect)
+    socket.on('disconnect', onDisconnect)
+    socket.on('connect_error', onConnectError)
 
-return () => {
-// ❗ НЕ disconnect тут
-console.log('♻️ unmount board sync (socket alive)')
-}
-}, [roomId, userId])
+    // Если сокет уже подключен (из-за синглтона), вызываем init вручную
+    if (socket.connected) onConnect()
 
-  /* ------------------------------------------------------------------
-   * 2️⃣ ПРИЁМ ДАННЫХ С СЕРВЕРА (editor может меняться)
-   * ------------------------------------------------------------------ */
+    return () => {
+      socket.off('connect', onConnect)
+      socket.off('disconnect', onDisconnect)
+      socket.off('connect_error', onConnectError)
+    }
+  }, [roomId, userId])
+
+  // 2. Прием данных (висит, пока есть editor и socketRef)
   useEffect(() => {
-    if (!editor || !socketRef.current) return
-
     const socket = socketRef.current
+    if (!editor || !socket) return
 
     const applyRecords = (records: any[]) => {
       if (!records.length) return
-
       const valid = records.filter((r) => r?.id && r?.typeName)
 
       isApplyingRemoteChange.current = true
@@ -83,9 +91,7 @@ console.log('♻️ unmount board sync (socket alive)')
 
     socket.on('init', applyRecords)
     socket.on('update', applyRecords)
-
     socket.on('delete', (ids: string[]) => {
-      if (!ids?.length) return
       isApplyingRemoteChange.current = true
       try {
         editor.store.mergeRemoteChanges(() => {
@@ -98,7 +104,6 @@ console.log('♻️ unmount board sync (socket alive)')
 
     socket.on('cursor', (data) => {
       if (data.userId === userId) return
-
       const presence = {
         id: `instance_presence:remote-${data.userId}`,
         typeName: 'instance_presence',
@@ -109,7 +114,6 @@ console.log('♻️ unmount board sync (socket alive)')
         currentPageId: editor.getCurrentPageId(),
         lastActivityTimestamp: Date.now(),
       }
-
       isApplyingRemoteChange.current = true
       try {
         editor.store.mergeRemoteChanges(() => {
@@ -126,15 +130,12 @@ console.log('♻️ unmount board sync (socket alive)')
       socket.off('delete')
       socket.off('cursor')
     }
-  }, [editor, userId])
+  }, [editor, roomId]) // Добавил roomId в зависимости
 
-  /* ------------------------------------------------------------------
-   * 3️⃣ ОТПРАВКА ЛОКАЛЬНЫХ ИЗМЕНЕНИЙ
-   * ------------------------------------------------------------------ */
+  // 3. Отправка изменений
   useEffect(() => {
-    if (!editor || !socketRef.current) return
-
     const socket = socketRef.current
+    if (!editor || !socket) return
 
     const unsubscribe = editor.store.listen(
       (changes) => {
@@ -145,12 +146,9 @@ console.log('♻️ unmount board sync (socket alive)')
         const updated = Object.values(changes.changes.updated)
         const removed = Object.keys(changes.changes.removed)
 
-        const records = [...added, ...updated]
-
-        if (records.length) {
-          socket.emit('update', records)
+        if (added.length || updated.length) {
+          socket.emit('update', [...added, ...updated])
         }
-
         if (removed.length) {
           socket.emit('delete', removed)
         }
@@ -159,26 +157,21 @@ console.log('♻️ unmount board sync (socket alive)')
     )
 
     return unsubscribe
-  }, [editor])
+  }, [editor, roomId])
 
-  /* ------------------------------------------------------------------
-   * 4️⃣ CURSOR
-   * ------------------------------------------------------------------ */
+  // 4. Курсор
   useEffect(() => {
-    if (!editor || !socketRef.current) return
-
     const socket = socketRef.current
-    let last = 0
+    if (!editor || !socket) return
 
+    let last = 0
     const handlePointer = () => {
       const now = Date.now()
       if (now - last < 50) return
       last = now
-
       if (!socket.connected) return
 
       const p = editor.inputs.currentPagePoint
-
       socket.emit('cursor', {
         userId,
         userName,
@@ -186,12 +179,18 @@ console.log('♻️ unmount board sync (socket alive)')
       })
     }
 
-    editor.on('event', (e) => {
+    const handleEvent = (e: any) => {
       if (e.type === 'pointer' && e.name === 'pointer_move') {
         handlePointer()
       }
-    })
-  }, [editor, userId, userName])
+    }
+
+    editor.on('event', handleEvent)
+
+    return () => {
+      editor.off('event', handleEvent)
+    }
+  }, [editor, userId, userName, roomId])
 
   return {}
 }
