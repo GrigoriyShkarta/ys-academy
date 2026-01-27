@@ -2,6 +2,19 @@ import { useEffect, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { Editor } from 'tldraw'
 
+let socket: Socket | null = null
+
+
+export function getSocket(roomId: string, userId: string) {
+if (!socket) {
+socket = io(`${process.env.NEXT_PUBLIC_API_URL}/board-sync`, {
+query: { roomId, userId },
+transports: ['websocket'],
+})
+}
+return socket
+}
+
 interface UseBoardSyncOptions {
   editor: Editor | null
   roomId: string
@@ -21,45 +34,29 @@ export function useBoardSync({
   const socketRef = useRef<Socket | null>(null)
   const isApplyingRemoteChange = useRef(false)
 
+  console.log('roomId:', roomId, 'userId:', userId)
+
   /* ------------------------------------------------------------------
    * 1️⃣ SOCKET — создаётся ОДИН РАЗ (НЕ зависит от editor)
    * ------------------------------------------------------------------ */
   useEffect(() => {
-    if (!roomId || !userId) return
-    if (socketRef.current) return
+if (!roomId || !userId) return
 
-    const socket = io(`${BACKEND_URL}/board-sync`, {
-      query: {
-        roomId: String(roomId),
-        userId: String(userId),
-      },
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-    })
 
-    socketRef.current = socket
+const socket = getSocket(roomId, userId)
 
-    socket.on('connect', () => {
-      console.log('✅ Socket connected')
-      socket.emit('get-board', { roomId })
-    })
 
-    socket.on('disconnect', (reason) => {
-      console.log('❌ Socket disconnected:', reason)
-    })
+socket.on('connect', () => {
+console.log('✅ Socket connected')
+socket.emit('get-board', { roomId })
+})
 
-    socket.on('error', (err) => {
-      console.error('🔥 Socket error:', err)
-    })
 
-    return () => {
-      console.log('🧹 Destroy socket')
-      socket.disconnect()
-      socketRef.current = null
-    }
-  }, [roomId, userId])
+return () => {
+// ❗ НЕ disconnect тут
+console.log('♻️ unmount board sync (socket alive)')
+}
+}, [roomId, userId])
 
   /* ------------------------------------------------------------------
    * 2️⃣ ПРИЁМ ДАННЫХ С СЕРВЕРА (editor может меняться)
