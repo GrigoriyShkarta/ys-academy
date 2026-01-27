@@ -26,6 +26,9 @@ export function useBoardSync({ editor, roomId, userId, userName }: UseBoardSyncO
         userId: String(userId),
       },
       transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     socketRef.current = socket;
