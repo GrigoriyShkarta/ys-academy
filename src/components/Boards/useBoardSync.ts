@@ -122,7 +122,7 @@ export function useBoardSync({
     }
 
     // Initial data from server
-    socket.on('init', applyRecords)
+    socket.on('get-board', applyRecords)
     
     // Real-time updates from other users
     socket.on('update', applyRecords)
