@@ -145,12 +145,12 @@ function CustomUI({ roomId }: CustomUIProps) {
   const [cameraKey, setCameraKey] = useState(0);
 
   // Setup real-time synchronization
-  const { remoteCursors } = useBoardSync({
-    editor,
-    roomId,
-    userId: user?.id?.toString() || 'anonymous',
-    userName: user?.name || 'Anonymous',
-  });
+  // const { remoteCursors } = useBoardSync({
+  //   editor,
+  //   roomId,
+  //   userId: user?.id?.toString() || 'anonymous',
+  //   userName: user?.name || 'Anonymous',
+  // });
 
   // Update cursor positions when camera changes (zoom/pan)
   useEffect(() => {
@@ -292,7 +292,7 @@ function CustomUI({ roomId }: CustomUIProps) {
   return (
     <>
       {/* Remote cursors overlay */}
-      {Array.from(remoteCursors.values()).map((cursor) => {
+      {/* {Array.from(remoteCursors.values()).map((cursor) => {
         const screenPos = getCursorScreenPosition(cursor.x, cursor.y);
         return (
           <RemoteCursor
@@ -303,7 +303,7 @@ function CustomUI({ roomId }: CustomUIProps) {
             color={cursor.color}
           />
         );
-      })}
+      })} */}
 
       {user?.role === 'super_admin' && (
         <>
