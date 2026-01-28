@@ -52,9 +52,10 @@ export function useBoardSync({
 
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
     
-    console.log('[useBoardSync] Connecting to', `${baseUrl}/board-sync`)
+    console.log('[useBoardSync] Connecting to', baseUrl)
 
-    const socket = io(`${baseUrl}/board-sync`, {
+    // Connect to default namespace - server should handle board-sync events
+    const socket = io(baseUrl, {
       transports: ['websocket', 'polling'],
       query: { roomId, userId, userName },
       reconnection: true,
