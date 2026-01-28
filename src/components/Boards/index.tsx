@@ -85,6 +85,53 @@ function CustomToolbar() {
 }
 
 
+// Remote cursor component
+interface RemoteCursorProps {
+  x: number;
+  y: number;
+  userName: string;
+  color: string;
+}
+
+function RemoteCursor({ x, y, userName, color }: RemoteCursorProps) {
+  return (
+    <div
+      className="pointer-events-none absolute z-[99999] transition-all duration-75"
+      style={{
+        left: x,
+        top: y,
+        transform: 'translate(-2px, -2px)',
+      }}
+    >
+      {/* Cursor pointer */}
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }}
+      >
+        <path
+          d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87c.48 0 .72-.58.38-.92L6.35 2.85a.5.5 0 0 0-.85.36Z"
+          fill={color}
+          stroke="white"
+          strokeWidth="1.5"
+        />
+      </svg>
+      {/* Name label */}
+      <div
+        className="absolute left-5 top-4 px-2 py-0.5 rounded text-xs font-medium text-white whitespace-nowrap"
+        style={{
+          backgroundColor: color,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+        }}
+      >
+        {userName}
+      </div>
+    </div>
+  );
+}
+
 interface CustomUIProps {
   roomId: string;
 }
@@ -95,14 +142,39 @@ function CustomUI({ roomId }: CustomUIProps) {
   const [photoOpen, setPhotoOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [audioOpen, setAudioOpen] = useState(false);
+  const [cameraKey, setCameraKey] = useState(0);
 
   // Setup real-time synchronization
-  useBoardSync({
+  const { remoteCursors } = useBoardSync({
     editor,
     roomId,
     userId: user?.id?.toString() || 'anonymous',
     userName: user?.name || 'Anonymous',
   });
+
+  // Update cursor positions when camera changes (zoom/pan)
+  useEffect(() => {
+    if (!editor) return;
+    
+    const handleCameraChange = () => {
+      setCameraKey((k) => k + 1);
+    };
+
+    // Listen to camera changes in the store
+    const unsubscribe = editor.store.listen(
+      () => handleCameraChange(),
+      { scope: 'session' }
+    );
+
+    return () => unsubscribe();
+  }, [editor]);
+
+  // Convert page coordinates to screen coordinates for cursor rendering
+  const getCursorScreenPosition = (pageX: number, pageY: number) => {
+    if (!editor) return { x: 0, y: 0 };
+    const screenPoint = editor.pageToViewport({ x: pageX, y: pageY });
+    return { x: screenPoint.x, y: screenPoint.y };
+  };
 
   const handleAddMedia = async (type: LessonItemType, content?: string | File, bankId?: number) => {
     if (!content) return;
@@ -219,6 +291,20 @@ function CustomUI({ roomId }: CustomUIProps) {
 
   return (
     <>
+      {/* Remote cursors overlay */}
+      {Array.from(remoteCursors.values()).map((cursor) => {
+        const screenPos = getCursorScreenPosition(cursor.x, cursor.y);
+        return (
+          <RemoteCursor
+            key={cursor.odiserId}
+            x={screenPos.x}
+            y={screenPos.y}
+            userName={cursor.userName}
+            color={cursor.color}
+          />
+        );
+      })}
+
       {user?.role === 'super_admin' && (
         <>
           <div className="absolute top-2 right-40 flex flex-col gap-2 z-[99999] pointer-events-auto bg-white p-2 rounded shadow-md border">
