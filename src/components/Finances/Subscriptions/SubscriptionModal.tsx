@@ -13,11 +13,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormFooter } from '@/common/ModalFooter';
-import {
-  createSubscription,
-  updateSubscription,
-} from '@/components/Materials/Subscriptions/action';
+
 import { Label } from '@radix-ui/react-menu';
+import { updateSubscription, createSubscription } from './action';
 
 interface Props {
   hideTrigger?: boolean;
@@ -99,7 +97,6 @@ export default function SubscriptionModal({
 
     try {
       if (subscription) {
-        // TODO: добавить updateAbonement, когда будет реализовано редактирование
         await updateSubscription(subscription.id, localAbonement);
       } else {
         await createSubscription(localAbonement);

@@ -43,7 +43,6 @@ export default function LessonSaveModal({
 }: Props) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
-  const [selectedModule, setSelectedModule] = useState<string[]>([]);
   const { user } = useUser();
 
   const t = useTranslations('Materials');
@@ -96,9 +95,7 @@ export default function LessonSaveModal({
             <MultiSelect
               options={categoryOptions}
               selected={selectedCategories}
-              onChange={next =>
-                setSelectedCategories(prev => Array.from(new Set([...prev, ...next])))
-              }
+              onChange={next => setSelectedCategories(next)}
               placeholder={t('select_categories')}
               className="w-full"
             />
@@ -122,7 +119,7 @@ export default function LessonSaveModal({
             <MultiSelect
               options={moduleOptions}
               selected={selectedModules}
-              onChange={next => setSelectedModules(prev => Array.from(new Set([...prev, ...next])))}
+              onChange={next => setSelectedModules(next)}
               placeholder={t('select_categories')}
               className="w-full"
             />

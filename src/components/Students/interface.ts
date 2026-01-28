@@ -17,6 +17,15 @@ export interface Student {
   courses?: StudentCourse[];
   subscriptions?: StudentSubscription[];
   password?: string;
+  accessExpiryDate?: string;
+  notifications?: Notification[];
+}
+
+export interface Notification {
+  id: number;
+  title: string;
+  read: boolean;
+  createdAt: string;
 }
 
 export interface StudentModule {
@@ -36,6 +45,7 @@ export interface StudentLesson {
   access_blocks: number[];
   categories: Category[];
   accessBlocks: string;
+  accessString: string;
 }
 
 export interface StudentCourse {
@@ -46,6 +56,7 @@ export interface StudentCourse {
   modules: StudentModule[];
   categories: Category[];
   progress: number;
+  lessons?: StudentLesson[];
 }
 
 export interface StudentSubscription {
@@ -64,4 +75,5 @@ export interface StudentSubscriptionLesson {
   id: number;
   scheduledAt: string;
   status: string;
+  recordingUrl?: string;
 }

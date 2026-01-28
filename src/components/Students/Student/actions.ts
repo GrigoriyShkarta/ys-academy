@@ -30,6 +30,7 @@ export const updateStudent = async (student: Student) => {
   formData.append('instagram', student?.instagram ?? '');
   formData.append('city', student?.city ?? '');
   formData.append('isActive', student.isActive.toString());
+  formData.append('accessExpiryDate', student?.accessExpiryDate ?? '');
   formData.append(
     'birthDate',
     student?.birthDate
@@ -123,5 +124,15 @@ export const updateLessonStatusInSubscription = async (
     transferredTo,
   });
 
+  return data;
+};
+
+export const readNotifications = async (notificationsIds: number[]) => {
+  const { data } = await axiosInstance.patch(`/user/notifications/`, { notificationsIds });
+  return data;
+};
+
+export const deleteNotification = async (notificationId: number) => {
+  const { data } = await axiosInstance.delete(`/user/notifications/${notificationId}`);
   return data;
 };

@@ -86,12 +86,18 @@ export interface Course {
   title: string;
   url?: string;
   modules: StudentModule[];
+  lessons?: {
+    id: number;
+    title: string;
+    order?: number;
+  }[];
   categories?: Category[];
 }
 
 export interface LessonDocItem {
   blockId: number;
   content: Block[];
+  index?: number;
 }
 
 export interface Subscription {

@@ -14,6 +14,7 @@ export const studentSchema = z.object({
   goals: z.string().optional().or(z.literal('')),
   photo: z.any().optional().or(z.literal('')),
   isActive: z.boolean(),
+  accessExpiryDate: z.string().optional(),
 });
 
 export type StudentFormValues = z.infer<typeof studentSchema>;

@@ -19,7 +19,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import PhotoEditor from '@/components/Materials/Modules/ModuleModal/PhotoEditor';
+import PhotoEditor from '@/common/PhotoEditor';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import MultiSelect from '@/common/MultiSelect';
@@ -31,6 +31,7 @@ import { Plus } from 'lucide-react';
 import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 import { useUser } from '@/providers/UserContext';
 import { uploadPhoto } from '@/components/Materials/Photo/action';
+import ModuleModal from '@/components/Materials/Modules/ModuleModal';
 
 interface Props {
   open: boolean;
@@ -57,9 +58,12 @@ export default function CourseModal({ open, setOpen, course }: Props) {
   const [name, setName] = useState<string>('');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [modules, setModules] = useState<{ id: number; title: string }[]>([]);
+  const [lessons, setLessons] = useState<{ id: number; title: string; order?: number }[]>([]);
   const [imageSrc, setImageSrc] = useState<string>('');
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [openModuleModal, setOpenModuleModal] = useState<boolean>(false);
+  const [openLessonModal, setOpenLessonModal] = useState<boolean>(false);
+  const [openCreateModuleModal, setOpenCreateModuleModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (open) {
@@ -67,6 +71,7 @@ export default function CourseModal({ open, setOpen, course }: Props) {
         setName(course.title ?? '');
         setImageSrc(course.url ?? '');
         setModules(course.modules ?? []);
+        setLessons(course.lessons ?? []);
         setCategoryIds((course.categories ?? []).map(c => String(c.id)));
       } else {
         setName('');
@@ -101,8 +106,8 @@ export default function CourseModal({ open, setOpen, course }: Props) {
     })
   );
 
-  // Перетаскивание
-  const handleDragEnd = (event: DragEndEvent) => {
+  // Перетаскивание модулей
+  const handleModuleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -113,6 +118,21 @@ export default function CourseModal({ open, setOpen, course }: Props) {
 
       // Пересчитываем index
       return newItems.map((item, idx) => ({ ...item, index: idx }));
+    });
+  };
+
+  // Перетаскивание уроков
+  const handleLessonDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setLessons(items => {
+      const oldIndex = items.findIndex(i => i.id === active.id);
+      const newIndex = items.findIndex(i => i.id === over.id);
+      const newItems = arrayMove(items, oldIndex, newIndex);
+
+      // Пересчитываем order
+      return newItems.map((item, idx) => ({ ...item, order: idx }));
     });
   };
 
@@ -127,7 +147,7 @@ export default function CourseModal({ open, setOpen, course }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       if (course?.id) {
-        queryClient.invalidateQueries({ queryKey: ['course'] });
+        queryClient.invalidateQueries({ queryKey: ['course', course.id] });
       }
       setOpen(false);
     },
@@ -138,6 +158,7 @@ export default function CourseModal({ open, setOpen, course }: Props) {
     onSettled: () => {
       setName('');
       setModules([]);
+      setLessons([]);
       setImageSrc('');
     },
   });
@@ -156,7 +177,6 @@ export default function CourseModal({ open, setOpen, course }: Props) {
           title: name || 'Course Cover',
           categories: [],
           isOther: true,
-
         });
         finalImageSrc = res.url;
         finalImagePublicId = res.publicId;
@@ -169,29 +189,43 @@ export default function CourseModal({ open, setOpen, course }: Props) {
       title: name,
       url: finalImageSrc ?? '',
       publicImgId: finalImagePublicId,
-      modules: modules.map(l => ({ id: l.id })),
+      modules: modules.map((l, idx) => ({ id: l.id, index: idx })),
+      lessons: lessons.map((l, idx) => ({ id: l.id, order: idx })),
       categories: categoryIds ?? [],
     };
 
     mutation.mutate(data);
   };
 
-  const addLesson = (newLessons: { id: number; title: string }[]) => {
-    const added = newLessons.filter(nl => !modules.some(l => l.id === nl.id));
+  const addModule = (newModules: { id: number; title: string }[]) => {
+    const added = newModules.filter(nl => !modules.some(l => l.id === nl.id));
     setModules([...modules, ...added]);
     setOpenModuleModal(false);
   };
 
-  const removeLesson = (id: number) => {
+  const removeModule = (id: number) => {
     setModules(modules.filter(l => l.id !== id));
+  };
+
+  const addLesson = (newLessons: { id: number; title: string }[]) => {
+    const added = newLessons.filter(nl => !lessons.some(l => l.id === nl.id));
+    setLessons([...lessons, ...added]);
+    setOpenLessonModal(false);
+  };
+
+  const removeLesson = (id: number) => {
+    setLessons(lessons.filter(l => l.id !== id));
   };
 
   const handleClose = () => {
     setName('');
     setModules([]);
+    setLessons([]);
     setImageSrc('');
     setOpen(false);
   };
+
+  console.log('modules', modules);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -202,10 +236,7 @@ export default function CourseModal({ open, setOpen, course }: Props) {
 
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 p-2">
-            <PhotoEditor
-              setImage={setImageSrc}
-              externalImage={imageSrc}
-            />
+            <PhotoEditor setImage={setImageSrc} externalImage={imageSrc} />
 
             <Label>{t('name')}</Label>
             <Input
@@ -242,14 +273,14 @@ export default function CourseModal({ open, setOpen, course }: Props) {
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
+                onDragEnd={handleModuleDragEnd}
               >
                 <SortableContext
                   items={modules.map(l => l.id)}
                   strategy={verticalListSortingStrategy}
                 >
                   {modules.map(module => (
-                    <SortableModule key={module.id} module={module} onRemove={removeLesson} />
+                    <SortableModule key={module.id} module={module} onRemove={removeModule} />
                   ))}
                 </SortableContext>
               </DndContext>
@@ -267,6 +298,36 @@ export default function CourseModal({ open, setOpen, course }: Props) {
               {t('add_module')}
             </Button>
 
+            <div className="space-y-2">
+              <Label>{t('lessons')}</Label>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleLessonDragEnd}
+              >
+                <SortableContext
+                  items={lessons.map(l => l.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {lessons.map(lesson => (
+                    <SortableModule key={lesson.id} module={lesson} onRemove={removeLesson} />
+                  ))}
+                </SortableContext>
+              </DndContext>
+
+              {lessons.length === 0 && (
+                <p className="text-sm text-gray-500 text-center py-4">{t('no_lessons_yet')}</p>
+              )}
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => setOpenLessonModal(true)}
+              className="w-[200px] mx-auto bg-accent"
+            >
+              {t('add_lesson')}
+            </Button>
+
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={handleClose} type="button">
                 {t('cancel')}
@@ -282,9 +343,18 @@ export default function CourseModal({ open, setOpen, course }: Props) {
       <ChooseListModal
         open={openModuleModal}
         closeModal={() => setOpenModuleModal(false)}
-        handleAdd={addLesson}
+        handleAdd={addModule}
         array={modules}
         isCourse
+        showAddButton
+        onAddClick={() => setOpenCreateModuleModal(true)}
+      />
+
+      <ChooseListModal
+        open={openLessonModal}
+        closeModal={() => setOpenLessonModal(false)}
+        handleAdd={addLesson}
+        array={lessons}
       />
 
       <CategoryModal
@@ -292,6 +362,11 @@ export default function CourseModal({ open, setOpen, course }: Props) {
         closeModal={() => setIsCategoryModalOpen(false)}
         selectCategory={handleNewCategoriesForFile}
         hideTrigger
+      />
+
+      <ModuleModal
+        open={openCreateModuleModal}
+        setOpen={setOpenCreateModuleModal}
       />
     </Dialog>
   );

@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Student } from '@/components/Students/interface';
 
-interface Column {
+export interface Column {
   key: string;
   label: string;
   render?: (student: Student) => ReactNode;

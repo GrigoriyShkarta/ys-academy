@@ -38,3 +38,8 @@ export const deleteCourse = async (id?: number) => {
   console.log('data', data);
   return data;
 };
+
+export const reorderCourses = async (courses: { id: number; order: number }[]) => {
+  const { data } = await axiosInstance.patch('/course/reorder', courses);
+  return data;
+};

@@ -10,13 +10,34 @@ import { IFile, LessonDocItem } from '@/components/Materials/utils/interfaces';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import LessonBlock from '@/components/Materials/Lesson/components/LessonBlock';
 import { Block } from '@blocknote/core';
 import Cover from '@/components/Materials/Lesson/components/Cover';
 import ConfirmModal from '@/common/ConfirmModal';
 import LessonSaveModal from '@/components/Materials/Lesson/components/LessonSaveModal';
 import { useUser } from '@/providers/UserContext';
 import { uploadPhoto } from '../Photo/action';
+import {
+  DndContext,
+  closestCorners,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  defaultDropAnimationSideEffects,
+  MeasuringStrategy,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableLessonBlock } from '@/components/Materials/Lesson/components/SortableLessonBlock';
+import LessonBlock from '@/components/Materials/Lesson/components/LessonBlock';
 
 export default function LessonLayout({ id }: { id: number }) {
   const [isEditPlace, setIsEditPlace] = useState(false);
@@ -28,6 +49,7 @@ export default function LessonLayout({ id }: { id: number }) {
   const [openSaveModal, setOpenSaveModal] = useState(false);
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
   const [open, setOpen] = useState(false);
+  const [activeId, setActiveId] = useState<number | null>(null);
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -40,6 +62,43 @@ export default function LessonLayout({ id }: { id: number }) {
     queryFn: () => getLesson(id),
     enabled: !!id,
   });
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setLessonDoc(items => {
+        const oldIndex = items.findIndex(item => item.blockId === active.id);
+        const newIndex = items.findIndex(item => item.blockId === over.id);
+
+        if (oldIndex === -1 || newIndex === -1) return items;
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+    setActiveId(null);
+  };
 
   useEffect(() => {
     if (lesson) {
@@ -101,6 +160,7 @@ export default function LessonLayout({ id }: { id: number }) {
     );
   };
 
+
   const handleDeleteLesson = async () => {
     await deleteLesson([id]);
     await queryClient.invalidateQueries({ queryKey: ['lessons'] });
@@ -110,7 +170,8 @@ export default function LessonLayout({ id }: { id: number }) {
   const addBlock = () => {
     // @ts-ignore
     setLessonDoc(prev => {
-      const newBlockId = prev.length > 0 ? prev[prev.length - 1].blockId + 1 : 1;
+      const maxId = prev.length > 0 ? Math.max(...prev.map(item => item.blockId)) : 0;
+      const newBlockId = maxId + 1;
 
       return [
         ...prev,
@@ -135,8 +196,8 @@ export default function LessonLayout({ id }: { id: number }) {
   if (!lesson) return <div>Lesson not found</div>;
 
   return (
-    <div className="space-y-6 pb-4 relative">
-      <div className="flex justify-between items-center md:p-4 sm:p-0">
+    <div className="space-y-6 pb-4 relative py-10 md:py-0">
+      <div className="flex justify-between items-center md:p-4 sm:p-0 z-10 relative">
         <button
           type="button"
           onClick={() => router.back()}
@@ -170,29 +231,64 @@ export default function LessonLayout({ id }: { id: number }) {
       {(cover || isEditPlace) && (
         <Cover updateCover={setCover} cover={cover} isEdit={isEditPlace} />
       )}
-      <div className="relative p-2 sm:p-0 max-w-7xl w-2/3 mx-auto">
+      <div className="relative p-2 sm:p-0 max-w-7xl sm:w-2/3 w-full mx-auto">
         {isEditPlace ? (
           <Input
             placeholder={t('lesson_title')}
             value={lessonTitle}
             onChange={e => setLessonTitle(e.target.value)}
-            className="min-w-1/2! text-[50px]! h-[58px] mb-6 mx-auto text-center border-none"
+            className="min-w-1/2! text-[50px]! h-[58px] mb-6 mx-auto text-center border-none mb-2"
           />
         ) : (
           <h1 className="text-center text-[50px]! font-bold mb-6">{lesson.title}</h1>
         )}
 
-        {lessonDoc.length > 0 &&
-          lessonDoc.map((block: LessonDocItem) => (
-            <LessonBlock
-              key={block.blockId}
-              blockId={block.blockId}
-              lesson={block.content ?? []}
-              onUpdate={updateBlock}
-              editable={isEditPlace}
-              deleteSection={handleDeleteBlock}
-            />
-          ))}
+        {lessonDoc.length > 0 && (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={() => setActiveId(null)}
+            measuring={{
+              droppable: {
+                strategy: MeasuringStrategy.Always,
+              },
+            }}
+            // autoScroll={{
+            //   threshold: 0.3,
+            // }}
+          >
+            <SortableContext
+              items={lessonDoc.map(item => item.blockId)}
+              strategy={verticalListSortingStrategy}
+            >
+              {lessonDoc.map((block: LessonDocItem) => (
+                <SortableLessonBlock
+                  key={block.blockId}
+                  id={block.blockId}
+                  blockId={block.blockId}
+                  lesson={block.content ?? []}
+                  onUpdate={updateBlock}
+                  editable={isEditPlace}
+                  deleteSection={handleDeleteBlock}
+                />
+              ))}
+            </SortableContext>
+            <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }) }}>
+              {activeId ? (
+                 <div className="bg-background border rounded-lg shadow-xl opacity-90 overflow-hidden">
+                    <LessonBlock
+                      blockId={activeId}
+                      lesson={lessonDoc.find(i => i.blockId === activeId)?.content || []}
+                      editable={true} // Keep editable true so handle renders, but interaction is effectively disabled by overlay
+                      isSelectBlock={false}
+                    />
+                 </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        )}
 
         {isEditPlace && (
           <div className="w-full px-8 mt-6">

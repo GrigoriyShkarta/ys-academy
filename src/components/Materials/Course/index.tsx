@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { keepPreviousData } from '@tanstack/query-core';
 import { getCategories } from '@/components/Materials/Categories/action';
-import { deleteCourse, getCourses } from '@/components/Materials/Course/action';
+import { deleteCourse, getCourses, reorderCourses } from '@/components/Materials/Course/action';
 import Loader from '@/common/Loader';
 import { Button } from '@/components/ui/button';
 import MediaGallery from '@/common/MediaGallery';
@@ -47,7 +47,7 @@ export default function CourseLayout() {
 
   return (
     <div
-      className={`flex flex-col gap-4 p-4 mt-18 sm:mt-0 ${
+      className={`flex flex-col gap-4 p-4 mt-18 md:mt-0 ${
         user?.role === 'student' ? 'max-w-7xl mx-auto' : ''
       }`}
     >
@@ -81,6 +81,16 @@ export default function CourseLayout() {
           isOneSelectItem
           hiddenCheckbox
           isLink
+          onReorder={async (newOrder) => {
+             // Optimistic update is handled inside MediaGallery, just sync with server
+             try {
+               await reorderCourses(newOrder);
+               // We might want to silent refresh or just let the local state be enough until next fetch
+             } catch (e) {
+               console.error("Failed to reorder courses", e);
+               // In a real app we might want to revert the change or show error
+             }
+          }}
           queryKey="courses"
           hideLessons
         />

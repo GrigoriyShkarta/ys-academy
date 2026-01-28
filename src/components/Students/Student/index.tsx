@@ -14,6 +14,8 @@ import { useTranslations } from 'next-intl';
 import Loader from '@/common/Loader';
 import Subscriptions from '@/components/Students/Student/components/Subscriptions/Subscriptions';
 import { useUser } from '@/providers/UserContext';
+import TrackerLayout from '@/components/Tracker';
+import LessonRecordings from '@/components/LessonRecordings';
 
 export default function Student({ id }: { id: number }) {
   const [open, setOpen] = useState(false);
@@ -32,7 +34,7 @@ export default function Student({ id }: { id: number }) {
   if (!student) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full space-y-8 mt-18 sm:mt-0">
+    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full space-y-8 mt-18 md:mt-0">
       {/* Header: Avatar + Name + Contacts */}
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
@@ -66,12 +68,24 @@ export default function Student({ id }: { id: number }) {
             <TabsTrigger value="profile" className="px-4 py-2 rounded-t-lg shadow-sm">
               {t('profile')}
             </TabsTrigger>
-            <TabsTrigger value="courses" className="px-4 py-2 rounded-t-lg shadow-sm">
-              {t('courses')}
-            </TabsTrigger>
+            {user?.role === 'super_admin' && (
+              <TabsTrigger value="courses" className="px-4 py-2 rounded-t-lg shadow-sm">
+                {t('courses')}
+              </TabsTrigger>
+            )}
+            {user?.role === 'super_admin' && (
+              <TabsTrigger value="tracker" className="px-4 py-2 rounded-t-lg shadow-sm">
+                {t('tracker')}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="subscriptions" className="px-4 py-2 rounded-t-lg shadow-sm">
               {t('subscriptions')}
             </TabsTrigger>
+            {user?.role === 'super_admin' && (
+              <TabsTrigger value="lesson-recordings" className="px-4 py-2 rounded-t-lg shadow-sm">
+                {t('lesson-recordings')}
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="profile">
@@ -79,11 +93,19 @@ export default function Student({ id }: { id: number }) {
           </TabsContent>
 
           <TabsContent value="courses">
-            <StudentCourses courses={student.courses} userId={id} />
+            <StudentCourses courses={student.courses} userId={id} isProfile />
+          </TabsContent>
+
+          <TabsContent value="tracker">
+            <TrackerLayout id={id} isProfile/>
           </TabsContent>
 
           <TabsContent value="subscriptions">
             <Subscriptions student={student} />
+          </TabsContent>
+
+          <TabsContent value="lesson-recordings">
+            <LessonRecordings id={id} isProfile />
           </TabsContent>
         </Tabs>
       </div>

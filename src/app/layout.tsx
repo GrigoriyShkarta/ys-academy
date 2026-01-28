@@ -18,18 +18,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'YS Academy',
-  description: 'Ваша універсальна платформа для управління освітою та навчанням.',
+  title: 'YS Vocal Academy',
+  description: 'Вокальна освіта, що виведе тебе на новий рівень',
   authors: [{ name: 'Яна Сабада' }],
   viewport: 'width=device-width, initial-scale=1',
   openGraph: {
-    title: 'YS Academy',
-    description: 'Ваша універсальна платформа для управління освітою та навчанням.',
+    title: 'YS Vocal Academy',
+    description: 'Вокальна освіта, що виведе тебе на новий рівень',
     type: 'website',
     url: 'https://ys-academy.vercel.app/main',
     images: [
       {
-        url: 'https://individual-lesson.vercel.app/assets/ys_vocalcoach.png',
+        url: 'https://ys-academy.vercel.app/assets/ys_ava.jpeg',
         width: 1200,
         height: 630,
         alt: 'Викладач вокалу Яна Сабада',
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'YS Academy',
-    description: 'Ваша універсальна платформа для управління освітою та навчанням.',
-    images: ['https://individual-lesson.vercel.app/assets/ys_vocalcoach.png'],
+    title: 'YS Vocal Academy',
+    description: 'Вокальна освіта, що виведе тебе на новий рівень',
+    images: ['https://ys-academy.vercel.app/assets/ys_ava.jpeg'],
   },
   metadataBase: new URL('https://ys-academy.vercel.app/main'),
 };

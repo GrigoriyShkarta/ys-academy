@@ -22,12 +22,13 @@
     "my_profile": "My courses",
     "welcome_back": "Welcome",
     "continue_learning_prompt": "Ready to continue your learning journey? Check out your latest courses",
-    "welcome_title": "Welcome to YS Academy",
+    "welcome_title": "Welcome to YS Vocal Academy",
     "welcome_description": "Your comprehensive platform for education management and learning.",
     "courses": "Courses",
     "lessons": "Lessons",
     "students": "Students",
-    "my_courses": "My courses"
+    "my_courses": "My courses",
+    "my_lesson_recordings": "My lesson recordings"
   },
 
   "SideBar": {
@@ -46,10 +47,22 @@
     "courses": "Courses",
     "my_profile": "My profile",
     "subscriptions": "Subscriptions",
-    "my_finance": "My finance"
+    "my_finance": "My finance",
+    "lesson_recordings": "Lesson recordings",
+    "all_rights_reserved": "All rights reserved",
+    "my_widgets": "My widgets",
+    "metronome": "Metronome",
+    "tuner": "Tuner",
+    "piano": "Piano",
+    "tracker": "Tracker",
+    "my_boards": "My boards",
+    "boards": "Boards",
+    "reports": "Reports"
   },
 
   "Students": {
+    "tracker": "Tracker",
+    "lesson-recordings": "Lesson Recordings",
     "status": "Status",
     "active": "Active",
     "inactive": "Inactive",
@@ -103,7 +116,16 @@
     "delete": "Delete",
     "collapse": "Collapse",
     "subscription_deleted": "Subscription deleted",
-    "subscription_renewal_message_copied": "The subscription renewal message has been copied to the clipboard"
+    "subscription_renewal_message_copied": "The subscription renewal message has been copied to the clipboard",
+    "renewal_reminder": "Subscription Renewal Reminder",
+    "subscription_expired": "Subscription expired",
+    "and_more": "and {count} more",
+    "subscription_renewal_needed": "Subscription Renewal Required",
+    "subscription_renewal_message": "Your subscription expires within 2 days or has already expired. Please contact your teacher to renew it.",
+    "last_lesson": "Last lesson",
+    "access_data": "Access data",
+    "payment_status": "Payment status",
+    "my_lesson_recordings": "My lesson Recordings"
   },
 
   "Materials": {
@@ -166,6 +188,8 @@
     "downloaded": "Downloaded",
     "change_cover": "Change cover",
     "add_cover": "Add cover",
+    "drop_file_here": "Drop file here",
+    "or_drag_and_drop": "or drag and drop",
     "confirm_lesson": "Are you sure you want to leave the page? All entered information will not be saved.",
     "add_photo_from_device": "Add from device",
     "take_from_photo_bank": "Add from photobank",
@@ -200,7 +224,9 @@
     "select_dates": "Select dates",
     "set_lesson_times": "Set times for lessons",
     "select_subscription": "Select subscription",
-    "no_dates_selected": "No dates selected"
+    "no_dates_selected": "No dates selected",
+    "add_link": "Add link",
+    "no_link": "No link"
   },
 
   "Validation": {
@@ -241,6 +267,57 @@
     "nothing_found": "Nothing found",
     "select_category": "Select category",
     "delete_files_confirm": "Are you sure you want to delete the file(s)?",
-    "files_used_in_lessons_warning": "If the file(s) are used in lessons, they will also be removed from those lessons."
+    "files_used_in_lessons_warning": "If the file(s) are used in lessons, they will also be removed from those lessons.",
+    "add":"Add new module",
+    "start": "Start",
+    "stop": "Stop",
+    "tuned": "✓ Tuned",
+    "almost": "~ Almost",
+    "higher": "↑ Higher",
+    "lower": "↓ Lower",
+    "tolerance": "Tolerance",
+    "cents": "cents",
+    "standard": "Standard",
+    "oscilloscope": "Oscilloscope",
+    "notifications": "Notifications",
+    "no_notifications": "No notifications",
+    "total": "Total"
+  },
+
+  "Finance": {
+    "reports": {
+      "title": "Financial Reports",
+      "description": "Detailed analysis of your income streams and student contributions",
+      "range": "Range:",
+      "export": "Export",
+      "total_income": "Total Income",
+      "active_students": "Active Students",
+      "avg_ticket": "Avg. Ticket / Student",
+      "total_sales": "Total Sales",
+      "subscriptions": "subscriptions",
+      "in_period": "In selected period",
+      "lifetime_average": "Lifetime average",
+      "successful_payments": "Successful payments",
+      "vs_period": "vs period",
+      "revenue_per_student": "Revenue per Student",
+      "revenue_per_student_desc": "Performance ranking based on total contributions in period",
+      "sort_by": "Sort By",
+      "income_per_subscription": "Income / Subscription",
+      "income_per_subscription_desc": "Revenue mix and market share",
+      "units_sold": "units sold",
+      "of_mix": "of mix",
+      "no_sales": "No sales in selected period",
+      "growth_factor": "Growth Factor",
+      "sales_density": "Sales density check",
+      "generating_reports": "Generating your reports...",
+      "forecast": "Payment Forecast",
+      "forecast_short": "Forecast",
+      "fact": "Real Payments",
+      "expected_payments": "Expected Payments",
+      "expected_sum": "Amount to Pay",
+      "renewal": "Renewal",
+      "extra_payment": "Extra payment",
+      "payment_date": "Payment Date"
+    }
   }
 }

@@ -21,13 +21,14 @@
   "Main": {
     "my_profile": "Мій профіль",
     "welcome_back": "Вітаю",
-    "continue_learning_prompt": "Хочеш продовжити навчання? Переглянь свої курси",
-    "welcome_title": "Ласкаво просимо до YS Academy",
+    "continue_learning_prompt": "Хочеш продовжити навчання? Переглянь свої матеріали",
+    "welcome_title": "Ласкаво просимо до YS Vocal Academy",
     "welcome_description": "Ваша універсальна платформа для управління освітою та навчанням.",
     "courses": "Курси",
     "lessons": "Уроки",
     "students": "Студенти",
-    "my_courses": "Мої курси"
+    "my_courses": "Мої курси",
+    "my_lesson_recordings": "Мої записи уроків"
   },
 
   "SideBar": {
@@ -46,10 +47,22 @@
     "courses": "Курси",
     "my_profile": "Мій профіль",
     "subscriptions": "Абонементи",
-    "my_finance": "Мої фінанси"
+    "my_finance": "Мої фінанси",
+    "lesson_recordings": "Записи уроків",
+    "all_rights_reserved": "Всі права захищені",
+    "my_widgets": "Мої віджети",
+    "metronome": "Метроном",
+    "tuner": "Тюнер",
+    "piano": "Піаніно",
+    "tracker": "Трекер",
+    "my_boards": "Мої дошки",
+    "boards": "Дошки",
+    "reports": "Звіти"
   },
 
   "Students": {
+    "tracker": "Трекер",
+    "lesson-recordings": "Записи уроків",
     "status": "Статус",
     "active": "Активний",
     "inactive": "Неактивний",
@@ -93,8 +106,8 @@
     "partially_paid": "Частково сплачено",
     "expired": "Згорів",
     "transfer": "Перенос",
-    "pending": "Не проведен",
-    "completed": "Проведен",
+    "pending": "Не проведено",
+    "completed": "Проведено",
     "data_saved": "Дані збережено",
     "amount": "Сума",
     "send_email": "Надіслати лист",
@@ -104,6 +117,16 @@
     "collapse": "Згорнути",
     "subscription_deleted": "Абонемент видален",
     "subscription_renewal_message_copied": "Повідомлення про поновлення абонемента скопійовано в буфер обміну",
+    "renewal_reminder": "Нагадування про поновлення абонемента",
+    "subscription_expired": "Абонемент закінчився",
+    "and_more": "та ще {count}",
+    "subscription_renewal_needed": "Необхідно оновити абонемент",
+    "subscription_renewal_message": "Ваш абонемент закінчується {date}. Будь ласка, вчасно оновіть абонемнт та надішліть квитанцію викладачу",
+    "expired_renewal_message": "Доступ до навчальної платформи закінчеться {date}. Для продовження навчання зв'яжіться з викладачем",
+    "last_lesson": "Останній урок",
+    "access_data": "Дата доступа",
+    "payment_status": "Статус оплати",
+    "my_lesson_recordings": "Мої записи уроків",
 
     "validation": {
       "required_field": "Обов’язкове поле",
@@ -171,6 +194,8 @@
     "downloaded": "Завантажено",
     "change_cover": "Змінити обкладинку",
     "add_cover": "Додати обкладинку",
+    "drop_file_here": "Перетягніть файл сюди",
+    "or_drag_and_drop": "або перетягніть файл",
     "confirm_lesson": "Ви впевнені, що хочете покинути сторінку? Уся введена інформація не буде збережена.",
     "add_photo_from_device": "Загрузити з пристрою",
     "take_from_photo_bank": "Загрузити з фотобанку",
@@ -206,7 +231,9 @@
     "select_dates": "Виберіть дати",
     "set_lesson_times": "Встановіть час для уроків",
     "select_subscription": "Виберіть абонемент",
-    "no_dates_selected": "Дати не вибрані"
+    "no_dates_selected": "Дати не вибрані",
+    "add_link": "Додати посилання",
+    "no_link": "Немає запису"
   },
 
   "Validation": {
@@ -247,6 +274,57 @@
     "nothing_found": "Нічого не знайдено",
     "select_category": "Обрати категорію",
     "delete_files_confirm": "Ви впевнені, що хочете видалити файл(и)?",
-    "files_used_in_lessons_warning": "Якщо файл(и) використовуються в уроках, їх також буде видалено з цих уроків."
+    "files_used_in_lessons_warning": "Якщо файл(и) використовуються в уроках, їх також буде видалено з цих уроків.",
+    "add":"Додати новий модуль",
+    "start": "Почати",
+    "stop": "Зупинити",
+    "tuned": "✓ Налаштовано",
+    "almost": "~ Майже",
+    "higher": "↑ Вище",
+    "lower": "↓ Нижче",
+    "tolerance": "Похибка",
+    "cents": "центів",
+    "standard": "Стандартний",
+    "oscilloscope": "Осцилограф",
+    "notifications": "Повідомлення",
+    "no_notifications": "Немає повідомлень",
+    "total": "Загалом"
+  },
+
+  "Finance": {
+    "reports": {
+      "title": "Фінансові звіти",
+      "description": "Детальний аналіз ваших доходів та вкладів студентів",
+      "range": "Період:",
+      "export": "Експорт",
+      "total_income": "Загальний дохід",
+      "active_students": "Усього студентів",
+      "avg_ticket": "Середній чек / Студент",
+      "total_sales": "Загальні продажі",
+      "subscriptions": "абонементів",
+      "in_period": "У вибраному періоді",
+      "lifetime_average": "Середнє за весь час",
+      "successful_payments": "Успішні платежі",
+      "vs_period": "пор. з періодом",
+      "revenue_per_student": "Дохід по студентах",
+      "revenue_per_student_desc": "Рейтинг на основі загальних внесків у вибраному періоді",
+      "sort_by": "Сортувати",
+      "income_per_subscription": "Дохід по абонементам",
+      "income_per_subscription_desc": "Розподіл доходів та частка ринку",
+      "units_sold": "продано",
+      "of_mix": "від загального",
+      "no_sales": "Немає продажів у вибраному періоді",
+      "growth_factor": "Фактор росту",
+      "sales_density": "Перевірка щільності продажів",
+      "generating_reports": "Генерація звітів...",
+      "forecast": "Прогноз оплат",
+      "forecast_short": "Прогноз",
+      "fact": "Реальні оплати",
+      "expected_payments": "Очікувані оплати",
+      "expected_sum": "Сума до оплати",
+      "renewal": "Поновлення",
+      "extra_payment": "Доплата",
+      "payment_date": "Дата оплати"
+    }
   }
 }

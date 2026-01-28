@@ -6,12 +6,27 @@ import { Input } from '@/components/ui/input';
 import { createLesson } from '@/components/Materials/Lesson/action';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react';
-import LessonBlock from '@/components/Materials/Lesson/components/LessonBlock';
 import { Block } from '@blocknote/core';
 import Cover from '@/components/Materials/Lesson/components/Cover';
 import ConfirmModal from '@/common/ConfirmModal';
 import LessonSaveModal from '@/components/Materials/Lesson/components/LessonSaveModal';
 import { uploadPhoto } from '@/components/Materials/Photo/action';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableLessonBlock } from '@/components/Materials/Lesson/components/SortableLessonBlock';
 
 interface Props {
   setIsEditPlace: Dispatch<SetStateAction<boolean>>;
@@ -28,6 +43,26 @@ export default function EditPlace({ setIsEditPlace }: Props) {
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setLessonDoc(items => {
+        const oldIndex = items.findIndex(item => item.blockId === active.id);
+        const newIndex = items.findIndex(item => item.blockId === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   const addBlock = () => {
     setLessonDoc(prev => {
@@ -111,18 +146,32 @@ export default function EditPlace({ setIsEditPlace }: Props) {
             placeholder={t('lesson_title')}
             value={lessonTitle}
             onChange={e => setLessonTitle(e.target.value)}
-            className="min-w-1/2! text-[50px]! h-[58px] mx-auto border-none text-center"
+            className="min-w-1/2! text-[50px]! h-[58px] mx-auto border-none text-center mb-2"
           />
         </div>
 
-        {lessonDoc.map(block => (
-          <LessonBlock
-            key={block.blockId}
-            blockId={block.blockId}
-            onUpdate={updateBlock}
-            deleteSection={handleDeleteBlock}
-          />
-        ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={lessonDoc.map(item => item.blockId)}
+            strategy={verticalListSortingStrategy}
+          >
+            {lessonDoc.map(block => (
+              <SortableLessonBlock
+                key={block.blockId}
+                id={block.blockId}
+                blockId={block.blockId}
+                lesson={block.content ?? []}
+                onUpdate={updateBlock}
+                editable={true}
+                deleteSection={handleDeleteBlock}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
 
         <Button variant="outline" className="w-full h-[50px] mt-6" onClick={addBlock}>
           {t('add_section')}

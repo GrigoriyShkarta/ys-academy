@@ -54,12 +54,17 @@ export default function InfoUserModal({ open, close, student }: Props) {
       email: student.email ?? '',
       telegram: student.telegram ?? '',
       instagram: student.instagram ?? '',
-      birthDate: (student.birthDate as string) ?? '',
+      birthDate: student?.birthDate
+        ? new Date(student.birthDate).toISOString().split('T')[0]
+        : '',
       musicLevel: student.musicLevel ?? '',
       vocalExperience: student.vocalExperience ?? '',
       goals: student.goals ?? '',
       photo: student.photo ?? '',
       isActive: student.isActive,
+      accessExpiryDate: student?.accessExpiryDate
+        ? new Date(student.accessExpiryDate).toISOString().split('T')[0]
+        : '',
       password: '',
     },
   });
@@ -74,12 +79,17 @@ export default function InfoUserModal({ open, close, student }: Props) {
       city: student?.city ?? '',
       telegram: student.telegram ?? '',
       instagram: student.instagram ?? '',
-      birthDate: (student.birthDate as string) ?? '',
+      birthDate: student?.birthDate
+        ? new Date(student.birthDate).toISOString().split('T')[0]
+        : '',
       musicLevel: student.musicLevel ?? '',
       vocalExperience: student.vocalExperience ?? '',
       goals: student.goals ?? '',
       photo: student.photo ?? '',
       isActive: student.isActive,
+      accessExpiryDate: student?.accessExpiryDate
+        ? new Date(student.accessExpiryDate).toISOString().split('T')[0]
+        : '',
       password: '',
     });
     setPreview((student.photo as string) ?? null);
@@ -166,6 +176,14 @@ export default function InfoUserModal({ open, close, student }: Props) {
                         {t('generate')}
                       </Button>
                     </div>
+                  </Field>
+                )}
+                {user?.role === 'super_admin' && (
+                  <Field
+                    label={t('access_data')}
+                    error={formState.errors?.accessExpiryDate?.message}
+                  >
+                    <Input type="date" {...register('accessExpiryDate')} />
                   </Field>
                 )}
               </div>

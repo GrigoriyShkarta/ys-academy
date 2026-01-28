@@ -20,6 +20,7 @@ interface Props {
 export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUploadedFiles }: Props) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null);
+  const [globalCategories, setGlobalCategories] = useState<string[]>([]);
   const t = useTranslations('Materials');
   const { user } = useUser();
 
@@ -51,6 +52,18 @@ export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUpload
       const copy = [...prev];
       (copy[index] as any).categories = next;
       return copy;
+    });
+  };
+
+  const handleGlobalCategoryChange = (next: string[]) => {
+    setGlobalCategories(next);
+    setUploadedFiles(prev => {
+      const copy = [...prev];
+      return copy.map(file => {
+        const currentCats = (file as any).categories || [];
+        (file as any).categories = [...new Set([...currentCats, ...next])];
+        return file;
+      });
     });
   };
 
@@ -86,6 +99,14 @@ export default function AudioPreviewList({ fetchingIdx, uploadedFiles, setUpload
           <p className="text-sm font-medium text-foreground">
             {t('uploaded_audio')}: <span className="font-bold">{uploadedFiles.length}</span>/9
           </p>
+
+          <MultiSelect
+            options={categoryOptions}
+            selected={globalCategories}
+            onChange={handleGlobalCategoryChange}
+            placeholder={t('select_categories')}
+            className="w-[300px]"
+          />
         </div>
 
         {uploadedFiles.map((file, idx) => {

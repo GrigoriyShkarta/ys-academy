@@ -14,15 +14,15 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Module, ModuleDTO } from '@/components/Materials/utils/interfaces';
+import { Module } from '@/components/Materials/utils/interfaces';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import PhotoEditor from '@/components/Materials/Modules/ModuleModal/PhotoEditor';
+import PhotoEditor from '@/common/PhotoEditor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ChooseListModal from '@/common/MaterialsCommon/ChooseListModal';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createModule, updateModule } from '@/components/Materials/Modules/action';
 import SortableLesson from '@/components/Materials/Modules/ModuleModal/SortableLesson';
 import MultiSelect from '@/common/MultiSelect';
@@ -155,18 +155,22 @@ export default function ModuleModal({ open, setOpen, selectModule, module }: Pro
     try {
       if (module) {
         await updateModule(data, module.id);
-        queryClient.invalidateQueries({ queryKey: ['module', module.id] });
+        await queryClient.invalidateQueries({ queryKey: ['module', module.id] });
+        await queryClient.invalidateQueries({ queryKey: ['modules'] });
+        await queryClient.invalidateQueries({ queryKey: ['lessons', 'modules'] }); 
       } else {
         const newModule = await createModule(data);
-        console.log('newModule', newModule)
+        await queryClient.invalidateQueries({ queryKey: ['modules'] });
+        await queryClient.invalidateQueries({ queryKey: ['lessons', 'modules'] });
+        console.log('newModule', newModule);
         if (newModule && selectModule) {
           selectModule(newModule.id);
         }
-        queryClient.invalidateQueries({ queryKey: ['modules'] });
       }
     } catch (error) {
       console.error('Error:', error);
     } finally {
+      
       setOpen(false);
       setIsLoading(false);
     }
@@ -201,10 +205,7 @@ export default function ModuleModal({ open, setOpen, selectModule, module }: Pro
 
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 p-2">
-            <PhotoEditor
-              setImage={setImageSrc}
-              externalImage={imageSrc}
-            />
+            <PhotoEditor setImage={setImageSrc} externalImage={imageSrc} />
 
             <Label>{t('name')}</Label>
             <Input

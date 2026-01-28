@@ -46,7 +46,7 @@ export default function ModulesLayout() {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
+    <div className="flex flex-col gap-4 p-4 mt-18 md:mt-0">
       <Button
         className="bg-accent w-[240px] mx-auto"
         onClick={() => {

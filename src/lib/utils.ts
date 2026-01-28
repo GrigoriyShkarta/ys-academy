@@ -11,14 +11,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const formatDateTime = (value?: string | Date | null) => {
+export const formatDateTime = (value?: string | Date | null, dateOnly?: boolean) => {
   if (!value) return '';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value);
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+  const dateStr = `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
+
+  if (dateOnly) {
+    return dateStr;
+  }
+
+  return `${dateStr} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
 export const getYouTubeId = (url: string): string | null => {
@@ -213,15 +218,15 @@ export const generateRenewalMessage = (subscription: StudentSubscription): strin
   );
 
   const lessonCount = lessons.length;
-  const title = subscription.subscription.title; // наприклад "STANDARD"
-  const price = subscription.subscription.price; // припустимо, що є поле price в subscription.subscription
+  const title = subscription.subscription.title;
+  const price = subscription.subscription.price;
 
-  // Групуємо уроки за днем тижня + часом (щоб знайти регулярні слоти)
+  // Групуємо уроки за днем тижня + часом
   const slotsMap = new Map<string, { dayName: string; time: string }>();
 
   lessons.forEach(lesson => {
     const date = new Date(lesson.scheduledAt);
-    const dayOfWeek = date.getUTCDay(); // 0 = неділя, 1 = понеділок, ..., 6 = субота
+    const dayOfWeek = date.getUTCDay();
     const time = format(date, 'HH:mm');
 
     const dayNames = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', "п'ятниця", 'субота'];
@@ -250,7 +255,7 @@ export const generateRenewalMessage = (subscription: StudentSubscription): strin
       } за Києвом`;
   }
 
-  // Список дат уроків: 02, 06, 09... грудня 2025
+  // Список дат уроків
   const datesLine = lessons
     .map(lesson => {
       const date = new Date(lesson.scheduledAt);
@@ -260,9 +265,19 @@ export const generateRenewalMessage = (subscription: StudentSubscription): strin
     })
     .join(', ');
 
-  // Дата поновлення — дата останнього урока
-  const lastLessonDate = lessons[lessons.length - 1]
-    ? format(new Date(lessons[lessons.length - 1].scheduledAt), 'dd.MM.yyyy')
+  // Дата останнього урока
+  const lastLesson = lessons[lessons.length - 1];
+  const lastLessonDate = lastLesson
+    ? format(new Date(lastLesson.scheduledAt), 'dd.MM.yyyy')
+    : '';
+
+  // Дата дійсності абонементу (останній урок + 2 дні)
+  const expiryDate = lastLesson
+    ? (() => {
+        const date = new Date(lastLesson.scheduledAt);
+        date.setDate(date.getDate() + 2);
+        return format(date, 'dd.MM.yyyy');
+      })()
     : '';
 
   // Текст повідомлення
@@ -270,7 +285,7 @@ export const generateRenewalMessage = (subscription: StudentSubscription): strin
     lessonCount
   )} вокалу успішно поновлено! 🎉
 
-Дійсний до: ${lastLessonDate} включно
+Дійсний до: ${expiryDate} включно
 ${timeLine}
 
 Уроки за розкладом:

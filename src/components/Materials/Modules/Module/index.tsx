@@ -29,6 +29,8 @@ export default function ModuleLayout({ moduleId }: { moduleId?: number }) {
     enabled: !!moduleId,
   });
 
+  console.log('module', module)
+
   const deleteMutation = useMutation({
     mutationFn: () => deleteModule(moduleId),
     onSuccess: () => {
@@ -43,7 +45,7 @@ export default function ModuleLayout({ moduleId }: { moduleId?: number }) {
   const lessons = module?.lessons || [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-8 md:py-6 py-10">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 mb-6">
         <button
@@ -71,11 +73,13 @@ export default function ModuleLayout({ moduleId }: { moduleId?: number }) {
       {/* Title + Categories */}
       <div className="mb-8">
         <h1 className="text-4xl md:text-5xl font-bold mb-3">{module.title}</h1>
-        <div className="flex gap-2 flex-wrap">
-          {module?.categories?.map((c: any) => (
-            <Chip key={c.id} category={c} />
-          ))}
-        </div>
+        {user?.role === 'super_admin' && (
+          <div className="flex gap-2 flex-wrap">
+            {module?.categories?.map((c: any) => (
+              <Chip key={c.id} category={c} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Unified Lessons List */}

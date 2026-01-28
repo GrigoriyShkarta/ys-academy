@@ -23,15 +23,27 @@ interface Props {
   handleAdd: (lesson: { id: number; title: string }[]) => void;
   array?: { id: number; title: string }[];
   isCourse?: boolean;
+  onAddClick?: () => void;
+  showAddButton?: boolean;
 }
 
-export default function ChooseListModal({ open, closeModal, handleAdd, array, isCourse }: Props) {
+export default function ChooseListModal({
+  open,
+  closeModal,
+  handleAdd,
+  array,
+  isCourse,
+  onAddClick,
+  showAddButton,
+}: Props) {
   const [search, setSearch] = useState('');
   const [selectedLessons, setSelectedLessons] = useState<{ id: number; title: string }[]>([]);
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const t = useTranslations('Materials');
   const { user } = useUser();
+
+  console.log('hi')
 
   useEffect(() => {
     if (array) {
@@ -40,7 +52,7 @@ export default function ChooseListModal({ open, closeModal, handleAdd, array, is
   }, [array, open]);
 
   const { data: list, isLoading } = useQuery({
-    queryKey: ['lessons', search, selectedCategories, isCourse],
+    queryKey: ['lessons', 'modules', search, selectedCategories, isCourse],
     queryFn: () => {
       if (isCourse) {
         return getModules({
@@ -135,6 +147,8 @@ export default function ChooseListModal({ open, closeModal, handleAdd, array, is
     },
   ];
 
+  console.log('list', list);
+
   return (
     <>
       <Dialog open={open} onOpenChange={closeModal}>
@@ -151,6 +165,8 @@ export default function ChooseListModal({ open, closeModal, handleAdd, array, is
                   data={list?.data ? list.data : list}
                   columns={columns}
                   multiSelectOptions={categoryOptions}
+                  showAddButton={showAddButton}
+                  onAddClick={onAddClick}
                   onMultiSelectChange={onMultiSelectChange}
                   onSearchChange={newSearch => {
                     setSearch(newSearch);

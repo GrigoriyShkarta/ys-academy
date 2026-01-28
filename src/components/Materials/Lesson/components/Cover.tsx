@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import Cropper, { Area, Point } from 'react-easy-crop';
-import { Check, X } from 'lucide-react';
+import { Check, Trash2, X } from 'lucide-react';
 
 interface Props {
   cover?: string | File | null;
@@ -41,9 +41,7 @@ export default function Cover({ cover, updateCover, isEdit }: Props) {
       setImageSrc(imageDataUrl);
 
       if (containerRef.current) {
-        setAspect(
-          containerRef.current.offsetWidth / containerRef.current.offsetHeight
-        );
+        setAspect(containerRef.current.offsetWidth / containerRef.current.offsetHeight);
       }
       setIsCropping(true);
       e.target.value = '';
@@ -99,18 +97,10 @@ export default function Cover({ cover, updateCover, isEdit }: Props) {
             objectFit="cover"
           />
           <div className="absolute bottom-4 right-4 flex gap-2 z-20">
-            <Button
-              onClick={handleCancel}
-              size="icon"
-              variant="destructive"
-            >
+            <Button onClick={handleCancel} size="icon" variant="destructive">
               <X className="h-4 w-4" />
             </Button>
-            <Button
-              onClick={saveCrop}
-              size="icon"
-              className="bg-green-500 hover:bg-green-600"
-            >
+            <Button onClick={saveCrop} size="icon" className="bg-green-500 hover:bg-green-600">
               <Check className="h-4 w-4" />
             </Button>
           </div>
@@ -122,7 +112,7 @@ export default function Cover({ cover, updateCover, isEdit }: Props) {
           ) : null}
 
           {isEdit && (
-            <>
+            <div className={`flex gap-2 ${previewUrl && 'absolute right-2 bottom-2'}`}>
               <input
                 type="file"
                 accept="image/*"
@@ -130,15 +120,15 @@ export default function Cover({ cover, updateCover, isEdit }: Props) {
                 className="hidden"
                 onChange={onFileChange}
               />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                className={
-                  previewUrl ? 'absolute right-2 bottom-2 bg-accent' : 'bg-accent'
-                }
-              >
+              <Button onClick={() => fileInputRef.current?.click()} className={'bg-accent'}>
                 {t(previewUrl ? 'change_cover' : 'add_cover')}
               </Button>
-            </>
+              {previewUrl && (
+                <Button onClick={() => updateCover && updateCover('')} variant="destructive">
+                  <Trash2 />
+                </Button>
+              )}
+            </div>
           )}
         </>
       )}
@@ -150,11 +140,7 @@ export default function Cover({ cover, updateCover, isEdit }: Props) {
 function readFile(file: File): Promise<string> {
   return new Promise(resolve => {
     const reader = new FileReader();
-    reader.addEventListener(
-      'load',
-      () => resolve(reader.result as string),
-      false
-    );
+    reader.addEventListener('load', () => resolve(reader.result as string), false);
     reader.readAsDataURL(file);
   });
 }
@@ -168,10 +154,7 @@ const createImage = (url: string): Promise<HTMLImageElement> =>
     image.src = url;
   });
 
-async function getCroppedImg(
-  imageSrc: string,
-  pixelCrop: Area
-): Promise<Blob | null> {
+async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob | null> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');

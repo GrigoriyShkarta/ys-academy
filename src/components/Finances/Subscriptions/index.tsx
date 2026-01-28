@@ -10,9 +10,9 @@ import TableActionMenu from '@/common/TableActioMenu';
 import { ArrowDown, ArrowUp, ChevronsUpDownIcon } from 'lucide-react';
 import DataTable from '@/common/Table';
 import ConfirmModal from '@/common/ConfirmModal';
-import { deleteSubscriptions, getSubscriptions } from '@/components/Materials/Subscriptions/action';
 import Loader from '@/common/Loader';
-import SubscriptionModal from '@/components/Materials/Subscriptions/SubscriptionModal';
+import { getSubscriptions, deleteSubscriptions } from './action';
+import SubscriptionModal from './SubscriptionModal';
 
 export default function SubscriptionsLayout() {
   const [page, setPage] = useState(1);
@@ -137,7 +137,7 @@ export default function SubscriptionsLayout() {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="flex flex-col gap-4 p-4 mt-18 sm:mt-0">
+    <div className="flex flex-col gap-4 p-4 mt-18 md:mt-0">
       <SubscriptionModal subscription={selectedFile as Subscription} />
       {subscriptions && subscriptions.data.length > 0 && (
         <DataTable

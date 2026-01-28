@@ -37,6 +37,7 @@ interface DataTableProps<T> {
   currentPage?: number;
   selectedIds?: number[];
   showFromDevice?: boolean;
+  showAddButton?: boolean;
   onPageChange?: (page: number) => void;
   onSearchChange?: (search: string) => void;
   handleDelete?: () => void;
@@ -45,6 +46,7 @@ interface DataTableProps<T> {
   multiSelectOptions?: MultiOption[];
   selectedMulti?: string[];
   onMultiSelectChange?: (selected: string[]) => void;
+  onAddClick?: () => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,6 +57,7 @@ export default function DataTable<T extends Record<string, any>>({
   totalPages,
   showDeleteIcon,
   showFromDevice,
+  showAddButton,
   selectedIds,
   onPageChange,
   onSearchChange,
@@ -64,6 +67,7 @@ export default function DataTable<T extends Record<string, any>>({
   multiSelectOptions = [],
   selectedMulti = [],
   onMultiSelectChange,
+  onAddClick,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('');
   const [localSelected, setLocalSelected] = useState<string[]>([]);
@@ -138,6 +142,11 @@ export default function DataTable<T extends Record<string, any>>({
         {showFromDevice && handleClickFromDevice && (
           <Button className="bg-accent hover:bg-accent/80" onClick={handleClickFromDevice}>
             {t('from_device')}
+          </Button>
+        )}
+        {showAddButton && (
+          <Button className="bg-accent hover:bg-accent/80" onClick={onAddClick}>
+            {t('add')}
           </Button>
         )}
       </div>

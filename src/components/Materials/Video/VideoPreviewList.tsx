@@ -45,6 +45,7 @@ export const VideoPreviewList: FC<Props> = ({
   const t = useTranslations('Materials');
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [activeVideoKey, setActiveVideoKey] = useState<string | null>(null); // 'yt-0' или 'file-abc123'
+  const [globalCategories, setGlobalCategories] = useState<string[]>([]);
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -61,6 +62,24 @@ export const VideoPreviewList: FC<Props> = ({
     ...youtube.map((v, i) => ({ ...v, type: 'youtube' as const, index: i })),
     ...files.map(f => ({ ...f, type: 'file' as const, uid: f.uid })),
   ];
+
+  const handleGlobalCategoryChange = (next: string[]) => {
+    setGlobalCategories(next);
+
+    // Update YouTube videos
+    youtube.forEach((video, idx) => {
+      const current = video.categories || [];
+      const merged = [...new Set([...current, ...next])];
+      onYoutubeCategoriesChange?.(idx, merged);
+    });
+
+    // Update File videos
+    files.forEach(file => {
+      const current = file.categories || [];
+      const merged = [...new Set([...current, ...next])];
+      onFileCategoriesChange?.(file.uid, merged);
+    });
+  };
 
   const handleNewCategories = (newCategories?: string[]) => {
     if (!activeVideoKey || !newCategories) return;
@@ -93,9 +112,19 @@ export const VideoPreviewList: FC<Props> = ({
   return (
     <>
       <div className="mt-6 space-y-5">
-        <p className="text-sm font-medium text-foreground">
-          {t('uploaded_videos')}: <span className="font-bold">{allVideos.length}</span>/9
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">
+            {t('uploaded_videos')}: <span className="font-bold">{allVideos.length}</span>/9
+          </p>
+
+          <MultiSelect
+            options={categoryOptions}
+            selected={globalCategories}
+            onChange={handleGlobalCategoryChange}
+            placeholder={t('select_categories')}
+            className="w-full max-w-[300px]"
+          />
+        </div>
 
         <div
           className={`grid gap-5 ${
