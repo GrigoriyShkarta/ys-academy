@@ -1,30 +1,29 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 import '@excalidraw/excalidraw/index.css'
-import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal'
-import ChooseVideoModal from '@/common/MaterialsCommon/ChooseVideoModal'
-import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal'
-import { LessonItemType } from '@/components/Materials/utils/interfaces'
-import { Image, Video, Music, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { LessonItemType } from '../Materials/utils/interfaces'
 
-export default function BoardLayout() {
+
+import { useBoardSync } from './useBoardSync'
+import { useUser } from '@/providers/UserContext'
+
+interface Props {
+  boardId?: string
+}
+
+export default function BoardLayout({ boardId }: Props) {
   const [ExcalidrawComponent, setExcalidrawComponent] = useState<React.ComponentType<any> | null>(null)
   const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null)
   const { theme, resolvedTheme } = useTheme()
+  const {user} = useUser()
   const [mounted, setMounted] = useState(false)
 
-  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false)
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
-  const [isAudioModalOpen, setIsAudioModalOpen] = useState(false)
+  // Real-time synchronization hook
+  const { handleBoardChange, handlePointerMove, isLoaded } = useBoardSync(boardId ?? String(user?.id), excalidrawAPI)
+
+  console.log('boardId', boardId)
 
   const handleAdd = async (type: LessonItemType, content?: string | File, bankId?: number) => {
     if (!excalidrawAPI || !content || typeof content !== 'string') return
@@ -193,92 +192,12 @@ export default function BoardLayout() {
         langCode="uk-UA"
         theme={isDark ? 'dark' : 'light'}
         excalidrawAPI={(api: any) => setExcalidrawAPI(api)}
-        renderEmbeddable={(element: any) => {
-          if (element.type === 'embeddable' && element.customData) {
-            if (element.customData.type === 'audio') {
-              return (
-                <div style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  background: 'transparent',
-                  padding: '10px'
-                }}>
-                  <audio 
-                    controls 
-                    src={element.link} 
-                    style={{ width: '100%' }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              )
-            }
-            if (element.customData.type === 'video') {
-              return (
-                <div style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  background: '#000',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center' 
-                }}>
-                  <video 
-                    controls 
-                    playsInline 
-                    src={element.link} 
-                    style={{ width: '100%', maxHeight: '100%' }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              )
-            }
-          }
-          return null
+        onChange={(elements: any, appState: any, files: any) => {
+           handleBoardChange(elements, appState, files)
         }}
-        renderTopRightUI={() => (
-          <div style={{ display: 'flex', gap: '8px', marginRight: '8px' }}>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="outline" className="rounded-full shadow-md bg-white dark:bg-zinc-800">
-                  <Plus className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsPhotoModalOpen(true)}>
-                  <Image className="mr-2 h-4 w-4" />
-                  <span>Фото</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsVideoModalOpen(true)}>
-                  <Video className="mr-2 h-4 w-4" />
-                  <span>Відео</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAudioModalOpen(true)}>
-                  <Music className="mr-2 h-4 w-4" />
-                  <span>Аудіо</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
-      />
-
-      <ChoosePhotoModal
-        open={isPhotoModalOpen}
-        closeModal={() => setIsPhotoModalOpen(false)}
-        handleAdd={handleAdd}
-      />
-      <ChooseVideoModal
-        open={isVideoModalOpen}
-        closeModal={() => setIsVideoModalOpen(false)}
-        handleAdd={handleAdd}
-      />
-      <ChooseAudioModal
-        open={isAudioModalOpen}
-        closeModal={() => setIsAudioModalOpen(false)}
-        handleAdd={handleAdd}
+        onPointerUpdate={(payload: any) => {
+           handlePointerMove(payload.pointer)
+        }}
       />
     </div>
   )
