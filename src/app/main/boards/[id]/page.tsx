@@ -12,5 +12,5 @@ export default async function StudentBoardPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <BoardLayout studentId={id} />;
+  return <BoardLayout />;
 }
