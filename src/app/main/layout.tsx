@@ -72,7 +72,7 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
           <div className="flex">
             <Sidebar />
 
-            <div className="absolute top-4 right-6 z-50 hidden md:block">
+            <div className="absolute top-16 right-6 z-50 hidden md:block">
               <NotificationBell notifications={user?.role === 'super_admin' ? userData?.notifications : studentData?.notifications ?? []} />
             </div>
 
