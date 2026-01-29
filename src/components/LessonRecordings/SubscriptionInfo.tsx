@@ -4,11 +4,15 @@ import { dateLocales } from '@/lib/consts';
 import { SupportedLocale } from '@/components/Students/Student/components/Subscriptions/SubscriptionModal';
 import { StudentSubscription } from '@/components/Students/interface';
 import { getYouTubeId } from '@/lib/utils';
-import { CirclePlus } from 'lucide-react';
+import { Pencil, Trash2, CirclePlus } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import UrlModal from '@/components/LessonRecordings/URLModal';
 import { useTranslations } from 'next-intl';
 import { useUser } from '@/providers/UserContext';
+import { deleteLessonRecording } from '@/components/LessonRecordings/actions';
+import { useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import ConfirmModal from '@/common/ConfirmModal';
 
 export default function SubscriptionInfo({
   subscription,
@@ -19,18 +23,35 @@ export default function SubscriptionInfo({
   isExpanded: boolean;
   studentId: number;
 }) {
-  const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+  const [selectedLesson, setSelectedLesson] = useState<{ id: number; url?: string } | null>(null);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [loading, setLoading] = useState(false);
   const locale = useLocale();
   const t = useTranslations('Materials');
   const { user } = useUser();
   const currentLocale = dateLocales[locale as SupportedLocale] || dateLocales.uk;
+  const client = useQueryClient();
 
-  // Сбрасываем selectedLessonId когда карточка сворачивается
+  // Сбрасываем выбранный урок когда карточка сворачивается
   useEffect(() => {
     if (!isExpanded) {
-      setSelectedLessonId(null);
+      setSelectedLesson(null);
     }
   }, [isExpanded]);
+
+  const handleConfirmDelete = async () => {
+    try {
+      setLoading(true)
+      await deleteLessonRecording(selectedLesson?.id || 0);
+      client.invalidateQueries({ queryKey: ['student', studentId] });
+    } catch (e) {
+      console.error('Error deleting recording:', e);
+    } finally {
+      setLoading(false)
+      setOpenConfirm(false)
+    }
+  };
 
   // Компактный вид (свёрнутый)
   if (!isExpanded) {
@@ -73,23 +94,43 @@ export default function SubscriptionInfo({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 w-full">
           {subscription.lessons.map(lesson => (
-            <div key={lesson.id} className="flex flex-col gap-2">
+            <div key={lesson.id} className="flex flex-col gap-2 relative">
               {lesson?.recordingUrl ? (
-                <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-                  <iframe
-                    className="absolute inset-0 w-full h-full"
-                    src={`https://www.youtube.com/embed/${getYouTubeId(
-                      lesson?.recordingUrl ?? ''
-                    )}`}
-                    title={lesson.scheduledAt}
-                    allowFullScreen
-                  />
+                <div className="flex flex-col gap-2">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src={`https://www.youtube.com/embed/${getYouTubeId(lesson?.recordingUrl ?? '')}`}
+                      title={lesson.scheduledAt}
+                      allowFullScreen
+                    />
+                  </div>
+                  {user?.role === 'super_admin' && (
+                    <div className="flex gap-2 justify-end absolute top-2 right-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-primary"
+                        onClick={() => {setSelectedLesson({ id: lesson.id, url: lesson.recordingUrl }), setOpenEdit(true)}}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => { setSelectedLesson({id: lesson.id}), setOpenConfirm(true)}}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : user?.role === 'super_admin' ? (
                 <div
                   onClick={e => {
                     e.stopPropagation();
-                    setSelectedLessonId(lesson.id);
+                    setSelectedLesson({ id: lesson.id });
                   }}
                   className="aspect-video w-full flex flex-col gap-2 p-4 cursor-pointer border-2 border-dashed
                     rounded-xl justify-center items-center hover:bg-muted transition-colors"
@@ -113,8 +154,22 @@ export default function SubscriptionInfo({
         </div>
       </div>
 
-      {selectedLessonId && (
-        <UrlModal lessonId={selectedLessonId} closeModal={() => setSelectedLessonId(null)} studentId={studentId} />
+      {openEdit && selectedLesson && (
+        <UrlModal
+          lessonId={selectedLesson.id}
+          initialUrl={selectedLesson.url}
+          closeModal={() => {setSelectedLesson(null), setOpenEdit(false)}}
+          studentId={studentId}
+        />
+      )}
+
+      {openConfirm && (
+        <ConfirmModal
+          open={openConfirm}
+          confirmAction={handleConfirmDelete}
+          setOnClose={() => setOpenConfirm(false)}
+          isLoading={loading}
+        />
       )}
     </div>
   );

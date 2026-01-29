@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, GripVertical } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import PreviewModal from '@/common/PreviewModal';
+import { useUser } from '@/providers/UserContext';
 
 interface Props {
   lesson?: Block[];
@@ -52,6 +53,7 @@ export default function LessonBlock({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
+  const {user} = useUser()
 
   useEffect(() => {
     if (editable) return;
@@ -249,7 +251,7 @@ export default function LessonBlock({
         ref={containerRef}
         onClick={handleContentClick}
         onContextMenu={(e) => !editable && e.preventDefault()}
-        className={!editable ? 'select-none hide-btn' : undefined}
+        className={user?.role === 'student' ? 'select-none hide-btn' : undefined}
       >
         <BlockNoteView
           editor={editor}

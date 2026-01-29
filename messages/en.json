@@ -226,7 +226,8 @@
     "select_subscription": "Select subscription",
     "no_dates_selected": "No dates selected",
     "add_link": "Add link",
-    "no_link": "No link"
+    "no_link": "No link",
+    "confirm_delete": "Are you sure you want to delete the recording?"
   },
 
   "Validation": {

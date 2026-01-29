@@ -1,5 +1,6 @@
 import { Bell, Trash2 } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
+import Link from 'next/link';
 import { Notification } from '@/components/Students/interface';
 import { deleteNotification, readNotifications } from '@/components/Students/Student/actions';
 import { useQueryClient } from '@tanstack/react-query';
@@ -81,12 +82,48 @@ export default function NotificationBell({ notifications }: Props) {
     return a.read ? 1 : -1;
   });
 
-  const message = (notification: string) => {
-    const split_message = notification.split(' ')
-    if (split_message.length > 1) {
-      return `${split_message[1]} ${NOTIFICATION_MESSAGES[split_message[0]]}`
+  const renderMessage = (notification: string): ReactNode => {
+    const firstSpaceIndex = notification.indexOf(' ');
+    
+    // If no space, it's just a type key
+    if (firstSpaceIndex === -1) {
+      return NOTIFICATION_MESSAGES[notification] || notification;
     }
-    return NOTIFICATION_MESSAGES[notification]
+
+    const type = notification.substring(0, firstSpaceIndex);
+    const content = notification.substring(firstSpaceIndex + 1);
+
+    if (type === 'student_updated_task_column') {
+      try {
+        const data = JSON.parse(content);
+        return (
+          <span>
+            <Link 
+              href={`/main/students/${data.id}`} 
+              className="text-accent hover:underline font-bold"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+            >
+              {data.name}
+            </Link>
+            {' '}
+            {NOTIFICATION_MESSAGES[type]}
+            {data.task ? `: ${data.task}` : ''}
+          </span>
+        );
+      } catch (e) {
+        console.error('Failed to parse notification JSON', e);
+      }
+    }
+
+    // Fallback for cases like type + simple string (e.g. legacy notifications)
+    if (NOTIFICATION_MESSAGES[type]) {
+      return `${content} ${NOTIFICATION_MESSAGES[type]}`;
+    }
+
+    return notification;
   }
 
   return (
@@ -120,9 +157,9 @@ export default function NotificationBell({ notifications }: Props) {
                     }`}
                   >
                     <div className="pr-8">
-                       <p className="text-sm font-medium mb-1">
-                          {message(notification.title)}
-                       </p>
+                        <div className="text-sm font-medium mb-1">
+                          {renderMessage(notification.title)}
+                        </div>
                        <span className="text-xs text-muted-foreground">
                           {format(new Date(notification.createdAt), 'dd.MM.yyyy HH:mm')}
                        </span>

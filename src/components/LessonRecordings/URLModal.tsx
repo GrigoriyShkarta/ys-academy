@@ -10,16 +10,19 @@ import { Input } from '@/components/ui/input';
 import { checkYouTubeVideoExists } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { updateLessonRecordings } from '@/components/LessonRecordings/actions';
+
 interface Props {
   lessonId: number;
   studentId: number;
+  initialUrl?: string;
   closeModal: () => void;
 }
 
-export default function UrlModal({ lessonId, studentId, closeModal }: Props) {
+export default function UrlModal({ lessonId, studentId, initialUrl, closeModal }: Props) {
   const [loading, setLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState(initialUrl || '');
   const t = useTranslations('Materials');
   const client = useQueryClient();
 
@@ -32,17 +35,20 @@ export default function UrlModal({ lessonId, studentId, closeModal }: Props) {
     validateUrl();
   }, [url]);
 
-  const handleAddUrl = async () => {
+  const handleAction = async () => {
     try {
       setLoading(true);
-      await addLessonRecording(lessonId, url, studentId);
+      if (initialUrl) {
+        await updateLessonRecordings(lessonId, url);
+      } else {
+        await addLessonRecording(lessonId, url, studentId);
+      }
       client.invalidateQueries({ queryKey: ['student', studentId] });
       closeModal();
     } catch (e) {
-      console.log('Error adding url:', e);
+      console.log('Error handling url action:', e);
     } finally {
       setLoading(false);
-      closeModal();
     }
   };
 
@@ -57,8 +63,8 @@ export default function UrlModal({ lessonId, studentId, closeModal }: Props) {
         <Input value={url} onChange={e => setUrl(e.target.value)} placeholder={t('enterUrl')} />
 
         <DialogFooter>
-          <Button className="bg-accent" onClick={handleAddUrl} disabled={loading || !isValid}>
-            {loading ? <Loader2 className="animate-spin" /> : t('add')}
+          <Button className="bg-accent" onClick={handleAction} disabled={loading || !isValid}>
+            {loading ? <Loader2 className="animate-spin" /> : initialUrl ? t('save') : t('add')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -12,6 +12,7 @@ interface ColumnProps {
   column: IColumn;
   tasks: Task[];
   userId: number;
+  currentTab: 'tasks' | 'songs';
   onDeleteTask: (taskId: number) => void;
   onToggleSubtask: (taskId: number, subtaskId: number, completed: boolean) => void;
 }
@@ -20,6 +21,7 @@ export default function Column({
   column, 
   tasks,
   userId,
+  currentTab,
   onDeleteTask, 
   onToggleSubtask 
 }: ColumnProps) {
@@ -28,6 +30,7 @@ export default function Column({
   });
 
   const {user} = useUser();
+  const canEdit = user?.role === 'super_admin' || currentTab === 'songs';
 
   return (
     <div className="flex flex-col h-fit">
@@ -49,7 +52,7 @@ export default function Column({
             </div>
           </div>
 
-          {user?.role === 'super_admin' && (
+          {canEdit && (
             <TaskDialog columnId={column.id} userId={userId} trigger={
               <Button 
                 variant="ghost" 
@@ -69,6 +72,7 @@ export default function Column({
                 key={task.id}
                 task={task}
                 userId={userId}
+                canEdit={canEdit}
                 onDelete={() => onDeleteTask(task.id)}
                 onToggleSubtask={(subtaskId: number, completed: boolean) => onToggleSubtask(task.id, subtaskId, completed)}
               />

@@ -233,7 +233,8 @@
     "select_subscription": "Виберіть абонемент",
     "no_dates_selected": "Дати не вибрані",
     "add_link": "Додати посилання",
-    "no_link": "Немає запису"
+    "no_link": "Немає запису",
+    "confirm_delete": "Ви впевнені, що хочете видалити запис?"
   },
 
   "Validation": {

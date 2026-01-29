@@ -27,8 +27,8 @@ export default function StudentsLayout() {
   const t = useTranslations('Students');
   const { user } = useUser();
   const { data: students, isLoading } = useQuery({
-    queryKey: ['students', page, search],
-    queryFn: () => getStudents(search, page),
+    queryKey: ['students', 'all', search],
+    queryFn: () => getStudents(search, 'all'),
     placeholderData: keepPreviousData,
   });
 
@@ -164,9 +164,6 @@ export default function StudentsLayout() {
           //@ts-ignore
           columns={columns}
           data={students.data}
-          totalPages={students.meta.totalPages}
-          currentPage={page}
-          onPageChange={newPage => setPage(newPage)}
           onSearchChange={newSearch => {
             setPage(1);
             setSearch(newSearch);

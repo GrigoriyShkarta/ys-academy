@@ -153,8 +153,13 @@ export default function InfoUserModal({ open, close, student }: Props) {
 
               <div className="flex flex-col gap-6">
                 <Field label={t('fullName')} required error={formState.errors.name?.message}>
-                  <Input {...register('name')} />
+                  <Input {...register('name')} disabled={user?.role !== 'super_admin'} />
                 </Field>
+
+                {/* Email */}
+              <Field label={t('email')} required error={formState.errors.email?.message}>
+                <Input type="email" {...register('email')} />
+              </Field>
 
                 {/* Пароль (только для супер-админа) */}
                 {user?.role === 'super_admin' && (
@@ -189,10 +194,7 @@ export default function InfoUserModal({ open, close, student }: Props) {
               </div>
               {/* ФИО */}
 
-              {/* Email */}
-              <Field label={t('email')} required error={formState.errors.email?.message}>
-                <Input type="email" {...register('email')} />
-              </Field>
+              
 
               {user?.role === 'super_admin' && (
                 <Controller

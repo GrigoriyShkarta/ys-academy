@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { assignLesson } from '@/components/Materials/Lesson/action';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import ConfirmModal from '@/common/ConfirmModal';
 
 interface Props {
   course?: StudentCourse;
@@ -26,9 +28,11 @@ export default function StudentCourseModal({
 }: Props) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [lessonId, setLessonId] = useState<number>();
   const [expandedModules, setExpandedModules] = useState<number[]>([]);
   const client = useQueryClient();
-
+  const router = useRouter();
   const t = useTranslations('Common');
 
   console.log('course', course)
@@ -89,6 +93,10 @@ export default function StudentCourseModal({
       // Since StudentCourses usually fetches student data which might include courses.
       // Ideally invalidate queries related to this student.
       await client.invalidateQueries({ queryKey: ['student', studentId] }); 
+
+      if (openConfirm) {
+        router.push(`/main/students/${studentId}/lesson-detail/${lessonId}`);
+      }
       
     } catch (error) {
       console.log('error: ', error);
@@ -98,6 +106,15 @@ export default function StudentCourseModal({
     }
   };
 
+  const handleClickAccessIcon = (id: number) => {
+    if (selectedIds.length > 0) {
+      setOpenConfirm(true);
+      setLessonId(id);
+    } else {
+      router.push(`/main/students/${studentId}/lesson-detail/${id}`);
+    }
+  }
+
   const renderLessonRow = (lesson: StudentLesson, className?: string) => (
     <div key={lesson.id} className={cn("flex items-center gap-4 py-2 hover:bg-muted rounded px-2", className)}>
       <Checkbox
@@ -105,17 +122,15 @@ export default function StudentCourseModal({
         onCheckedChange={() => toggleSelect(lesson.id)}
       />
       <div className="flex-1 text-sm font-medium truncate" title={lesson.title}>
-        {lesson.title}
+        <Link href={`/main/materials/lessons/${lesson.id}`} className='hover:underline'>
+          {lesson.title}
+        </Link>
       </div>
       <div className="text-xs text-muted-foreground w-12 text-center">
         {lesson.accessString || '0/0'}
       </div>
-      <Link
-        href={`/main/students/${studentId}/lesson-detail/${lesson.id}`}
-        className="text-muted-foreground hover:text-primary transition-colors"
-      >
-        <UserLock className="w-4 h-4" />
-      </Link>
+
+      <UserLock className="w-4 h-4 cursor-pointer" onClick={() => handleClickAccessIcon(lesson.id)} />
     </div>
   );
 
@@ -186,6 +201,14 @@ export default function StudentCourseModal({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <ConfirmModal
+        open={openConfirm}
+        confirmAction={handleAddAccess}
+        textContent='Зберегти зміни перед тим як перейти на сторінку уроку?'
+        setOnClose={() => setOpenConfirm(false)}
+        isLoading={loading}
+      />
     </Dialog>
   );
 }

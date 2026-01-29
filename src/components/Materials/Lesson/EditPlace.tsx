@@ -117,7 +117,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
 
   return (
     <div className="space-y-6 relative">
-      <div className="flex justify-between items-center">
+      <div className="max-w-7xl sm:w-[75%] mx-auto flex justify-between items-center">
         <button
           type="button"
           onClick={() => setOpen(true)}

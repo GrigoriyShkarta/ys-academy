@@ -10,6 +10,8 @@ import DataTable from '@/common/Table';
 import { Button } from '@/components/ui/button';
 import { assignLesson } from '@/components/Materials/Lesson/action';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import ConfirmModal from '@/common/ConfirmModal';
 
 interface Props {
   lessons?: StudentLesson[];
@@ -29,10 +31,13 @@ export default function StudentModuleModal({
   courseId,
 }: Props) {
   const [search, setSearch] = useState('');
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [lessonId, setLessonId] = useState<number>();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const client = useQueryClient();
-
+  
+  const router = useRouter();
   const t = useTranslations('Common');
 
   useEffect(() => {
@@ -49,6 +54,15 @@ export default function StudentModuleModal({
   }, [lessons, open]);
 
   const filteredLessons = lessons?.filter(l => l.title.includes(search));
+
+  const handleClickAccessIcon = (id: number) => {
+    if (selectedIds.length > 0) {
+      setOpenConfirm(true);
+      setLessonId(id);
+    } else {
+      router.push(`/main/students/${studentId}/lesson-detail/${id}`);
+    }
+  }
 
   const toggleSelect = useCallback((id: number) => {
     setSelectedIds(prev => (prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]));
@@ -81,6 +95,10 @@ export default function StudentModuleModal({
       await assignLesson([+studentId], payload);
 
       await client.invalidateQueries({ queryKey: ['course', courseId] });
+
+      if (openConfirm) {
+        router.push(`/main/students/${studentId}/lesson-detail/${lessonId}`);
+      }
     } catch (error) {
       console.log('error: ', error);
     } finally {
@@ -126,12 +144,7 @@ export default function StudentModuleModal({
       key: 'details',
       label: <p className="text-center">{t('details')}</p>,
       render: (item: StudentLesson) => (
-        <Link
-          href={`/main/students/${studentId}/lesson-detail/${item.id}`}
-          className="w-full flex justify-center"
-        >
-          <UserLock />
-        </Link>
+        <UserLock onClick={() => handleClickAccessIcon(item.id)} />
       ),
     },
   ];
@@ -158,6 +171,13 @@ export default function StudentModuleModal({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <ConfirmModal
+        open={openConfirm}
+        confirmAction={handleAddAccess}
+        setOnClose={() => setOpenConfirm(false)}
+        isLoading={loading}
+      />
     </Dialog>
   );
 }

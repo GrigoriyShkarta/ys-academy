@@ -271,6 +271,7 @@ export default function TrackerLayout({id, isProfile}: {id?: number, isProfile?:
                   column={column} 
                   tasks={getTasksByColumn(column.id)} 
                   userId={id ?? user!.id}
+                  currentTab={currentTab}
                   onDeleteTask={onDeleteTask}
                   onToggleSubtask={onToggleSubtask}
                 />
@@ -284,6 +285,7 @@ export default function TrackerLayout({id, isProfile}: {id?: number, isProfile?:
                 <TaskCard
                   task={activeTask}
                   userId={id ?? user!.id}
+                  canEdit={user?.role === 'super_admin' || currentTab === 'songs'}
                   onDelete={() => {}}
                   onToggleSubtask={() => {}}
                   isOverlay

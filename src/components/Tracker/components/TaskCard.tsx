@@ -14,6 +14,7 @@ import { format } from "date-fns";
 interface TaskCardProps {
   task: Task;
   userId: number;
+  canEdit?: boolean;
   onDelete: () => void;
   onToggleSubtask: (subtaskId: number, completed: boolean) => void;
   isOverlay?: boolean;
@@ -22,6 +23,7 @@ interface TaskCardProps {
 export default function TaskCard({ 
   task, 
   userId, 
+  canEdit,
   onDelete, 
   onToggleSubtask,
   isOverlay 
@@ -194,7 +196,7 @@ export default function TaskCard({
 
         <span className="text-[10px] text-muted-foreground p-3">{format(new Date(task.createdAt), 'dd.MM.yyyy HH:mm')}</span>
 
-        {(user!.role === 'super_admin') && (
+        {canEdit && (
           <div 
             className={cn(
               "px-3 pb-3 flex items-center justify-end transition-all duration-300",
