@@ -9,10 +9,7 @@ import {
   DefaultToolbarContent,
   useEditor,
   AssetRecordType,
-  createShapeId,
-  DefaultColorThemePalette,
-  TLUiOverrides,
-  TldrawUiMenuItem,
+  createShapeId
 } from 'tldraw';
 import { useUser } from '@/providers/UserContext';
 import axiosInstance from '@/services/axios';
@@ -33,14 +30,6 @@ import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
 import ChooseVideoModal from '@/common/MaterialsCommon/ChooseVideoModal';
 import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal';
 import { LessonItemType } from '@/components/Materials/utils/interfaces';
-
-// Adjusting default colors to match the app's theme as per documentation
-// light mode
-DefaultColorThemePalette.lightMode.background = '#fafafa'
-DefaultColorThemePalette.lightMode.black.solid = '#18181b'
-// dark mode
-DefaultColorThemePalette.darkMode.background = '#101011'
-DefaultColorThemePalette.darkMode.black.solid = '#fafafa'
 
 type IAudioShape = TLBaseShape<
   'audio',
@@ -232,38 +221,38 @@ function CustomUI({ roomId }: CustomUIProps) {
     <>
       {user?.role === 'super_admin' && (
         <>
-          {/* Floating Round Plus Button Menu - Positioned as requested earlier */}
+          {/* Floating Round Plus Button Menu */}
           <div className="absolute top-[10px] right-[170px] z-[1000] pointer-events-auto">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="outline" 
                   size="icon" 
-                  className="h-10 w-10 rounded-full shadow-md border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                  className="h-10 w-10 rounded-full shadow-md hover:bg-gray-50 border-gray-200"
                 >
-                  <Plus className="h-6 w-6" />
+                  <Plus className="h-6 w-6 text-gray-700" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 shadow-lg rounded-xl p-1 z-[1001] dark:bg-gray-800 dark:border-gray-700">
+              <DropdownMenuContent align="end" className="w-48 border-gray-200 shadow-lg rounded-xl p-1 z-[1001]">
                 <DropdownMenuItem 
                    onClick={() => setPhotoOpen(true)}
-                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <ImageIcon className="h-4 w-4" />
+                  <ImageIcon className="h-4 w-4 text-gray-600" />
                   <span>Photo</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                    onClick={() => setAudioOpen(true)}
-                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <Music className="h-4 w-4" />
+                  <Music className="h-4 w-4 text-gray-600" />
                   <span>Audio</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                    onClick={() => setVideoOpen(true)}
-                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <Video className="h-4 w-4" />
+                  <Video className="h-4 w-4 text-gray-600" />
                   <span>Video</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -311,46 +300,11 @@ export default function BoardLayout({ studentId, boardId }: BoardLayoutProps) {
       ? `board-persistence-${boardId}`
       : 'board-persistence';
 
-  const overrides: TLUiOverrides = useMemo(() => ({
-      actions(_editor, actions) {
-          actions['insert-photo'] = {
-              id: 'insert-photo',
-              label: 'Photo',
-              onSelect: () => {}, // Handled via state in CustomUI but kept for schema completeness
-          }
-           actions['insert-audio'] = {
-              id: 'insert-audio',
-              label: 'Audio',
-              onSelect: () => {},
-          }
-           actions['insert-video'] = {
-              id: 'insert-video',
-              label: 'Video',
-              onSelect: () => {},
-          }
-          return actions
-      },
-      menu(_editor, schema, helpers) {
-          const { menuGroup, menuItem } = helpers;
-          const materialsGroup = menuGroup('materials',
-              menuItem('insert-photo'),
-              menuItem('insert-audio'),
-              menuItem('insert-video')
-          );
-          // Unshift to put it at the beginning of the main menu
-          schema.unshift(materialsGroup);
-          return schema;
-      }
-  }), []);
-
   return (
     <div className="w-full h-screen relative overflow-hidden bg-background">
       <Tldraw 
         persistenceKey={persistenceKey}
         shapeUtils={customShapeUtils}
-        theme={tldrawTheme}
-        locale={locale}
-        overrides={overrides}
         components={{
           Toolbar: CustomToolbar,
         }}
