@@ -1,149 +1,285 @@
-'use client'
-
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
-import { useUser } from '@/providers/UserContext'
+import { Editor, TLInstancePresence } from 'tldraw'
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+interface UseBoardSyncOptions {
+  editor: Editor | null
+  roomId: string
+  userId: string
+  userName?: string
+}
 
-export const useBoardSync = (boardId: string | undefined, excalidrawAPI: any) => {
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+
+interface RemoteCursor {
+  odiserId: string
+  userName: string
+  x: number
+  y: number
+  color: string
+}
+
+// Generate a consistent color from a user ID
+function getUserColor(userId: string): string {
+  const colors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
+    '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
+    '#BB8FCE', '#85C1E9', '#F8B500', '#00CED1',
+  ]
+  
+  let hash = 0
+  for (let i = 0; i < userId.length; i++) {
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  
+  return colors[Math.abs(hash) % colors.length]
+}  
+
+export function useBoardSync({
+  editor,
+  roomId,
+  userId,
+  userName,
+}: UseBoardSyncOptions) {
   const socketRef = useRef<Socket | null>(null)
-  const isImportingRef = useRef(false)
-  const apiRef = useRef<any>(null)
-  const { user } = useUser()
-  const [isLoaded, setIsLoaded] = useState(false)
-  const pendingFilesRef = useRef<Record<string, any>>({})
+  const isApplyingRemoteChange = useRef(false)
+  const userColorRef = useRef<string>('')
+  const lastCursorEmit = useRef(0)
+  const [remoteCursors, setRemoteCursors] = useState<Map<string, RemoteCursor>>(new Map())
+  
 
-  // Update apiRef whenever excalidrawAPI changes
+  /* ------------------------------------------------------------------
+   * 1️⃣ SOCKET — создаётся ОДИН РАЗ (НЕ зависит от editor)
+   * ------------------------------------------------------------------ */
   useEffect(() => {
-    apiRef.current = excalidrawAPI
-  }, [excalidrawAPI])
+    if (!roomId || !userId) return
+    if (socketRef.current) return
 
-  useEffect(() => {
-    const userId = user?.id
-    const userName = user?.name
-
-    if (!boardId || !userId) return
-
-    // Prevent multiple connections for the same parameters
-    if (socketRef.current?.connected && 
-        socketRef.current.io.opts.query?.boardId === boardId) {
-      return
-    }
-
-    const socket = io(SOCKET_URL, {
-      query: { 
-        boardId, 
-        userId, 
-        userName
+    const socket = io(`${BACKEND_URL}/board-sync`, {
+      query: {
+        roomId: String(roomId),
+        userId: String(userId),
       },
       transports: ['websocket'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
     })
+
     socketRef.current = socket
 
     socket.on('connect', () => {
-      console.log('Connected to board sync socket', { boardId, userId })
-      socket.emit('join-board', boardId)
+      console.log('✅ Socket connected')
+      socket.emit('get-board', { roomId })
     })
 
-    socket.on('init-board', (data: { elements: any[]; appState: any; files?: any }) => {
-      if (!apiRef.current) return
-      isImportingRef.current = true
-      
-      const { collaborators: _, ...cleanAppState } = data.appState || {}
-
-      apiRef.current.updateScene({
-        elements: data.elements,
-        appState: { ...cleanAppState, collaboratorId: socket.id },
-        commitToHistory: false,
-      })
-      if (data.files) {
-        apiRef.current.addFiles(Object.values(data.files))
-      }
-      isImportingRef.current = false
-      setIsLoaded(true)
+    socket.on('disconnect', (reason) => {
+      console.log('❌ Socket disconnected:', reason)
     })
 
-    socket.on('board-update', (data: { elements: any[]; appState?: any; files?: any }) => {
-      if (!apiRef.current) return
-      isImportingRef.current = true
-      
-      if (data.files) {
-         apiRef.current.addFiles(Object.values(data.files))
-      }
-
-      const updateData: any = {
-        elements: data.elements,
-        commitToHistory: false,
-      }
-
-      if (data.appState) {
-        const { collaborators: _, ...cleanAppState } = data.appState
-        updateData.appState = cleanAppState
-      }
-
-      apiRef.current.updateScene(updateData)
-      isImportingRef.current = false
-    })
-
-    socket.on('pointer-move', (data: { userId: number, userName: string, pointer: { x: number, y: number } }) => {
-       if (data.userId === userId || !apiRef.current) return
-       
-       isImportingRef.current = true
-       const appState = apiRef.current.getAppState()
-       const collaborators = new Map(appState.collaborators instanceof Map ? appState.collaborators : [])
-       
-       collaborators.set(String(data.userId), {
-         pointer: data.pointer,
-         username: data.userName,
-         button: "up",
-         selectedElementIds: {},
-       })
-
-       apiRef.current.updateScene({ collaborators })
-       isImportingRef.current = false
+    socket.on('error', (err) => {
+      console.error('🔥 Socket error:', err)
     })
 
     return () => {
+      console.log('🧹 Destroy socket')
       socket.disconnect()
       socketRef.current = null
     }
-  }, [boardId, user?.id]) // Stable dependencies
+  }, [roomId, userId])
 
-  const handleBoardChange = useCallback((elements: any[], appState: any, files: any) => {
-    if (isImportingRef.current || !socketRef.current?.connected || !boardId) return
+  /* ------------------------------------------------------------------
+   * 2️⃣ ПРИЁМ ДАННЫХ С СЕРВЕРА (editor может меняться)
+   * ------------------------------------------------------------------ */
+  useEffect(() => {
+    if (!editor || !socketRef.current) return
 
-    if (files) {
-      Object.assign(pendingFilesRef.current, files)
+    const socket = socketRef.current
+
+    const applyRecords = (records: any[]) => {
+      if (!records.length) return
+
+      const valid = records.filter((r) => r?.id && r?.typeName)
+
+      isApplyingRemoteChange.current = true
+      try {
+        editor.store.mergeRemoteChanges(() => {
+          valid.forEach((r) => editor.store.put([r]))
+        })
+      } finally {
+        isApplyingRemoteChange.current = false
+      }
     }
 
-    const { collaborators: _, ...cleanAppState } = appState
+    socket.on('init', applyRecords)
+    socket.on('update', applyRecords)
 
-    const timeoutId = (handleBoardChange as any)._timeoutId
-    if (timeoutId) clearTimeout(timeoutId)
-
-    ;(handleBoardChange as any)._timeoutId = setTimeout(() => {
-      const filesToSend = { ...pendingFilesRef.current }
-      pendingFilesRef.current = {}
-
-      socketRef.current?.emit('update-board', {
-        boardId,
-        elements,
-        appState: cleanAppState,
-        files: Object.keys(filesToSend).length > 0 ? filesToSend : undefined,
-      })
-    }, 100)
-  }, [boardId])
-
-  const handlePointerMove = useCallback((pointer: { x: number, y: number }) => {
-    if (!socketRef.current?.connected || !boardId || !user) return
-    socketRef.current.emit('pointer-move', {
-      boardId,
-      userId: user.id,
-      userName: user.name,
-      pointer,
+    socket.on('delete', (ids: string[]) => {
+      if (!ids?.length) return
+      isApplyingRemoteChange.current = true
+      try {
+        editor.store.mergeRemoteChanges(() => {
+          ids.forEach((id) => editor.store.remove([id as any]))
+        })
+      } finally {
+        isApplyingRemoteChange.current = false
+      }
     })
-  }, [boardId, user?.id, user?.name])
 
-  return { handleBoardChange, handlePointerMove, isLoaded }
+    socket.on('cursor', (data: { userId: string; userName: string; cursor: { x: number; y: number }; color: string }) => {
+      if (!editor || data.userId === userId) return
+
+      // Создаем полную запись присутствия, соответствующую схеме tldraw v3
+      const presence = {
+        id: `instance_presence:remote-${data.userId}` as any,
+        typeName: 'instance_presence' as const,
+        userId: data.userId,
+        userName: data.userName || `User ${data.userId.slice(0, 8)}`,
+        cursor: { 
+          x: data.cursor.x, 
+          y: data.cursor.y, 
+          type: 'default', 
+          rotation: 0 
+        },
+        color: data.color || generateUserColor(data.userId),
+        currentPageId: editor.getCurrentPageId(),
+        lastActivityTimestamp: Date.now(),
+        // Обязательные поля для TLInstancePresence
+        camera: { x: 0, y: 0, z: 1 },
+        selectedShapeIds: [],
+        brush: null,
+        scribbles: [],
+        followingUserId: null,
+        chatMessage: '',
+        screenBounds: { x: 0, y: 0, w: 1, h: 1 },
+        meta: {}, // Добавлено поле meta
+      }
+
+      isApplyingRemoteChange.current = true
+      try {
+        editor.store.put([presence as any])
+      } finally {
+        isApplyingRemoteChange.current = false
+      }
+    })
+
+    socket.on('disconnect', () => {
+      if (!editor) return
+      // При отключении можно не чистить специально, tldraw сам скроет по тайм-ауту
+      // но для порядка удалим запись
+    })
+
+    socket.on('user-left', (leftUserId: string) => {
+      try {
+        editor.store.remove([`instance_presence:remote-${leftUserId}` as any])
+      } catch (e) {}
+    })
+
+    return () => {
+      socket.off('init', applyRecords)
+      socket.off('update', applyRecords)
+      socket.off('delete')
+      socket.off('cursor')
+    }
+  }, [editor, userId])
+
+  /* ------------------------------------------------------------------
+   * 3️⃣ ОТПРАВКА ЛОКАЛЬНЫХ ИЗМЕНЕНИЙ
+   * ------------------------------------------------------------------ */
+  useEffect(() => {
+    if (!editor || !socketRef.current) return
+
+    const socket = socketRef.current
+
+    const unsubscribe = editor.store.listen(
+      (changes) => {
+        if (isApplyingRemoteChange.current) return
+        if (!socket.connected) return
+
+        const added = Object.values(changes.changes.added)
+        const updated = Object.values(changes.changes.updated)
+        const removed = Object.keys(changes.changes.removed)
+
+        const records = [...added, ...updated]
+
+        if (records.length) {
+          socket.emit('update', records)
+        }
+
+        if (removed.length) {
+          socket.emit('delete', removed)
+        }
+      },
+      { scope: 'document', source: 'user' }
+    )
+
+    return unsubscribe
+  }, [editor])
+
+  /* ------------------------------------------------------------------
+   * 4️⃣ CURSOR — отправка позиции своего курсора
+   * ------------------------------------------------------------------ */
+  useEffect(() => {
+    if (!editor || !socketRef.current) return
+
+    const socket = socketRef.current
+    let last = 0
+
+    // Генерируем цвет для текущего пользователя (один раз)
+    if (!userColorRef.current) {
+      userColorRef.current = generateUserColor(userId)
+    }
+
+    const handlePointer = () => {
+      const now = Date.now()
+      if (now - last < 50) return
+      last = now
+
+      if (!socket.connected) return
+
+      const p = editor.inputs.currentPagePoint
+
+      socket.emit('cursor', {
+        userId,
+        userName: userName || `User ${userId.slice(0, 8)}`,
+        cursor: { x: p.x, y: p.y, type: 'default', rotation: 0 },
+        color: userColorRef.current,
+      })
+    }
+
+    const handleEvent = (e: any) => {
+      if (e.type === 'pointer' && e.name === 'pointer_move') {
+        handlePointer()
+      }
+    }
+
+    editor.on('event', handleEvent)
+
+    return () => {
+      editor.off('event', handleEvent)
+    }
+  }, [editor, userId, userName])
+
+  return {}
+}
+
+// Генерация уникального цвета для пользователя
+function generateUserColor(userId: string): string {
+  const colors = [
+    '#FF6B6B', // красный
+    '#4ECDC4', // бирюзовый
+    '#45B7D1', // голубой
+    '#FFA07A', // оранжевый
+    '#98D8C8', // мятный
+    '#F7DC6F', // жёлтый
+    '#BB8FCE', // фиолетовый
+    '#85C1E2', // светло-синий
+  ]
+
+  let hash = 0
+  for (let i = 0; i < userId.length; i++) {
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return colors[Math.abs(hash) % colors.length]
 }

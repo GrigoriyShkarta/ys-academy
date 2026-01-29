@@ -9,12 +9,13 @@ import {
   DefaultToolbarContent,
   useEditor,
   AssetRecordType,
-  createShapeId
+  createShapeId,
+  DefaultColorThemePalette,
 } from 'tldraw';
 import { useUser } from '@/providers/UserContext';
 import axiosInstance from '@/services/axios';
 import 'tldraw/tldraw.css';
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Plus, Image as ImageIcon, Music, Video } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useLocale } from 'next-intl';
@@ -30,6 +31,11 @@ import ChoosePhotoModal from '@/common/MaterialsCommon/ChoosePhotoModal';
 import ChooseVideoModal from '@/common/MaterialsCommon/ChooseVideoModal';
 import ChooseAudioModal from '@/common/MaterialsCommon/ChooseAudioModal';
 import { LessonItemType } from '@/components/Materials/utils/interfaces';
+import { useBoardSync } from './useBoardSync';
+
+// Синхронизация палитры с темой приложения
+DefaultColorThemePalette.lightMode.background = '#fafafa';
+DefaultColorThemePalette.darkMode.background = 'oklch(0.129 0.042 264.695)';
 
 type IAudioShape = TLBaseShape<
   'audio',
@@ -99,6 +105,14 @@ function CustomUI({ roomId }: CustomUIProps) {
   const [videoOpen, setVideoOpen] = useState(false);
   const [audioOpen, setAudioOpen] = useState(false);
 
+  // Setup real-time synchronization
+  useBoardSync({
+    editor,
+    roomId,
+    userId: user?.id?.toString() || 'anonymous',
+    userName: user?.name || 'Anonymous',
+  });
+
   const handleAddMedia = async (type: LessonItemType, content?: string | File, bankId?: number) => {
     if (!content) return;
 
@@ -116,7 +130,7 @@ function CustomUI({ roomId }: CustomUIProps) {
         const { data } = await axiosInstance.post('/boards/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-        src = data.url;
+        src = data.url || data.src;
         publicId = data.publicId;
       } catch (error) {
         console.error('Failed to upload board asset:', error);
@@ -221,38 +235,37 @@ function CustomUI({ roomId }: CustomUIProps) {
     <>
       {user?.role === 'super_admin' && (
         <>
-          {/* Floating Round Plus Button Menu */}
           <div className="absolute top-[10px] right-[170px] z-[1000] pointer-events-auto">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="outline" 
                   size="icon" 
-                  className="h-10 w-10 rounded-full shadow-md hover:bg-gray-50 border-gray-200"
+                  className="h-10 w-10 rounded-full shadow-md border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
                 >
-                  <Plus className="h-6 w-6 text-gray-700" />
+                  <Plus className="h-6 w-6 text-gray-700 dark:text-gray-200" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 border-gray-200 shadow-lg rounded-xl p-1 z-[1001]">
+              <DropdownMenuContent align="end" className="w-48 border-gray-200 shadow-lg rounded-xl p-1 z-[1001] bg-white dark:bg-gray-800 dark:border-gray-700">
                 <DropdownMenuItem 
                    onClick={() => setPhotoOpen(true)}
-                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <ImageIcon className="h-4 w-4 text-gray-600" />
+                  <ImageIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                   <span>Photo</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                    onClick={() => setAudioOpen(true)}
-                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <Music className="h-4 w-4 text-gray-600" />
+                  <Music className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                   <span>Audio</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                    onClick={() => setVideoOpen(true)}
-                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                   className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <Video className="h-4 w-4 text-gray-600" />
+                  <Video className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                   <span>Video</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -287,18 +300,31 @@ interface BoardLayoutProps {
 
 export default function BoardLayout({ studentId, boardId }: BoardLayoutProps) {
   const { user } = useUser();
-  const { theme } = useTheme();
+  const { theme, resolvedTheme } = useTheme();
   const locale = useLocale();
   
+  const currentTheme = (resolvedTheme || theme || 'light') as 'light' | 'dark';
   const roomId = boardId || studentId || user?.id?.toString() || 'default';
-  
-  const tldrawTheme = theme === 'dark' ? 'dark' : 'light';
   
   const persistenceKey = studentId 
     ? `board-persistence-student-${studentId}` 
     : boardId 
       ? `board-persistence-${boardId}`
-      : 'board-persistence';
+      : 'board-v2-persistence'; // Смена ключа для принудительного сброса при миграции
+
+  // Синхронизация данных пользователя в localStorage
+  useEffect(() => {
+    const userDataStr = localStorage.getItem('TLDRAW_USER_DATA_v3');
+    let userData = userDataStr ? JSON.parse(userDataStr) : { version: 9, user: { id: `user:${user?.id || 'anon'}`, color: '#F04F88' } };
+    
+    userData.user = {
+      ...userData.user,
+      colorScheme: currentTheme,
+      locale: 'uk',
+    };
+    
+    localStorage.setItem('TLDRAW_USER_DATA_v3', JSON.stringify(userData));
+  }, [currentTheme, locale, user?.id]);
 
   return (
     <div className="w-full h-screen relative overflow-hidden bg-background">
@@ -324,7 +350,7 @@ export default function BoardLayout({ studentId, boardId }: BoardLayoutProps) {
               type: file.type.startsWith('video/') ? 'video' : 'image',
               props: {
                 name: file.name,
-                src: data.url,
+                src: data.url || data.src,
                 w: 400,
                 h: 400,
                 mimeType: file.type,
