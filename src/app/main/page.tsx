@@ -114,6 +114,9 @@ export default function MainPage() {
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
             {t('welcome_back')}, {`${user.name.split(' ')[0]}`}!
           </h1>
+          {isBirthday && (
+            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">{t('birthday_message')}</h2>
+          )}
           <p className="text-xl text-muted-foreground">{t('continue_learning_prompt')}</p>
           
           <motion.div 

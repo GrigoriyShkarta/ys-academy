@@ -28,7 +28,8 @@
     "lessons": "Lessons",
     "students": "Students",
     "my_courses": "My courses",
-    "my_lesson_recordings": "My lesson recordings"
+    "my_lesson_recordings": "My lesson recordings",
+    "birthday_message": "Happy Birthday!"
   },
 
   "SideBar": {

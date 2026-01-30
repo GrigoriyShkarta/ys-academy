@@ -28,7 +28,8 @@
     "lessons": "Уроки",
     "students": "Студенти",
     "my_courses": "Мої курси",
-    "my_lesson_recordings": "Мої записи уроків"
+    "my_lesson_recordings": "Мої записи уроків",
+    "birthday_message": "З Днем народження!"
   },
 
   "SideBar": {
