@@ -22,6 +22,7 @@ export default function Subscriptions({ student }: { student: Student }) {
     isLoadingDelete,
     editSubscription,
     partialAmount,
+    partialPaymentDate,
     editingLessonId,
     currentLocale,
     changeLessonStatus,
@@ -36,7 +37,16 @@ export default function Subscriptions({ student }: { student: Student }) {
     setEditSubscription,
     saveLessonDate,
     setPartialAmount,
+    setPartialPaymentDate,
   } = useSubscription({ student, setOpen });
+
+  const lastSubscriptionEndDate = student.subscriptions?.reduce((latest: Date | undefined, sub) => {
+    const subLatest = sub.lessons?.reduce((max: Date | undefined, lesson) => {
+      const d = new Date(lesson.scheduledAt);
+      return !max || d > max ? d : max;
+    }, undefined);
+    return !latest || (subLatest && subLatest > latest) ? subLatest : latest;
+  }, undefined);
 
   const showSubscriptions = subscriptions && isAdmin ? subscriptions : subscriptions?.slice(0, 1);
 
@@ -68,6 +78,8 @@ export default function Subscriptions({ student }: { student: Student }) {
             changePaymentStatus={changePaymentStatus}
             saveAmount={saveAmount}
             setPartialAmount={setPartialAmount}
+            partialPaymentDate={partialPaymentDate}
+            setPartialPaymentDate={setPartialPaymentDate}
             changeLessonStatus={changeLessonStatus}
             saveLessonDate={saveLessonDate}
             editingDateTime={editingDateTime}
@@ -85,6 +97,7 @@ export default function Subscriptions({ student }: { student: Student }) {
         }}
         studentId={student.id}
         subscription={editSubscription}
+        lastSubscriptionEndDate={lastSubscriptionEndDate}
       />
     </div>
   );

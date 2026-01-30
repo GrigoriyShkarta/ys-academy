@@ -57,7 +57,8 @@
     "tracker": "Tracker",
     "my_boards": "My boards",
     "boards": "Boards",
-    "reports": "Reports"
+    "reports": "Reports",
+    "calendar": "Calendar"
   },
 
   "Students": {
@@ -125,7 +126,15 @@
     "last_lesson": "Last lesson",
     "access_data": "Access data",
     "payment_status": "Payment status",
-    "my_lesson_recordings": "My lesson Recordings"
+    "my_lesson_recordings": "My lesson Recordings",
+    "payment_date": "Payment date",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
   },
 
   "Materials": {
@@ -220,6 +229,8 @@
     "price": "Price",
     "lessons_count": "Number of lessons",
     "subscription": "Subscription",
+    "select_lesson_days": "Select lesson days",
+    "generate": "Generate",
     "select_lesson_dates": "Select dates for lessons",
     "select_dates": "Select dates",
     "set_lesson_times": "Set times for lessons",
@@ -284,7 +295,15 @@
     "no_notifications": "No notifications",
     "total": "Total"
   },
-
+  "Calendar": {
+    "title": "Calendar",
+    "create": "Create",
+    "today": "Today",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "my_calendars": "My calendars"
+  },
   "Finance": {
     "reports": {
       "title": "Financial Reports",

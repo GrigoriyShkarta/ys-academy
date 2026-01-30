@@ -57,7 +57,8 @@
     "tracker": "Трекер",
     "my_boards": "Мої дошки",
     "boards": "Дошки",
-    "reports": "Звіти"
+    "reports": "Звіти",
+    "calendar": "Календар"
   },
 
   "Students": {
@@ -122,11 +123,19 @@
     "and_more": "та ще {count}",
     "subscription_renewal_needed": "Необхідно оновити абонемент",
     "subscription_renewal_message": "Ваш абонемент закінчується {date}. Будь ласка, вчасно оновіть абонемнт та надішліть квитанцію викладачу",
-    "expired_renewal_message": "Доступ до навчальної платформи закінчеться {date}. Для продовження навчання зв'яжіться з викладачем",
+    "expired_renewal_message": "Доступ до навчальної платформи закінчиться {date}. Для продовження навчання зв'яжіться з викладачем",
     "last_lesson": "Останній урок",
     "access_data": "Дата доступа",
     "payment_status": "Статус оплати",
     "my_lesson_recordings": "Мої записи уроків",
+    "payment_date": "Дата оплати",
+    "monday": "Понеділок",
+    "tuesday": "Вівторок",
+    "wednesday": "Середа",
+    "thursday": "Четвер",
+    "friday": "П’ятниця",
+    "saturday": "Субота",
+    "sunday": "Неділя",
 
     "validation": {
       "required_field": "Обов’язкове поле",
@@ -227,6 +236,8 @@
     "price": "Ціна",
     "lessons_count": "Кількість уроків",
     "subscription": "Абонемент",
+    "select_lesson_days": "Виберіть дні занять",
+    "generate": "Згенерувати",
     "select_lesson_dates": "Виберіть дати для уроків",
     "select_dates": "Виберіть дати",
     "set_lesson_times": "Встановіть час для уроків",
@@ -291,7 +302,15 @@
     "no_notifications": "Немає повідомлень",
     "total": "Загалом"
   },
-
+  "Calendar": {
+    "title": "Календар",
+    "create": "Створити",
+    "today": "Сьогодні",
+    "month": "Місяць",
+    "week": "Тиждень",
+    "day": "День",
+    "my_calendars": "Мої календарі"
+  },
   "Finance": {
     "reports": {
       "title": "Фінансові звіти",

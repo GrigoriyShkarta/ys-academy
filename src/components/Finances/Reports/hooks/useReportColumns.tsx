@@ -105,7 +105,7 @@ export function useReportColumns({
       render: (s: ForecastStudent) => (
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="w-4 h-4 text-muted-foreground" />
-          <span>{new Date(s.lastLessonDate).toLocaleDateString()}</span>
+          <span>{new Date(s.paymentDate || s.lastLessonDate).toLocaleDateString()}</span>
         </div>
       )
     },

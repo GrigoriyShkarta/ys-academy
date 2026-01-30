@@ -16,7 +16,7 @@ export default function StudentList({link}: {link: string}) {
 
   const { data: students, isLoading } = useQuery({
     queryKey: ['students', page, search],
-    queryFn: () => getStudents(search, page),
+    queryFn: () => getStudents(search, 'all'),
     placeholderData: keepPreviousData,
   });
 
@@ -45,9 +45,6 @@ export default function StudentList({link}: {link: string}) {
         <DataTable
           columns={columns}
           data={link === 'boards' ? [{id: 1, name: 'Яна Сабада'}, ...students.data] : students.data}
-          totalPages={students.meta.totalPages}
-          currentPage={page}
-          onPageChange={newPage => setPage(newPage)}
           onSearchChange={newSearch => {
             setPage(1);
             setSearch(newSearch);

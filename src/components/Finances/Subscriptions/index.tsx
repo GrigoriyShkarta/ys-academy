@@ -29,7 +29,7 @@ export default function SubscriptionsLayout() {
 
   const { data: subscriptions, isLoading } = useQuery({
     queryKey: ['subscriptions', page, search, sortBy, sortOrder],
-    queryFn: () => getSubscriptions({ page, search, sortBy: sortBy ?? undefined, sortOrder }),
+    queryFn: () => getSubscriptions({ page: 'all', search, sortBy: sortBy ?? undefined, sortOrder }),
     placeholderData: keepPreviousData,
   });
 
@@ -143,9 +143,6 @@ export default function SubscriptionsLayout() {
         <DataTable
           data={subscriptions.data}
           columns={columns}
-          totalPages={subscriptions.meta.totalPages}
-          currentPage={page}
-          onPageChange={newPage => setPage(newPage)}
           showDeleteIcon={selectedIds.length > 0}
           selectedIds={selectedIds}
           handleDelete={() => setOpenConfirm(true)}

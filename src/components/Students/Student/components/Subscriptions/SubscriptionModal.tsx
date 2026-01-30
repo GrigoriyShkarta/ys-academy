@@ -14,6 +14,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 
 import { StudentSubscription } from '@/components/Students/interface';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -41,11 +42,18 @@ interface Props {
   studentId?: number;
   open: boolean;
   close: () => void;
+  lastSubscriptionEndDate?: Date;
 }
 
 export type SupportedLocale = keyof typeof dateLocales;
 
-export default function SubscriptionModal({ subscription, open, close, studentId }: Props) {
+export default function SubscriptionModal({
+  subscription,
+  open,
+  close,
+  studentId,
+  lastSubscriptionEndDate,
+}: Props) {
   const t = useTranslations('Materials');
 
   const [abonements, setAbonements] = useState<Abonement[]>([]);
@@ -53,8 +61,28 @@ export default function SubscriptionModal({ subscription, open, close, studentId
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [slots, setSlots] = useState<LessonSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [daySettings, setDaySettings] = useState<Record<string, { selected: boolean; time: string }>>({
+    monday: { selected: false, time: '14:00' },
+    tuesday: { selected: false, time: '14:00' },
+    wednesday: { selected: false, time: '14:00' },
+    thursday: { selected: false, time: '14:00' },
+    friday: { selected: false, time: '14:00' },
+    saturday: { selected: false, time: '14:00' },
+    sunday: { selected: false, time: '14:00' },
+  });
   const { user } = useUser();
   const client = useQueryClient();
+  const st = useTranslations('Students');
+
+  const DAYS = [
+    { id: 'monday', value: 1 },
+    { id: 'tuesday', value: 2 },
+    { id: 'wednesday', value: 3 },
+    { id: 'thursday', value: 4 },
+    { id: 'friday', value: 5 },
+    { id: 'saturday', value: 6 },
+    { id: 'sunday', value: 0 },
+  ];
 
   const locale = useLocale();
   const dateLocale = dateLocales[locale as SupportedLocale] || dateLocales.uk;
@@ -101,8 +129,6 @@ export default function SubscriptionModal({ subscription, open, close, studentId
         .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime()); // сортируем по времени
 
       setSlots(initialSlots);
-
-      // Для календаря — только даты (без времени), чтобы выделялись дни
       setSelectedDates(
         initialSlots.map(slot => {
           const d = new Date(slot.dateTime);
@@ -110,60 +136,106 @@ export default function SubscriptionModal({ subscription, open, close, studentId
           return d;
         })
       );
+
+      if (subscription.lessonDays) {
+        const newSettings = { ...daySettings };
+        subscription.lessonDays.forEach(day => {
+          if (newSettings[day]) {
+            newSettings[day].selected = true;
+            // Пытаемся найти время из первого урока в этот день
+            const lessonOnThisDay = subscription.lessons.find(l => {
+              const d = new Date(l.scheduledAt);
+              const dayName = DAYS.find(dweek => dweek.value === d.getDay())?.id;
+              return dayName === day;
+            });
+            if (lessonOnThisDay) {
+              newSettings[day].time = format(new Date(lessonOnThisDay.scheduledAt), 'HH:mm');
+            }
+          }
+        });
+        setDaySettings(newSettings);
+      }
     } else {
       setSelectedAbonementId('');
       setSelectedDates([]);
       setSlots([]);
+      setDaySettings({
+        monday: { selected: false, time: '14:00' },
+        tuesday: { selected: false, time: '14:00' },
+        wednesday: { selected: false, time: '14:00' },
+        thursday: { selected: false, time: '14:00' },
+        friday: { selected: false, time: '14:00' },
+        saturday: { selected: false, time: '14:00' },
+        sunday: { selected: false, time: '14:00' },
+      });
     }
   }, [open, subscription]);
 
+  // Вспомогательная функция для генерации дат на основе правил
+  const generateDates = (settings: typeof daySettings, startFrom?: Date) => {
+    const selectedDayValues = Object.entries(settings)
+      .filter(([_, s]) => s.selected)
+      .map(([day]) => DAYS.find(d => d.id === day)?.value ?? 0);
+
+    if (selectedDayValues.length === 0) return [];
+
+    const newDates: Date[] = [];
+    let currentDate = startFrom ? new Date(startFrom) : new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    let iterations = 0;
+    while (newDates.length < maxLessons && iterations < 500) {
+      iterations++;
+      if (selectedDayValues.includes(currentDate.getDay())) {
+        const dateStr = format(currentDate, 'yyyy-MM-dd');
+        // Избегаем дублей, хотя в этом цикле их и так не должно быть
+        if (!newDates.some(d => format(d, 'yyyy-MM-dd') === dateStr)) {
+          newDates.push(new Date(currentDate));
+        }
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return newDates;
+  };
+
+  // Основной эффект для синхронизации слотов с выбранными датами
   useEffect(() => {
     if (maxLessons === 0) {
       setSlots([]);
       return;
     }
 
-    if (!subscription) {
-      const newSlots: LessonSlot[] = selectedDates.slice(0, maxLessons).map(date => {
-        const normalizedDate = format(date, 'yyyy-MM-dd');
-        const existing = slots.find(s => format(s.date, 'yyyy-MM-dd') === normalizedDate);
+    // Синхронизируем слоты с выбранными датами
+    // Мы НЕ фильтруем и НЕ авто-заполняем здесь автоматически, чтобы уважать ручной выбор в календаре
+    const updatedSlots: LessonSlot[] = selectedDates.slice(0, maxLessons).map(date => {
+      const normalized = format(date, 'yyyy-MM-dd');
+      const existingSlot = slots.find(s => format(s.date, 'yyyy-MM-dd') === normalized);
 
-        const time = existing?.time || '10:00'; // сохраняем время, если дата уже была
-        const [hours, minutes] = time.split(':').map(Number);
-        const dateTime = setMinutes(setHours(date, hours), minutes);
+      const dayName = DAYS.find(d => d.value === date.getDay())?.id;
+      const ruleTime = dayName ? daySettings[dayName].time : '14:00';
 
-        return { date, time, dateTime };
-      });
-
-      setSlots(newSlots);
-      return;
-    }
-
-    const updatedSlots: LessonSlot[] = selectedDates.slice(0, maxLessons).map(selectedDate => {
-      const normalizedSelected = format(selectedDate, 'yyyy-MM-dd');
-
-      const existingSlot = slots.find(s => format(s.date, 'yyyy-MM-dd') === normalizedSelected);
-
-      if (existingSlot) {
-        return {
-          ...existingSlot,
-          date: selectedDate,
-        };
-      }
-
-      const fallbackTime = slots[0]?.time || '10:00';
-      const [hours, minutes] = fallbackTime.split(':').map(Number);
-      const dateTime = setMinutes(setHours(selectedDate, hours), minutes);
+      // Если в настройках дней выбрано время, используем его как приоритетное для этого дня недели
+      const time = (dayName && daySettings[dayName].selected) 
+        ? daySettings[dayName].time 
+        : (existingSlot?.time || ruleTime);
+      
+      const [hours, minutes] = time.split(':').map(Number);
+      const dateTime = setMinutes(setHours(date, hours), minutes);
 
       return {
-        date: selectedDate,
-        time: fallbackTime,
+        date,
+        time,
         dateTime,
       };
     });
 
-    setSlots(updatedSlots);
-  }, [selectedDates, maxLessons, subscription]);
+    const newDatesStr = updatedSlots.map(s => s.dateTime.getTime()).join(',');
+    const currentDatesStr = slots.map(s => s.dateTime.getTime()).join(',');
+
+    if (newDatesStr !== currentDatesStr) {
+      setSlots(updatedSlots);
+    }
+  }, [selectedDates, maxLessons, daySettings]); // Убрали subscription из зависимостей, так как он обрабатывается в другом useEffect
 
   // Обновление времени для конкретного слота
   const updateSlotTime = (index: number, time: string) => {
@@ -182,6 +254,41 @@ export default function SubscriptionModal({ subscription, open, close, studentId
     });
   };
 
+  const handleDayToggle = (day: string, checked: boolean) => {
+    setDaySettings(prev => {
+      const updated = {
+        ...prev,
+        [day]: { ...prev[day], selected: checked },
+      };
+
+      const hasSelected = Object.values(updated).some(s => s.selected);
+      if (hasSelected) {
+        // Определяем точку начала: либо уже выбранные даты, либо конец предыдущего абонемента, либо сегодня
+        let startFrom = selectedDates[0];
+        if (!startFrom && lastSubscriptionEndDate) {
+          // Начинаем со следующего дня после окончания предыдущего абонемента
+          startFrom = new Date(lastSubscriptionEndDate);
+          startFrom.setDate(startFrom.getDate() + 1);
+        }
+        
+        const newDates = generateDates(updated, startFrom);
+        setSelectedDates(newDates);
+      } else {
+        setSelectedDates([]);
+      }
+
+      return updated;
+    });
+  };
+
+  const handleDayTimeChange = (day: string, time: string) => {
+    setDaySettings(prev => ({
+      ...prev,
+      [day]: { ...prev[day], time },
+    }));
+  };
+
+
   const isValid =
     !!selectedAbonementId &&
     slots.length === maxLessons &&
@@ -192,19 +299,25 @@ export default function SubscriptionModal({ subscription, open, close, studentId
 
     setIsLoading(true);
     try {
-      if (subscription) {
+          if (subscription) {
         await updateSubscribeStudent({
           userSubscriptionId: Number(subscription.id),
           subscriptionId: Number(selectedAbonementId),
           slots: slots.map(s => s.dateTime.toISOString()),
           amount: subscription?.amount,
           paymentStatus: subscription.paymentStatus,
+          lessonDays: Object.entries(daySettings)
+            .filter(([_, s]) => s.selected)
+            .map(([day]) => day),
         });
       } else {
         await subscribeStudent({
           userId: studentId,
           subscriptionId: Number(selectedAbonementId),
           slots: slots.map(s => s.dateTime.toISOString()),
+          lessonDays: Object.entries(daySettings)
+            .filter(([_, s]) => s.selected)
+            .map(([day]) => day),
         });
       }
 
@@ -221,12 +334,12 @@ export default function SubscriptionModal({ subscription, open, close, studentId
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] flex flex-col overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t(subscription ? 'edit_subscription' : 'add_subscription')}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden flex flex-col gap-6 py-4">
+        <div className="flex-1 overflow-y-auto flex flex-col gap-6 py-4">
           <div className="space-y-2">
             <Label>{t('subscription')}</Label>
             <Select value={selectedAbonementId} onValueChange={setSelectedAbonementId}>
@@ -241,6 +354,36 @@ export default function SubscriptionModal({ subscription, open, close, studentId
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className={`space-y-4 border rounded-md p-4 bg-muted/20 ${!selectedAbonementId ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold">{t('select_lesson_days') || 'Виберіть дні занять'}</Label>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4">
+              {DAYS.map(day => (
+                <div key={day.id} className="flex flex-col gap-2 p-2 border rounded-md bg-background">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={day.id}
+                      checked={daySettings[day.id].selected}
+                      onCheckedChange={checked => handleDayToggle(day.id, !!checked)}
+                      disabled={!selectedAbonementId}
+                    />
+                    <Label htmlFor={day.id} className="text-xs cursor-pointer truncate">
+                      {st(day.id)}
+                    </Label>
+                  </div>
+                  <Input
+                    type="time"
+                    value={daySettings[day.id].time}
+                    onChange={e => handleDayTimeChange(day.id, e.target.value)}
+                    className="h-8 text-xs p-1"
+                    disabled={!daySettings[day.id].selected}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">

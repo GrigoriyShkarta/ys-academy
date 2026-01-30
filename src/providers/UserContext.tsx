@@ -9,6 +9,7 @@ export interface User {
   name: string;
   id: number;
   isActive: boolean;
+  birthDate?: string;
 }
 
 interface UserContextType {

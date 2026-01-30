@@ -103,7 +103,7 @@ export default function CoursePageLayout({
             course.modules.map(module => {
               console.log('module', module);
               
-              if (module.access) {
+              if (module.access || user?.role === 'super_admin') {
                 return (
                   <Link
                     href={`/main/materials/modules/${module.id}/?id=${userId}`}
@@ -116,9 +116,9 @@ export default function CoursePageLayout({
                       className="w-full h-48 object-cover cursor-pointer"
                     />
 
-                    <div className="absolute left-2 top-2 p-1 bg-white/50 text-xs rounded-xl">
+                    {user?.role !== 'super_admin' && <div className="absolute left-2 top-2 p-1 bg-white/50 text-xs rounded-xl">
                       {module.progress}%
-                    </div>
+                    </div>}
 
                     <div
                       className="p-2 text-center text-sm font-medium text-muted-foreground truncate"
@@ -159,19 +159,6 @@ export default function CoursePageLayout({
                     >
                       {module.title}
                     </div>
-                    {user?.role === 'super_admin' && module?.categories && module?.categories?.length > 0 && (
-                      <div className="flex gap-1 m-2 justify-center">
-                        {module?.categories?.slice(0, 2).map(category => (
-                          <Chip key={category.id} category={category} />
-                        ))}
-                        {module?.categories?.length > 2 && (
-                          <CircleChevronRight
-                            className="cursor-pointer"
-                            onClick={() => seCategoryList(module.categories)}
-                          />
-                        )}
-                      </div>
-                    )}
 
                     <div className="absolute left-0 top-0 w-full h-full bg-black/30">
                       <LockKeyhole

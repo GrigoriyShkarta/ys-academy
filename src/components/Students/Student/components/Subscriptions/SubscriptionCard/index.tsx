@@ -24,6 +24,8 @@ interface Props {
   saveAmount: (subscriptionId: number) => void;
   partialAmount: number;
   setPartialAmount: Dispatch<SetStateAction<number | undefined>>;
+  partialPaymentDate: string | undefined;
+  setPartialPaymentDate: Dispatch<SetStateAction<string | undefined>>;
   changeLessonStatus: (subscriptionId: number, lessonId: number, status: string) => void;
   saveLessonDate: (lessonId: number) => void;
   editingDateTime: Date | null;
@@ -48,6 +50,8 @@ export default function SubscriptionCard({
   saveAmount,
   partialAmount,
   setPartialAmount,
+  partialPaymentDate,
+  setPartialPaymentDate,
   changeLessonStatus,
   saveLessonDate,
   editingDateTime,
@@ -102,6 +106,8 @@ export default function SubscriptionCard({
             editingId={editingId}
             setEditingId={setEditingId}
             setPartialAmount={setPartialAmount}
+            partialPaymentDate={partialPaymentDate}
+            setPartialPaymentDate={setPartialPaymentDate}
           />
 
           <div className="flex flex-wrap gap-2">
@@ -129,6 +135,10 @@ export default function SubscriptionCard({
           endTime={subscription.lessons.at(-1)?.scheduledAt || ''}
           setShowMore={setShowMore}
           idx={idx}
+          paymentStatus={subscription.paymentStatus}
+          paymentDate={subscription.paymentDate}
+          amount={subscription.amount}
+          price={subscription.subscription.price}
         />
       )}
     </Card>

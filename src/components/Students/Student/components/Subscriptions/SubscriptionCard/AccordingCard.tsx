@@ -1,4 +1,5 @@
 import { format, Locale } from 'date-fns';
+import { useTranslations } from 'next-intl';
 import { Dispatch, SetStateAction } from 'react';
 
 interface Props {
@@ -8,6 +9,10 @@ interface Props {
   endTime: string;
   setShowMore: Dispatch<SetStateAction<number[]>>;
   idx: number;
+  paymentStatus?: string;
+  paymentDate?: string;
+  amount?: number;
+  price?: number;
 }
 
 export default function AccordingCard({
@@ -17,7 +22,12 @@ export default function AccordingCard({
   startTime,
   endTime,
   setShowMore,
+  paymentStatus,
+  paymentDate,
+  amount,
+  price,
 }: Props) {
+  const t = useTranslations('Students');
   return (
     <div
       className="flex items-center gap-2 cursor-pointer"
@@ -34,6 +44,13 @@ export default function AccordingCard({
           locale: currentLocale,
         })}{' '}
       </p>
+
+      {paymentStatus === 'partially_paid' && (
+        <p className="text-sm text-orange-400">
+          ({t('partially_paid')}: {amount}/{price}
+          {paymentDate && ` — ${t('payment_date')}: ${format(new Date(paymentDate), 'd.MM.yy')}`})
+        </p>
+      )}
     </div>
   );
 }

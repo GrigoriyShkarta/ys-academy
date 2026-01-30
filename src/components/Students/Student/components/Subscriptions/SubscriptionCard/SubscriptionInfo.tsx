@@ -22,6 +22,8 @@ interface Props {
   editingId?: number;
   setEditingId: Dispatch<SetStateAction<number | undefined>>;
   setPartialAmount: Dispatch<SetStateAction<number | undefined>>;
+  partialPaymentDate: string | undefined;
+  setPartialPaymentDate: Dispatch<SetStateAction<string | undefined>>;
   currentLocale: Locale;
 }
 
@@ -33,6 +35,8 @@ export default function SubscriptionInfo({
   saveAmount,
   subscription,
   setPartialAmount,
+  partialPaymentDate,
+  setPartialPaymentDate,
   currentLocale,
 }: Props) {
   const { user } = useUser();
@@ -60,6 +64,7 @@ export default function SubscriptionInfo({
         >
           {t(subscription.paymentStatus)}{' '}
           {subscription.amount > 0 && `${subscription.amount}/${subscription.subscription.price}`}
+          {subscription.paymentDate && ` — ${t('payment_date')}: ${format(new Date(subscription.paymentDate), 'd.MM.yy')}`}
         </p>
       ) : (
         <div className="flex gap-2 ">
@@ -87,6 +92,14 @@ export default function SubscriptionInfo({
                   value={partialAmount || subscription?.amount}
                   placeholder={t('amount')}
                   onChange={e => setPartialAmount(+e.target.value)}
+                  className='w-[100px]'
+                />
+                <Input
+                  type="date"
+                  placeholder={t('payment_date')}
+                  value={partialPaymentDate ?? (subscription?.paymentDate ? format(new Date(subscription.paymentDate), 'yyyy-MM-dd') : '')}
+                  onChange={e => setPartialPaymentDate(e.target.value)}
+                  className="w-[150px]"
                 />
                 {isLoadingChangeAmount ? (
                   <Loader className="animate-spin" />
@@ -98,6 +111,7 @@ export default function SubscriptionInfo({
               <div className="flex gap-2 items-center">
                 <p className="text-orange-400">
                   {subscription.amount}/{subscription.subscription.price}
+                  {subscription.paymentDate && ` — ${t('payment_date')}: ${format(new Date(subscription.paymentDate), 'd.MM.yy')}`}
                 </p>
               </div>
             ))}

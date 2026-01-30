@@ -44,6 +44,7 @@ export async function onSubmit(
         id: responseData.id,
         name: responseData.name,
         isActive: responseData.isActive,
+        birthDate: responseData?.birthDate,
       });
       window.location.href = '/main';
     }

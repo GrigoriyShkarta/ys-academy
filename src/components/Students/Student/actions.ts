@@ -5,6 +5,7 @@ interface SubscribeStudentParams {
   userId: number;
   subscriptionId: number;
   slots: string[];
+  lessonDays?: string[];
 }
 
 interface UpdateStudentParams {
@@ -13,6 +14,7 @@ interface UpdateStudentParams {
   slots: string[];
   paymentStatus: string;
   amount?: number;
+  lessonDays?: string[];
 }
 
 export const getStudent = async (id: number): Promise<Student> => {
@@ -64,11 +66,13 @@ export const subscribeStudent = async ({
   userId,
   subscriptionId,
   slots,
+  lessonDays,
 }: SubscribeStudentParams): Promise<void> => {
   const body = {
     userId,
     subscriptionId,
     lessonDates: slots,
+    lessonDays,
   };
 
   const { data } = await axiosInstance.post('/subscriptions/subscribe', body);
@@ -81,12 +85,14 @@ export const updateSubscribeStudent = async ({
   slots,
   amount,
   paymentStatus,
+  lessonDays,
 }: UpdateStudentParams): Promise<void> => {
   const body = {
     subscriptionId,
     amount,
     paymentStatus,
     lessonDates: slots,
+    lessonDays,
   };
 
   const { data } = await axiosInstance.patch(
@@ -104,11 +110,13 @@ export const deleteSubscription = async (subscriptionId: number) => {
 export const updateSubscriptionPaymentStatus = async (
   subscriptionId: number,
   paymentStatus: string,
-  amount?: number
+  amount?: number,
+  paymentDate?: string
 ) => {
   const { data } = await axiosInstance.patch(`/subscriptions/${subscriptionId}/payment-status`, {
     paymentStatus,
     amount,
+    paymentDate,
   });
 
   return data;

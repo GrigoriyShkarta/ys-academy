@@ -197,7 +197,7 @@ export default function LessonLayout({ id }: { id: number }) {
 
   return (
     <div className="space-y-6 pb-4 relative py-10 md:py-0">
-      <div className="flex justify-between items-center md:p-4 sm:p-0 z-10 relative">
+      <div className="flex justify-between items-center md:p-4 sm:p-0 z-10 relative max-w-7xl sm:w-2/3 w-full mx-auto">
         <button
           type="button"
           onClick={() => router.back()}

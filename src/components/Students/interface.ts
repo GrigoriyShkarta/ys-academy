@@ -63,6 +63,8 @@ export interface StudentSubscription {
   id: number;
   paymentStatus: string;
   amount: number;
+  paymentDate?: string;
+  lessonDays?: string[];
   subscription: {
     id: number;
     title: string;

@@ -21,6 +21,7 @@ export interface ForecastStudent {
   photo?: string;
   expectedAmount: number;
   lastLessonDate: string;
+  paymentDate?: string;
   subscriptionTitle: string;
   type: 'extra' | 'renewal';
 }

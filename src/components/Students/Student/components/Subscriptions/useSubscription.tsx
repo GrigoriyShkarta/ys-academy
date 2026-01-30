@@ -23,6 +23,7 @@ export default function useSubscription({ student, setOpen }: Props) {
   const [subscriptions, setSubscriptions] = useState<StudentSubscription[] | undefined>();
   const [editingId, setEditingId] = useState<number>();
   const [partialAmount, setPartialAmount] = useState<number>();
+  const [partialPaymentDate, setPartialPaymentDate] = useState<string>();
   const [editingDateTime, setEditingDateTime] = useState<Date | null>(null);
   const [editingLessonId, setEditingLessonId] = useState<number>();
   const [isLoadingChangeAmount, setIsLoadingChangeAmount] = useState(false);
@@ -48,7 +49,8 @@ export default function useSubscription({ student, setOpen }: Props) {
   const saveAmount = async (subscriptionId: number) => {
     try {
       setIsLoadingChangeAmount(true);
-      await updateSubscriptionPaymentStatus(subscriptionId, 'partially_paid', partialAmount);
+      const isoDate = partialPaymentDate ? new Date(partialPaymentDate).toISOString() : undefined;
+      await updateSubscriptionPaymentStatus(subscriptionId, 'partially_paid', partialAmount, isoDate);
       await client.invalidateQueries({ queryKey: ['student', student.id] });
     } catch (e) {
       console.log('error', e);
@@ -81,6 +83,11 @@ export default function useSubscription({ student, setOpen }: Props) {
     try {
       if (status === 'partially_paid') {
         setEditingId(subscriptionId);
+        const sub = subscriptions?.find(s => s.id === subscriptionId);
+        if (sub) {
+          setPartialAmount(sub.amount);
+          setPartialPaymentDate(sub.paymentDate ? new Date(sub.paymentDate).toISOString().split('T')[0] : undefined);
+        }
       } else {
         await updateSubscriptionPaymentStatus(subscriptionId, status);
         toast.success(t('data_saved'));
@@ -128,45 +135,98 @@ export default function useSubscription({ student, setOpen }: Props) {
       const sub = subscriptions?.find(s => s.id === subscriptionId);
       if (!sub || sub.lessons.length === 0) return;
 
-      // Группируем уроки по шаблону: день недели (UTC) + точное время
-      const groups: Record<string, Date[]> = {};
+      const lessonCount = sub.lessons.length;
+      let newSlots: string[] = [];
 
-      for (const lesson of sub.lessons) {
-        const dt = new Date(lesson.scheduledAt);
+      // 1. Находим самую последнюю дату среди всех уроков студента (как в модалке)
+      const lastOverallDate = student.subscriptions?.reduce((latest: Date | undefined, s) => {
+        const subLatest = s.lessons?.reduce((max: Date | undefined, l) => {
+          const d = new Date(l.scheduledAt);
+          return !max || d > max ? d : max;
+        }, undefined);
+        return !latest || (subLatest && subLatest > latest) ? subLatest : latest;
+      }, undefined);
 
-        const weekday = dt.getUTCDay(); // 0=Вс, 3=Ср, 5=Пт и т.д.
-        const hours = dt.getUTCHours().toString().padStart(2, '0');
-        const minutes = dt.getUTCMinutes().toString().padStart(2, '0');
-        const seconds = dt.getUTCSeconds().toString().padStart(2, '0');
+      let startFrom = lastOverallDate ? new Date(lastOverallDate) : new Date();
+      startFrom.setHours(0, 0, 0, 0);
+      startFrom.setDate(startFrom.getDate() + 1);
 
-        const key = `${weekday}-${hours}:${minutes}:${seconds}`;
+      if (sub.lessonDays && sub.lessonDays.length > 0) {
+        // Логика на основе lessonDays
+        const DAY_MAP: Record<string, number> = {
+          sunday: 0,
+          monday: 1,
+          tuesday: 2,
+          wednesday: 3,
+          thursday: 4,
+          friday: 5,
+          saturday: 6,
+        };
+        const dayValues = sub.lessonDays.map(name => DAY_MAP[name]);
 
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(dt);
-      }
+        // Пытаемся вытащить время для каждого дня из старых уроков
+        const dayTimes: Record<number, { h: number; m: number }> = {};
+        sub.lessons.forEach(l => {
+          const d = new Date(l.scheduledAt);
+          dayTimes[d.getDay()] = { h: d.getHours(), m: d.getMinutes() };
+        });
 
-      // Генерируем новые даты
-      const newSlots: string[] = [];
+        let currentDate = new Date(startFrom);
+        let iterations = 0;
+        while (newSlots.length < lessonCount && iterations < 500) {
+          iterations++;
+          const dayVal = currentDate.getDay();
+          if (dayValues.includes(dayVal)) {
+            const time = dayTimes[dayVal] || Object.values(dayTimes)[0] || { h: 14, m: 0 };
+            const nextDate = new Date(currentDate);
+            nextDate.setHours(time.h, time.m, 0, 0);
+            newSlots.push(nextDate.toISOString());
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      } else {
+        // Группируем уроки по шаблону: день недели (UTC) + точное время
+        const groups: Record<string, Date[]> = {};
 
-      for (const key in groups) {
-        const dates = groups[key].sort((a, b) => a.getTime() - b.getTime());
-        const count = dates.length;
-        if (count === 0) continue;
+        for (const lesson of sub.lessons) {
+          const dt = new Date(lesson.scheduledAt);
 
-        let last = dates[dates.length - 1];
+          const weekday = dt.getUTCDay(); // 0=Вс, 3=Ср, 5=Пт и т.д.
+          const hours = dt.getUTCHours().toString().padStart(2, '0');
+          const minutes = dt.getUTCMinutes().toString().padStart(2, '0');
+          const seconds = dt.getUTCSeconds().toString().padStart(2, '0');
 
-        for (let i = 0; i < count; i++) {
-          // Копируем дату и добавляем 7 дней (по UTC)
-          const next = new Date(last.getTime());
-          next.setUTCDate(next.getUTCDate() + 7);
+          const key = `${weekday}-${hours}:${minutes}:${seconds}`;
 
-          newSlots.push(next.toISOString());
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(dt);
+        }
 
-          last = next; // для следующей итерации
+        // Генерируем новые даты
+        for (const key in groups) {
+          const dates = groups[key].sort((a, b) => a.getTime() - b.getTime());
+          const count = dates.length;
+          if (count === 0) continue;
+
+          let last = dates[dates.length - 1];
+
+          for (let i = 0; i < count; i++) {
+            // Копируем дату и добавляем 7 дней (по UTC)
+            const next = new Date(last.getTime());
+            next.setUTCDate(next.getUTCDate() + 7);
+
+            // Если дата все еще в прошлом относительно startFrom, подтягиваем ее
+            while (next < startFrom) {
+              next.setUTCDate(next.getUTCDate() + 7);
+            }
+
+            newSlots.push(next.toISOString());
+            last = next; // для следующей итерации
+          }
         }
       }
 
-      // Сортируем новые слоты по дате (по возрастанию) — опционально, но удобно
+      // Сортируем новые слоты по дате (по возрастанию)
       newSlots.sort((a, b) => a.localeCompare(b));
 
       // Создаём новую подписку с новыми слотами
@@ -174,10 +234,11 @@ export default function useSubscription({ student, setOpen }: Props) {
         userId: student.id,
         subscriptionId: sub.subscription.id,
         slots: newSlots,
+        lessonDays: sub.lessonDays,
       });
       await client.invalidateQueries({ queryKey: ['student', student.id] });
     } catch (e) {
-      console.error(e); // лучше логировать ошибку, пустой catch — плохая практика
+      console.error(e);
     }
   };
 
@@ -207,6 +268,7 @@ export default function useSubscription({ student, setOpen }: Props) {
     subscriptions,
     editingId,
     partialAmount,
+    partialPaymentDate,
     editingDateTime,
     editingLessonId,
     isLoadingChangeAmount,
@@ -218,6 +280,7 @@ export default function useSubscription({ student, setOpen }: Props) {
     setSubscriptions,
     setEditingId,
     setPartialAmount,
+    setPartialPaymentDate,
     handleCopyMessage,
     setEditingDateTime,
     setEditingLessonId,

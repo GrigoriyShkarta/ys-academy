@@ -41,6 +41,7 @@ export default function MainLayout({ children }: Readonly<{ children: ReactNode 
         id: userData.id,
         name: userData.name,
         isActive: userData.isActive,
+        birthDate: userData?.birthDate,
       });
     }
   }, [userData]);

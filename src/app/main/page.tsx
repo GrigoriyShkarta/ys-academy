@@ -8,15 +8,36 @@ import { BookOpen, FileText, Users, Layers, MonitorPlay } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/providers/UserContext';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import ava from '../../../public/assets/ys_ava.jpeg';
 import { useTranslations } from 'next-intl';
+import Confetti from 'react-confetti';
+import { useState, useMemo } from 'react';
 
 export default function MainPage() {
   const router = useRouter();
   const { user } = useUser();
   const t = useTranslations('Main');
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateSize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener('resize', updateSize);
+    updateSize();
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  const isBirthday = useMemo(() => {
+    if (!user?.birthDate) return false;
+    const birthDate = new Date(user.birthDate);
+    const today = new Date();
+    return (
+      birthDate.getDate() === today.getDate() &&
+      birthDate.getMonth() === today.getMonth()
+    );
+  }, [user?.birthDate]);
 
   useEffect(() => {
     const token = localStorage.getItem(YS_TOKEN);
@@ -91,7 +112,7 @@ export default function MainPage() {
           className="space-y-4 max-w-2xl w-full flex flex-col items-center"
         >
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            {t('welcome_back')}, {`${user.name}`}!
+            {t('welcome_back')}, {`${user.name.split(' ')[0]}`}!
           </h1>
           <p className="text-xl text-muted-foreground">{t('continue_learning_prompt')}</p>
           
@@ -115,6 +136,14 @@ export default function MainPage() {
             ))}
           </motion.div>
         </motion.div>
+        {isBirthday && (
+          <Confetti
+            width={windowSize.width}
+            height={windowSize.height}
+            recycle={true}
+            numberOfPieces={200}
+          />
+        )}
       </div>
     );
   }
@@ -154,6 +183,14 @@ export default function MainPage() {
           </motion.div>
         ))}
       </motion.div>
+      {isBirthday && (
+        <Confetti
+          width={windowSize.width}
+          height={windowSize.height}
+          recycle={true}
+          numberOfPieces={200}
+        />
+      )}
     </div>
   );
 }

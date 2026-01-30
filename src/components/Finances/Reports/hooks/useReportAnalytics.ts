@@ -68,8 +68,10 @@ export function useReportAnalytics({
       const subs = student.subscriptions || [];
 
       subs.forEach((sub: any) => {
-        const subDateRaw = sub.createdAt || sub.lessons?.[0]?.scheduledAt;
-        const subDate = subDateRaw ? new Date(subDateRaw) : null;
+        const firstLessonDate = sub.lessons && sub.lessons.length > 0
+          ? new Date(Math.min(...sub.lessons.map((l: any) => new Date(l.scheduledAt).getTime())))
+          : null;
+        const subDate = sub.createdAt ? new Date(sub.createdAt) : firstLessonDate;
         
         if (subDate && subDate >= startDate && subDate <= endDate && (sub.paymentStatus === 'paid' || sub.paymentStatus === 'partially_paid' || sub.paymentStatus === 'partial_paid')) {
           const isPartial = sub.paymentStatus === 'partially_paid' || sub.paymentStatus === 'partial_paid';
@@ -101,8 +103,10 @@ export function useReportAnalytics({
       });
 
       subs.forEach((sub: any) => {
-        const subDateRaw = sub.createdAt || sub.lessons?.[0]?.scheduledAt;
-        const subDate = subDateRaw ? new Date(subDateRaw) : null;
+        const firstLessonDate = sub.lessons && sub.lessons.length > 0
+          ? new Date(Math.min(...sub.lessons.map((l: any) => new Date(l.scheduledAt).getTime())))
+          : null;
+        const subDate = sub.createdAt ? new Date(sub.createdAt) : firstLessonDate;
         
         if (subDate && subDate >= startDate && subDate <= endDate) {
           const price = sub.subscription?.price || 0;
@@ -118,6 +122,7 @@ export function useReportAnalytics({
                 photo: typeof student.photo === 'string' ? student.photo : undefined,
                 expectedAmount: debt,
                 lastLessonDate: subDate.toISOString(),
+                paymentDate: sub.paymentDate,
                 subscriptionTitle: sub.subscription?.title || 'Unknown',
                 type: 'extra'
               });
