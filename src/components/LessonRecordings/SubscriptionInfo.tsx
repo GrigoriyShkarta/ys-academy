@@ -130,6 +130,7 @@ export default function SubscriptionInfo({
                 <div
                   onClick={e => {
                     e.stopPropagation();
+                    setOpenEdit(true)
                     setSelectedLesson({ id: lesson.id });
                   }}
                   className="aspect-video w-full flex flex-col gap-2 p-4 cursor-pointer border-2 border-dashed
