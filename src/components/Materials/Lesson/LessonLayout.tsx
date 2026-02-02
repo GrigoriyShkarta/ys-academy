@@ -233,7 +233,7 @@ export default function LessonLayout({ lessonId }: { lessonId: number }) {
   if (!lesson) return <div>Lesson not found</div>;
 
   return (
-    <div className="space-y-6 pb-4 w-full relative py-10 md:py-0">
+    <div className={`space-y-6 pb-4 w-full relative py-10 md:py-0 ${user?.role === 'student' && !isEdit || !isEditPlace ? 'hide-btn' : ''}`}>
       <div className="flex justify-between items-center md:p-4 sm:p-0 z-10 relative max-w-7xl sm:w-2/3 w-full mx-auto">
         <button
           type="button"
