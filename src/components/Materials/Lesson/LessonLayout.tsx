@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteLesson, getLesson, updateLesson } from '@/components/Materials/Lesson/action';
 import Loader from '@/common/Loader';
 import { IFile, LessonDocItem } from '@/components/Materials/utils/interfaces';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PlayCircle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Block } from '@blocknote/core';
@@ -16,6 +16,8 @@ import ConfirmModal from '@/common/ConfirmModal';
 import LessonSaveModal from '@/components/Materials/Lesson/components/LessonSaveModal';
 import { useUser } from '@/providers/UserContext';
 import { uploadPhoto } from '../Photo/action';
+import { useMemo } from 'react';
+import Link from 'next/link';
 import {
   DndContext,
   closestCorners,
@@ -38,8 +40,9 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableLessonBlock } from '@/components/Materials/Lesson/components/SortableLessonBlock';
 import LessonBlock from '@/components/Materials/Lesson/components/LessonBlock';
+import { getCourse } from '../Course/action';
 
-export default function LessonLayout({ id }: { id: number }) {
+export default function LessonLayout({ lessonId }: { lessonId: number }) {
   const [isEditPlace, setIsEditPlace] = useState(false);
   const [lessonTitle, setLessonTitle] = useState('');
   const [cover, setCover] = useState<File | string | null>(null);
@@ -56,12 +59,46 @@ export default function LessonLayout({ id }: { id: number }) {
   const { user } = useUser();
   const isEdit = searchParams.get('isEdit') === 'true';
   const t = useTranslations('Materials');
+  const courseId = searchParams.get('courseId');
+  console.log(courseId,'courseId');
 
   const { data: lesson, isLoading } = useQuery({
-    queryKey: ['lesson', id],
-    queryFn: () => getLesson(id),
-    enabled: !!id,
+    queryKey: ['lesson', lessonId],
+    queryFn: () => getLesson(lessonId),
+    enabled: !!lessonId,
   });
+
+  const { data: course, isLoading: courseLoading } = useQuery({
+      queryKey: ['course', courseId],
+      queryFn: () => getCourse(+courseId!, user?.id ? +user.id : undefined),
+      enabled: !!courseId && !!user,
+    });
+
+  const { allLessons, currentIndex, prevLesson, nextLesson } = useMemo(() => {
+    if (!course) return { allLessons: [], currentIndex: -1, prevLesson: null, nextLesson: null };
+    
+    const moduleLessons = (course.modules || []).flatMap(m => m.lessons || []);
+    // Ensure all have access info if it's a student view, though super_admin overrides
+    const standaloneLessons = (course.lessons || []);
+    
+    const flat = [...moduleLessons, ...standaloneLessons];
+    const index = flat.findIndex(l => l.id === lessonId);
+    
+    return {
+      allLessons: flat,
+      currentIndex: index,
+      prevLesson: index > 0 ? flat[index - 1] : null,
+      nextLesson: index < flat.length - 1 ? flat[index + 1] : null,
+    };
+  }, [course, lessonId]);
+
+  const hasAccess = (lesson: any) => {
+    if (user?.role === 'super_admin') return true;
+    return !!lesson?.access;
+  };
+
+  const isPrevEnabled = !!prevLesson && hasAccess(prevLesson);
+  const isNextEnabled = !!nextLesson && hasAccess(nextLesson);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -135,7 +172,7 @@ export default function LessonLayout({ id }: { id: number }) {
         coverPublicId = res.publicId;
       }
       await updateLesson(
-        id,
+        lessonId,
         lessonDoc,
         lessonTitle,
         coverUrl,
@@ -143,7 +180,7 @@ export default function LessonLayout({ id }: { id: number }) {
         selectedCategories,
         selectedModules
       );
-      await queryClient.invalidateQueries({ queryKey: ['lesson', id] });
+      await queryClient.invalidateQueries({ queryKey: ['lesson', lessonId] });
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch (e) {
       console.log('Error updating lesson: ', e);
@@ -162,7 +199,7 @@ export default function LessonLayout({ id }: { id: number }) {
 
 
   const handleDeleteLesson = async () => {
-    await deleteLesson([id]);
+    await deleteLesson([lessonId]);
     await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     router.back();
   };
@@ -196,17 +233,65 @@ export default function LessonLayout({ id }: { id: number }) {
   if (!lesson) return <div>Lesson not found</div>;
 
   return (
-    <div className="space-y-6 pb-4 relative py-10 md:py-0">
+    <div className="space-y-6 pb-4 w-full relative py-10 md:py-0">
       <div className="flex justify-between items-center md:p-4 sm:p-0 z-10 relative max-w-7xl sm:w-2/3 w-full mx-auto">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => {
+            if (courseId) {
+              if (user?.role === 'super_admin') {
+                router.push(`/main/materials/courses/${courseId}`);
+              } else {
+                router.push(`/main/course/${courseId}?id=${user?.id}`);
+              }
+            } else {
+              router.back();
+            }
+          }}
           className="flex items-center"
           aria-label="Назад"
         >
           <ChevronLeft />
           <span>{t('back')}</span>
         </button>
+
+        {courseId && (
+          <div className="fixed w-[240px] justify-center flex items-center bg-muted/30 rounded-lg p-1 mr-2 left-1/2">
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={!isPrevEnabled}
+              asChild={isPrevEnabled}
+              className="h-8 w-8"
+            >
+              {isPrevEnabled ? (
+                <Link href={`/main/courses/lesson/${prevLesson.id}/?courseId=${courseId}`}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Link>
+              ) : (
+                <ChevronLeft className="h-4 w-4 opacity-50" />
+              )}
+            </Button>
+            <div className="mx-2 text-xs font-medium text-muted-foreground tabular-nums">
+              {currentIndex + 1} / {allLessons.length}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={!isNextEnabled}
+              asChild={isNextEnabled}
+              className="h-8 w-8"
+            >
+              {isNextEnabled ? (
+                <Link href={`/main/courses/lesson/${nextLesson.id}/?courseId=${courseId}`}>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              ) : (
+                <ChevronRight className="h-4 w-4 opacity-50" />
+              )}
+            </Button>
+          </div>
+        )}
 
         <div className="flex gap-2">
           {!isEditPlace && user?.role === 'super_admin' && (
@@ -227,6 +312,10 @@ export default function LessonLayout({ id }: { id: number }) {
             )
           )}
         </div>
+
+        {!isEditPlace && user?.role !== 'super_admin' && (
+            <div></div>  
+          )}
       </div>
       {(cover || isEditPlace) && (
         <Cover updateCover={setCover} cover={cover} isEdit={isEditPlace} />

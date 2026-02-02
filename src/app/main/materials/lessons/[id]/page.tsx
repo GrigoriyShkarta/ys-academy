@@ -7,5 +7,5 @@ interface LessonPageProps {
 export default async function LessonPage({ params }: LessonPageProps) {
   const { id } = await params;
   const lessonId = Number(id);
-  return <LessonLayout id={lessonId} />;
+  return <LessonLayout lessonId={lessonId} />;
 }

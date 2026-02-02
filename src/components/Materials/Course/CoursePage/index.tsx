@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { deleteCourse, getCourse } from '@/components/Materials/Course/action';
 import Loader from '@/common/Loader';
-import { ChevronLeft, CircleChevronRight, LockKeyhole, Lock } from 'lucide-react';
+import { ChevronLeft, GraduationCap, LockKeyhole, Lock, ChevronDown, PlayCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Chip from '@/common/Chip';
 import CourseModal from '@/components/Materials/Course/CourseModal';
@@ -14,9 +14,9 @@ import StudentModules from '@/components/Students/Student/components/StudentModu
 import ConfirmModal from '@/common/ConfirmModal';
 import { useUser } from '@/providers/UserContext';
 import Link from 'next/link';
-import logo from '../../../../../public/assets/logo.png';
 import { Category } from '@/components/Materials/utils/interfaces';
 import CategoryListModal from '@/common/CategoryListModal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CoursePageLayout({
   courseId,
@@ -28,10 +28,8 @@ export default function CoursePageLayout({
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
+  const [expandedModules, setExpandedModules] = useState<number[]>([]);
   const { user } = useUser();
-
-  console.log('user', user);
-  
 
   const t = useTranslations('Common');
   const queryClient = useQueryClient();
@@ -42,7 +40,7 @@ export default function CoursePageLayout({
   const { data: course, isLoading } = useQuery({
     queryKey: ['course', courseId],
     queryFn: () => getCourse(courseId, userId ? +userId : undefined),
-    enabled: !!courseId && !!user,
+    enabled: !!user && (user?.role === 'student' ? !!userId : !!courseId),
   });
 
   const deleteMutation = useMutation({
@@ -98,134 +96,172 @@ export default function CoursePageLayout({
       {isStudentPage && userId && course.modules.length > 0 && user?.role !== 'student' ? (
         <StudentModules studentId={+userId} modules={course.modules} courseId={courseId} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-4 w-full box-border">
+        <div className="flex flex-col gap-4 w-full">
           {course?.modules &&
-            course.modules.map(module => {
-              console.log('module', module);
-              
-              if (module.access || user?.role === 'super_admin') {
-                return (
-                  <Link
-                    href={`/main/materials/modules/${module.id}/?id=${userId}`}
-                    className="relative group rounded-lg overflow-hidden border hover:shadow-md transition"
-                    key={module.id}
-                  >
-                    <img
-                      src={module?.url ? module.url : logo.src}
-                      alt={module.title}
-                      className="w-full h-48 object-cover cursor-pointer"
-                    />
-
-                    {user?.role !== 'super_admin' && <div className="absolute left-2 top-2 p-1 bg-white/50 text-xs rounded-xl">
-                      {module.progress}%
-                    </div>}
-
-                    <div
-                      className="p-2 text-center text-sm font-medium text-muted-foreground truncate"
-                      title={module.title}
-                    >
-                      {module.title}
-                    </div>
-                    {module?.categories && module?.categories?.length > 0 && (
-                      <div className="flex gap-1 m-2 justify-center">
-                        {user?.role === 'super_admin' && module?.categories?.slice(0, 2).map(category => (
-                          <Chip key={category.id} category={category} />
-                        ))}
-                        {module?.categories?.length > 2 && (
-                          <CircleChevronRight
-                            className="cursor-pointer"
-                            onClick={() => seCategoryList(module.categories)}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </Link>
+            course.modules.map((module, index) => {
+              const isExpanded = expandedModules.includes(module.id);
+              const toggleModule = () => {
+                setExpandedModules(prev =>
+                  prev.includes(module.id) ? prev.filter(id => id !== module.id) : [...prev, module.id]
                 );
-              } else {
-                return (
-                  <div
-                    key={module.id}
-                    className={`relative group rounded-lg overflow-hidden border hover:shadow-md transition`}
-                  >
-                    <img
-                      src={module?.url ? module.url : logo.src}
-                      alt={module.title}
-                      className="w-full h-48 object-cover cursor-pointer"
-                    />
+              };
 
-                    <div
-                      className="p-2 text-center text-sm font-medium text-muted-foreground truncate"
-                      title={module.title}
-                    >
-                      {module.title}
+              const hasAccess = module.access || user?.role === 'super_admin';
+
+              return (
+                <div
+                  key={module.id}
+                  className={`border rounded-xl bg-card overflow-hidden transition-all ${
+                    hasAccess ? 'hover:shadow-md' : 'opacity-80'
+                  }`}
+                >
+                  <div
+                    onClick={hasAccess ? toggleModule : undefined}
+                    className={`p-5 flex items-center justify-between cursor-pointer select-none ${
+                      !hasAccess ? 'cursor-not-allowed bg-muted/30' : 'hover:bg-accent/5'
+                    }`}
+                  >
+                    <div className="flex items-center gap-6">
+                      <div className="hidden sm:flex text-3xl font-black text-muted-foreground/10 tabular-nums">
+                        {String(index + 1).padStart(2, '0')}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xl font-semibold tracking-tight">
+                            {module.title}
+                          </h3>
+                          {!hasAccess && <Lock className="w-4 h-4 text-muted-foreground" />}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                          <span>{module.lessons?.length || 0} {t('lessons')}</span>
+                          {hasAccess && user?.role !== 'super_admin' && (
+                            <span className="flex items-center gap-1.5 px-2 py-0.5 bg-accent/10 text-accent rounded-full">
+                              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+                              {module.progress}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="absolute left-0 top-0 w-full h-full bg-black/30">
-                      <LockKeyhole
-                        width={69}
-                        height={60}
-                        className="m-auto h-[85%] text-white"
-                        color="white"
-                      />
+                    <div className="flex items-center gap-4">
+                      {module?.categories && module?.categories?.length > 0 && (
+                        <div className="hidden md:flex gap-1">
+                          {user?.role === 'super_admin' && module?.categories?.slice(0, 2).map(category => (
+                            <Chip key={category.id} category={category} />
+                          ))}
+                        </div>
+                      )}
+                      {hasAccess ? (
+                        <motion.div
+                          animate={{ rotate: isExpanded ? 180 : 0 }}
+                          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                        >
+                          <ChevronDown className="w-6 h-6 text-muted-foreground" />
+                        </motion.div>
+                      ) : (
+                        <LockKeyhole className="w-6 h-6 text-muted-foreground/40" />
+                      )}
                     </div>
                   </div>
-                );
-              }
+
+                  <AnimatePresence>
+                    {isExpanded && hasAccess && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="border-t bg-muted/5"
+                      >
+                        <div className="p-2 sm:p-4 grid grid-cols-1 gap-2">
+                          {module.lessons && module.lessons.length > 0 ? (
+                            module.lessons.map((lesson) => (
+                              <Link
+                                key={lesson.id}
+                                href={`/main/courses/lesson/${lesson.id}/?courseId=${courseId}`}
+                                className={`group flex items-center justify-between p-3 rounded-lg border border-transparent hover:border-accent/20 hover:bg-accent/10 transition-all ${
+                                  !lesson.access && user?.role !== 'super_admin' 
+                                    ? 'opacity-60 cursor-not-allowed pointer-events-none' 
+                                    : ''
+                                }`}
+                              >
+                                <div className="flex items-center gap-4">
+                                  <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center border group-hover:bg-accent group-hover:text-white transition-colors">
+                                    <GraduationCap className="w-4 h-4" />
+                                  </div>
+                                  <span className="font-medium text-sm group-hover:text-accent transition-colors">
+                                    {lesson.title}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {!lesson.access && user?.role !== 'super_admin' && (
+                                    <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                                  )}
+                                  <ChevronLeft className="w-4 h-4 rotate-180 text-muted-foreground group-hover:text-accent opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
+                                </div>
+                              </Link>
+                            ))
+                          ) : (
+                            <div className="p-4 text-center text-muted-foreground text-sm italic">
+                              {t('no_lessons_find')}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
             })}
         </div>
       )}
 
-      <div className="space-y-3 mt-4">
-        {course?.lessons &&course?.lessons?.length > 0 && (
+      <div className="flex flex-col gap-2 mt-4">
+        {course?.lessons && course?.lessons?.length > 0 && (
           course?.lessons?.map((lesson: any) => {
             const hasAccess = !!lesson.access;
 
-            // Общий контейнер
-            const containerClasses = `
-              border rounded-lg p-4 transition-all
-              ${
-                hasAccess
-                  ? 'hover:shadow-md hover:bg-accent/5 cursor-pointer group'
-                  : 'bg-muted/30 border-muted opacity-75 cursor-not-allowed'
-              }
-            `;
-
-            const titleClasses = hasAccess
-              ? 'font-medium text-foreground group-hover:underline'
-              : 'font-medium text-muted-foreground';
-
-            const statusText = hasAccess ? t('let_access') : t('close');
-            const statusClasses = hasAccess
-              ? 'text-xs text-green-600 dark:text-green-400'
-              : 'text-xs text-muted-foreground';
-
             return hasAccess ? (
-              // Доступный урок — кликабельный
-              <Link key={lesson.id} href={`/main/materials/lessons/${lesson.id}`} className="block">
-                <article className={containerClasses}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h3 className={titleClasses}>{lesson.title}</h3>
-                      <p className={statusClasses}>{statusText}</p>
-                    </div>
-                    {/* Стрелка появляется при hover */}
-                    <ChevronLeft className="w-5 h-5 text-muted-foreground rotate-180 opacity-0 group-hover:opacity-100 transition" />
+              <Link
+                key={lesson.id}
+                href={`/main/courses/lesson/${lesson.id}/?courseId=${courseId}`}
+                className="group flex items-center justify-between p-4 rounded-xl border bg-card hover:shadow-md hover:border-accent/20 hover:bg-accent/5 transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center border group-hover:bg-accent group-hover:text-white transition-colors">
+                    <GraduationCap className="w-5 h-5" />
                   </div>
-                </article>
-              </Link>
-            ) : (
-              // Закрытый урок
-              <article key={lesson.id} className={containerClasses}>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div>
-                      <h3 className={titleClasses}>{lesson.title}</h3>
-                      <p className={statusClasses}>{statusText}</p>
-                    </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold group-hover:text-accent transition-colors">
+                      {lesson.title}
+                    </span>
+                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                      {t('let_access')}
+                    </span>
                   </div>
                 </div>
-              </article>
+                <ChevronLeft className="w-5 h-5 rotate-180 text-muted-foreground group-hover:text-accent transition-all transform group-hover:translate-x-1" />
+              </Link>
+            ) : (
+              <div
+                key={lesson.id}
+                className="flex items-center justify-between p-4 rounded-xl border bg-muted/30 opacity-75 cursor-not-allowed"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-background/50 flex items-center justify-center border">
+                    <Lock className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-muted-foreground">
+                      {lesson.title}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {t('close')}
+                    </span>
+                  </div>
+                </div>
+              </div>
             );
           })
         )}

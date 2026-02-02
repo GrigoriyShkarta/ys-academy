@@ -205,7 +205,7 @@ export default function ModuleModal({ open, setOpen, selectModule, module }: Pro
 
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 p-2">
-            <PhotoEditor setImage={setImageSrc} externalImage={imageSrc} />
+            {/* <PhotoEditor setImage={setImageSrc} externalImage={imageSrc} /> */}
 
             <Label>{t('name')}</Label>
             <Input
