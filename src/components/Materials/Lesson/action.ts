@@ -70,8 +70,8 @@ export const getAllLessons = async ({
   return data;
 };
 
-export const getLesson = async (id: number) => {
-  const { data } = await axiosInstance.get(`/lesson/${id}`);
+export const getLesson = async (id: number, checkUserAccess?: number) => {
+  const { data } = await axiosInstance.get(`/lesson/${id}`, { params: { checkUserAccess } });
   return data;
 };
 

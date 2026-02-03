@@ -23,7 +23,7 @@ export default function useSubscription({ student, setOpen }: Props) {
   const [subscriptions, setSubscriptions] = useState<StudentSubscription[] | undefined>();
   const [editingId, setEditingId] = useState<number>();
   const [partialAmount, setPartialAmount] = useState<number>();
-  const [partialPaymentDate, setPartialPaymentDate] = useState<string>();
+  const [paymentDate, setPaymentDate] = useState<string>();
   const [editingDateTime, setEditingDateTime] = useState<Date | null>(null);
   const [editingLessonId, setEditingLessonId] = useState<number>();
   const [isLoadingChangeAmount, setIsLoadingChangeAmount] = useState(false);
@@ -47,10 +47,34 @@ export default function useSubscription({ student, setOpen }: Props) {
   };
 
   const saveAmount = async (subscriptionId: number) => {
+    console.log('saveAmount');
     try {
       setIsLoadingChangeAmount(true);
-      const isoDate = partialPaymentDate ? new Date(partialPaymentDate).toISOString() : undefined;
-      await updateSubscriptionPaymentStatus(subscriptionId, 'partially_paid', partialAmount, isoDate);
+      const sub = subscriptions?.find(s => s.id === subscriptionId) || student.subscriptions?.find(s => s.id === subscriptionId);
+      if (!sub) return;
+
+      // Ensure we have a date string (either from state, existing sub, or today)
+      let finalDateStr = paymentDate;
+      if (!finalDateStr && sub.paymentDate) {
+        finalDateStr = new Date(sub.paymentDate).toISOString().split('T')[0];
+      }
+      if (!finalDateStr) {
+        finalDateStr = new Date().toISOString().split('T')[0];
+      }
+
+      console.log('finalDateStr', finalDateStr);
+
+      const isoDate = new Date(finalDateStr).toISOString();
+      console.log('isoDate', isoDate);
+
+      console.log('sub.paymentStatus', sub.paymentStatus);
+      
+      // Calculate final amount: if paid, use subscription price. Fallback to sub.amount or partialAmount
+      let finalAmount = sub.paymentStatus === 'paid' 
+        ? (sub.subscription?.price ?? sub.amount)
+        : (partialAmount ?? sub.amount);
+
+      await updateSubscriptionPaymentStatus(subscriptionId, sub.paymentStatus, finalAmount, isoDate);
       await client.invalidateQueries({ queryKey: ['student', student.id] });
     } catch (e) {
       console.log('error', e);
@@ -79,14 +103,18 @@ export default function useSubscription({ student, setOpen }: Props) {
   };
 
   const changePaymentStatus = async (subscriptionId: number, status: string) => {
+    console.log('changePaymentStatus');
     changeLocalStatus(subscriptionId, status);
     try {
-      if (status === 'partially_paid') {
+      if (status === 'partially_paid' || status === 'paid') {
         setEditingId(subscriptionId);
         const sub = subscriptions?.find(s => s.id === subscriptionId);
         if (sub) {
-          setPartialAmount(sub.amount);
-          setPartialPaymentDate(sub.paymentDate ? new Date(sub.paymentDate).toISOString().split('T')[0] : undefined);
+          status === 'partially_paid' && setPartialAmount(sub.amount);
+          setPaymentDate(sub.paymentDate 
+            ? new Date(sub.paymentDate).toISOString().split('T')[0] 
+            : new Date().toISOString().split('T')[0]
+          );
         }
       } else {
         await updateSubscriptionPaymentStatus(subscriptionId, status);
@@ -102,7 +130,6 @@ export default function useSubscription({ student, setOpen }: Props) {
     changeLocalLessonStatus(subscriptionId, lessonId, status);
     try {
       if (status === 'transfer') {
-        console.log('hi');
         setEditingLessonId(lessonId);
       } else {
         await updateLessonStatusInSubscription(lessonId, status);
@@ -268,7 +295,7 @@ export default function useSubscription({ student, setOpen }: Props) {
     subscriptions,
     editingId,
     partialAmount,
-    partialPaymentDate,
+    partialPaymentDate: paymentDate,
     editingDateTime,
     editingLessonId,
     isLoadingChangeAmount,
@@ -280,7 +307,7 @@ export default function useSubscription({ student, setOpen }: Props) {
     setSubscriptions,
     setEditingId,
     setPartialAmount,
-    setPartialPaymentDate,
+    setPartialPaymentDate: setPaymentDate,
     handleCopyMessage,
     setEditingDateTime,
     setEditingLessonId,

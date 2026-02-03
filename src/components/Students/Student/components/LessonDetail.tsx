@@ -29,7 +29,7 @@ export default function LessonDetail({
 
   const { data: lesson, isLoading } = useQuery({
     queryKey: ['lesson', lessonId],
-    queryFn: () => getLesson(lessonId),
+    queryFn: () => getLesson(lessonId, studentId),
     enabled: !!lessonId,
   });
 
@@ -40,24 +40,20 @@ export default function LessonDetail({
   });
 
   useEffect(() => {
-    if (lesson && student) {
+    if (lesson) {
       const doc = (lesson.content || []).map((item: any) => ({
         blockId: item.blockId,
         content: item.content ?? [],
       }));
-      const moduleItem = student?.modules?.find(m => Number(m.id) === Number(lesson.moduleId));
-      const currentLesson = moduleItem?.lessons?.find(
-        (l: { id: number }) => Number(l.id) === Number(lessonId)
-      );
 
-      if (currentLesson && currentLesson.access_blocks.length > 0) {
-        setSelectedBlocks(currentLesson.access_blocks);
+      if (lesson.accessBlocks && lesson.accessBlocks.length > 0) {
+        setSelectedBlocks(lesson.accessBlocks);
       } else {
         setSelectedBlocks(lesson.content?.map((item: { blockId: number }) => item.blockId) ?? []);
       }
       setLessonDoc(doc);
     }
-  }, [lesson, student]);
+  }, [lesson]);
 
   const sendBlocksAccess = async () => {
     try {
@@ -80,12 +76,12 @@ export default function LessonDetail({
   };
 
   return (
-    <div className="space-y-6 p-4 w-full overflow-hidden relative overflow-y-auto h-screen">
+    <div className="space-y-6 p-4 w-full overflow-hidden relative overflow-y-auto h-screen max-w-7xl sm:w-2/3 w-full mx-auto">
       {isLoading || loading || isLoadingStudent ? (
         <Loader />
       ) : (
         <>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center max-w-7xl w-full">
             <button
               type="button"
               onClick={() => router.back()}

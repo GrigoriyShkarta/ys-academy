@@ -71,7 +71,7 @@ export function useReportAnalytics({
         const firstLessonDate = sub.lessons && sub.lessons.length > 0
           ? new Date(Math.min(...sub.lessons.map((l: any) => new Date(l.scheduledAt).getTime())))
           : null;
-        const subDate = sub.createdAt ? new Date(sub.createdAt) : firstLessonDate;
+        const subDate = sub.paymentDate ? new Date(sub.paymentDate) : (sub.createdAt ? new Date(sub.createdAt) : firstLessonDate);
         
         if (subDate && subDate >= startDate && subDate <= endDate && (sub.paymentStatus === 'paid' || sub.paymentStatus === 'partially_paid' || sub.paymentStatus === 'partial_paid')) {
           const isPartial = sub.paymentStatus === 'partially_paid' || sub.paymentStatus === 'partial_paid';
@@ -106,7 +106,7 @@ export function useReportAnalytics({
         const firstLessonDate = sub.lessons && sub.lessons.length > 0
           ? new Date(Math.min(...sub.lessons.map((l: any) => new Date(l.scheduledAt).getTime())))
           : null;
-        const subDate = sub.createdAt ? new Date(sub.createdAt) : firstLessonDate;
+        const subDate = sub.paymentDate ? new Date(sub.paymentDate) : (sub.createdAt ? new Date(sub.createdAt) : firstLessonDate);
         
         if (subDate && subDate >= startDate && subDate <= endDate) {
           const price = sub.subscription?.price || 0;

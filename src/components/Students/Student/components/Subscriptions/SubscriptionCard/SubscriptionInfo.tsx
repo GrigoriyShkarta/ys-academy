@@ -85,15 +85,17 @@ export default function SubscriptionInfo({
               </SelectContent>
             </Select>
           </div>
-          {subscription.paymentStatus === 'partially_paid' &&
+          {(subscription.paymentStatus === 'partially_paid' || subscription.paymentStatus === 'paid') &&
             (editingId === subscription.id ? (
               <div className="flex gap-2 items-center">
-                <Input
-                  value={partialAmount || subscription?.amount}
-                  placeholder={t('amount')}
-                  onChange={e => setPartialAmount(+e.target.value)}
-                  className='w-[100px]'
-                />
+                {subscription.paymentStatus === 'partially_paid' && (
+                  <Input
+                    value={partialAmount ?? subscription?.amount}
+                    placeholder={t('amount')}
+                    onChange={e => setPartialAmount(+e.target.value)}
+                    className='w-[100px]'
+                  />
+                )}
                 <Input
                   type="date"
                   placeholder={t('payment_date')}
@@ -109,8 +111,8 @@ export default function SubscriptionInfo({
               </div>
             ) : (
               <div className="flex gap-2 items-center">
-                <p className="text-orange-400">
-                  {subscription.amount}/{subscription.subscription.price}
+                <p className={subscription.paymentStatus === 'partially_paid' ? "text-orange-400" : "text-green-500"}>
+                  {subscription.paymentStatus === 'partially_paid' && `${subscription.amount}/${subscription.subscription.price}`}
                   {subscription.paymentDate && ` — ${t('payment_date')}: ${format(new Date(subscription.paymentDate), 'd.MM.yy')}`}
                 </p>
               </div>
