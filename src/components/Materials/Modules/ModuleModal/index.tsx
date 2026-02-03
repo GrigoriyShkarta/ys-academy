@@ -162,7 +162,7 @@ export default function ModuleModal({ open, setOpen, selectModule, module }: Pro
         const newModule = await createModule(data);
         await queryClient.invalidateQueries({ queryKey: ['modules'] });
         await queryClient.invalidateQueries({ queryKey: ['lessons', 'modules'] });
-        console.log('newModule', newModule);
+
         if (newModule && selectModule) {
           selectModule(newModule.id);
         }

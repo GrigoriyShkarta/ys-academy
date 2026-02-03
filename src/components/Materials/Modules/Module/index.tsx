@@ -29,8 +29,6 @@ export default function ModuleLayout({ moduleId }: { moduleId?: number }) {
     enabled: !!moduleId,
   });
 
-  console.log('module', module)
-
   const deleteMutation = useMutation({
     mutationFn: () => deleteModule(moduleId),
     onSuccess: () => {

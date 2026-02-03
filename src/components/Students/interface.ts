@@ -65,6 +65,7 @@ export interface StudentSubscription {
   amount: number;
   paymentDate?: string;
   lessonDays?: string[];
+  createdAt: string;
   subscription: {
     id: number;
     title: string;

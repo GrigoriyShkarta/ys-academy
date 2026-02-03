@@ -60,7 +60,6 @@ export default function LessonLayout({ lessonId }: { lessonId: number }) {
   const isEdit = searchParams.get('isEdit') === 'true';
   const t = useTranslations('Materials');
   const courseId = searchParams.get('courseId');
-  console.log(courseId,'courseId');
 
   const { data: lesson, isLoading } = useQuery({
     queryKey: ['lesson', lessonId],

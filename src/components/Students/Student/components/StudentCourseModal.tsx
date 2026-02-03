@@ -36,8 +36,6 @@ export default function StudentCourseModal({
   const router = useRouter();
   const t = useTranslations('Common');
 
-  console.log('course', course)
-
   // Collect all lessons from modules and orphan lessons
   const getAllLessons = useCallback(() => {
     if (!course) return [];

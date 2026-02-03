@@ -113,7 +113,7 @@ export default function SubscriptionInfo({
               <div className="flex gap-2 items-center">
                 <p className={subscription.paymentStatus === 'partially_paid' ? "text-orange-400" : "text-green-500"}>
                   {subscription.paymentStatus === 'partially_paid' && `${subscription.amount}/${subscription.subscription.price}`}
-                  {subscription.paymentDate && ` — ${t('payment_date')}: ${format(new Date(subscription.paymentDate), 'd.MM.yy')}`}
+                  {` — ${t('payment_date')}: ${format(new Date(subscription?.paymentDate ?? subscription.createdAt), 'd.MM.yy')}`}
                 </p>
               </div>
             ))}

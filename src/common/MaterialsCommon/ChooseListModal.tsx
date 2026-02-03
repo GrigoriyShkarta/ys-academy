@@ -43,8 +43,6 @@ export default function ChooseListModal({
   const t = useTranslations('Materials');
   const { user } = useUser();
 
-  console.log('hi')
-
   useEffect(() => {
     if (array) {
       setSelectedLessons(array);
@@ -146,8 +144,6 @@ export default function ChooseListModal({
       ),
     },
   ];
-
-  console.log('list', list);
 
   return (
     <>

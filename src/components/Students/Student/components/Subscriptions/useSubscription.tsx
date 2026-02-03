@@ -47,7 +47,6 @@ export default function useSubscription({ student, setOpen }: Props) {
   };
 
   const saveAmount = async (subscriptionId: number) => {
-    console.log('saveAmount');
     try {
       setIsLoadingChangeAmount(true);
       const sub = subscriptions?.find(s => s.id === subscriptionId) || student.subscriptions?.find(s => s.id === subscriptionId);
@@ -62,13 +61,8 @@ export default function useSubscription({ student, setOpen }: Props) {
         finalDateStr = new Date().toISOString().split('T')[0];
       }
 
-      console.log('finalDateStr', finalDateStr);
-
       const isoDate = new Date(finalDateStr).toISOString();
-      console.log('isoDate', isoDate);
 
-      console.log('sub.paymentStatus', sub.paymentStatus);
-      
       // Calculate final amount: if paid, use subscription price. Fallback to sub.amount or partialAmount
       let finalAmount = sub.paymentStatus === 'paid' 
         ? (sub.subscription?.price ?? sub.amount)
@@ -103,7 +97,6 @@ export default function useSubscription({ student, setOpen }: Props) {
   };
 
   const changePaymentStatus = async (subscriptionId: number, status: string) => {
-    console.log('changePaymentStatus');
     changeLocalStatus(subscriptionId, status);
     try {
       if (status === 'partially_paid' || status === 'paid') {

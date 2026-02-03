@@ -225,8 +225,6 @@ export default function CourseModal({ open, setOpen, course }: Props) {
     setOpen(false);
   };
 
-  console.log('modules', modules);
-
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-full sm:max-w-[850px] max-h-[90vh] overflow-y-auto">

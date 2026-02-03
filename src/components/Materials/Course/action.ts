@@ -33,9 +33,7 @@ export const getCourse = async (id: number, userId?: number): Promise<Course> =>
 };
 
 export const deleteCourse = async (id?: number) => {
-  console.log('check');
   const { data } = await axiosInstance.delete(`/course/${id}`);
-  console.log('data', data);
   return data;
 };
 
