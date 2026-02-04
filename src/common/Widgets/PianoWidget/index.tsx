@@ -120,7 +120,7 @@ export default function PianoWidget() {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 200, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed left-0 right-0 z-[40] bg-card/95 backdrop-blur-md border-t border-border shadow-lg"
+        className="fixed z-1000 left-0 right-0 z-[40] bg-card/95 backdrop-blur-md border-t border-border shadow-lg"
         style={{ bottom: '0px' }}
       >
         <div className="container mx-auto px-4 pt-2 pb-0">

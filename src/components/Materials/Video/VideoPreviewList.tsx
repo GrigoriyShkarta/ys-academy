@@ -64,20 +64,29 @@ export const VideoPreviewList: FC<Props> = ({
   ];
 
   const handleGlobalCategoryChange = (next: string[]) => {
+    const removed = globalCategories.filter(c => !next.includes(c));
+    const added = next.filter(c => !globalCategories.includes(c));
+
     setGlobalCategories(next);
 
     // Update YouTube videos
     youtube.forEach((video, idx) => {
-      const current = video.categories || [];
-      const merged = [...new Set([...current, ...next])];
-      onYoutubeCategoriesChange?.(idx, merged);
+      let current = video.categories || [];
+      // Remove categories that were removed globally
+      current = current.filter(c => !removed.includes(c));
+      // Add categories that were added globally
+      const updated = [...new Set([...current, ...added])];
+      onYoutubeCategoriesChange?.(idx, updated);
     });
 
     // Update File videos
     files.forEach(file => {
-      const current = file.categories || [];
-      const merged = [...new Set([...current, ...next])];
-      onFileCategoriesChange?.(file.uid, merged);
+      let current = file.categories || [];
+      // Remove categories that were removed globally
+      current = current.filter(c => !removed.includes(c));
+      // Add categories that were added globally
+      const updated = [...new Set([...current, ...added])];
+      onFileCategoriesChange?.(file.uid, updated);
     });
   };
 

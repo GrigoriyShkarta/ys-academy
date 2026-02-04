@@ -242,7 +242,7 @@ export default function StudentCourseModal({
                   />
                   <span className="font-medium text-sm">{module.title}</span>
                   <span className="text-xs text-muted-foreground ml-auto">
-                    {module.lessons?.length || 0} {t('lessons').toLowerCase()}
+                    {module.lessons?.filter(l => selectedIds.includes(l.id)).length || 0}/{module.lessons?.length || 0} {t('lessons').toLowerCase()}
                   </span>
                 </div>
                 

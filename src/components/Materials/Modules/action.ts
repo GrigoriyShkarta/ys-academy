@@ -19,9 +19,15 @@ export const deleteModule = async (id?: number) => {
   return data;
 };
 
-export const getModules = async ({ search = '', categories }: GetMaterialParams) => {
+export const getModules = async ({
+  page,
+  search = '',
+  categories,
+  sortBy,
+  sortOrder,
+}: GetMaterialParams) => {
   const { data } = await axiosInstance.get('/module', {
-    params: { search, categories },
+    params: { page, search, categories, sortBy, sortOrder },
     paramsSerializer: params => {
       return qs.stringify(params, { arrayFormat: 'repeat' });
     },

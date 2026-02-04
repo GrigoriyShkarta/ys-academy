@@ -34,12 +34,18 @@ export default function PhotoPreviewList({ fetchingIdx, uploadedFiles, setUpload
   }));
 
   const handleGlobalCategoryChange = (next: string[]) => {
+    const removed = globalCategories.filter(c => !next.includes(c));
+    const added = next.filter(c => !globalCategories.includes(c));
+
     setGlobalCategories(next);
     setUploadedFiles(prev => {
-      const copy = [...prev];
-      return copy.map(file => {
-        const currentCats = (file as any).categories || [];
-        (file as any).categories = [...new Set([...currentCats, ...next])];
+      return prev.map(file => {
+        let currentCats = (file as any).categories || [];
+        // Remove categories that were removed globally
+        currentCats = currentCats.filter((c: string) => !removed.includes(c));
+        // Add categories that were added globally
+        currentCats = [...new Set([...currentCats, ...added])];
+        (file as any).categories = currentCats;
         return file;
       });
     });
