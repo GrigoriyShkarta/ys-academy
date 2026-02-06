@@ -131,7 +131,7 @@ export default function SubscriptionCard({
         <AccordingCard
           tile={subscription.subscription.title}
           currentLocale={currentLocale}
-          startTime={subscription.lessons[0].scheduledAt}
+          startTime={subscription.lessons[0]?.scheduledAt}
           endTime={subscription.lessons.at(-1)?.scheduledAt || ''}
           setShowMore={setShowMore}
           idx={idx}

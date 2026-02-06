@@ -60,13 +60,13 @@ export default function SubscriptionInfo({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
           <h2 className="text-base sm:text-lg font-medium">{subscription.subscription.title}</h2>
           <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-            {format(new Date(subscription.lessons[0].scheduledAt), 'd MMM yyyy', {
+            {subscription.lessons[0]?.scheduledAt ? format(new Date(subscription.lessons[0].scheduledAt), 'd MMM yyyy', {
               locale: currentLocale,
-            })}{' '}
+            }) : ''}{' '}
             —{' '}
-            {format(new Date(subscription.lessons.at(-1)?.scheduledAt || ''), 'd MMM yyyy', {
+            {subscription.lessons.at(-1)?.scheduledAt ? format(new Date(subscription.lessons.at(-1)?.scheduledAt || ''), 'd MMM yyyy', {
               locale: currentLocale,
-            })}
+            }) : ''}
           </p>
         </div>
       </div>
@@ -82,13 +82,13 @@ export default function SubscriptionInfo({
             {subscription.subscription.title}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {format(new Date(subscription.lessons[0].scheduledAt), 'd MMMM yyyy', {
+            {subscription.lessons[0]?.scheduledAt ? format(new Date(subscription.lessons[0].scheduledAt), 'd MMMM yyyy', {
               locale: currentLocale,
-            })}{' '}
+            }) : ''}{' '}
             —{' '}
-            {format(new Date(subscription.lessons.at(-1)?.scheduledAt || ''), 'd MMMM yyyy', {
+            {subscription.lessons.at(-1)?.scheduledAt ? format(new Date(subscription.lessons.at(-1)?.scheduledAt || ''), 'd MMMM yyyy', {
               locale: currentLocale,
-            })}{' '}
+            }) : ''}
           </p>
         </div>
 
