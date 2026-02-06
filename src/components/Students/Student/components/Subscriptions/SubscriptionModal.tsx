@@ -295,7 +295,7 @@ export default function SubscriptionModal({
     slots.every(s => s.time && s.time.length === 5);
 
   const handleSave = async () => {
-    if (!isValid || !studentId) return;
+    if (!studentId) return;
 
     setIsLoading(true);
     try {
@@ -445,7 +445,7 @@ export default function SubscriptionModal({
           <Button variant="outline" onClick={close}>
             {t('cancel')}
           </Button>
-          <Button onClick={handleSave} disabled={!isValid || isLoading} className="bg-accent">
+          <Button onClick={handleSave} disabled={!selectedAbonementId || isLoading} className="bg-accent">
             {t('save')}
           </Button>
         </div>

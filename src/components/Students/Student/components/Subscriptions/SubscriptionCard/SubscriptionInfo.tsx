@@ -47,13 +47,13 @@ export default function SubscriptionInfo({
   return (
     <>
       <p className="text-sm text-muted-foreground">
-        {format(new Date(subscription.lessons[0].scheduledAt), 'd MMMM yyyy', {
+        {subscription?.lessons?.length > 0 ? format(new Date(subscription?.lessons?.[0]?.scheduledAt), 'd MMMM yyyy', {
           locale: currentLocale,
-        })}{' '}
+        }) : ''}{' '}
         —{' '}
-        {format(new Date(subscription.lessons.at(-1)?.scheduledAt || ''), 'd MMMM yyyy', {
+        {subscription?.lessons?.length > 0 ? format(new Date(subscription?.lessons?.at(-1)?.scheduledAt || ''), 'd MMMM yyyy', {
           locale: currentLocale,
-        })}{' '}
+        }) : ''}{' '}
       </p>
       {user?.role !== 'super_admin' ? (
         <p
