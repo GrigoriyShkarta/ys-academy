@@ -53,7 +53,7 @@ export default function LessonItem({
         <>
           <Input
             type="date"
-            value={format(editingDateTime! || lesson.scheduledAt, 'yyyy-MM-dd')}
+            value={format(editingDateTime! || lesson?.scheduledAt, 'yyyy-MM-dd')}
             onChange={e => {
               const date = e.target.value;
               const time = format(editingDateTime!, 'HH:mm');
@@ -63,7 +63,7 @@ export default function LessonItem({
 
           <Input
             type="time"
-            value={format(editingDateTime! || lesson.scheduledAt, 'HH:mm')}
+            value={format(editingDateTime! || lesson?.scheduledAt, 'HH:mm')}
             onChange={e => {
               const time = e.target.value;
               const date = format(editingDateTime!, 'yyyy-MM-dd');
@@ -83,13 +83,13 @@ export default function LessonItem({
         <>
           {/* День недели + полная дата */}
           <p className="text-sm font-medium">
-            {lesson.scheduledAt ? format(new Date(lesson.scheduledAt), 'd MMMM yyyy', {
+            {lesson.scheduledAt ? format(new Date(lesson?.scheduledAt), 'd MMMM yyyy', {
               locale: currentLocale,
             }) : ''}
           </p>
 
           <p className="text-sm">
-            {lesson.scheduledAt ? format(new Date(lesson.scheduledAt), 'EEEE HH:mm', {
+            {lesson.scheduledAt ? format(new Date(lesson?.scheduledAt), 'EEEE HH:mm', {
               locale: currentLocale,
             }) : ''}
           </p>
