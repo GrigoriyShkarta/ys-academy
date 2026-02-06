@@ -36,13 +36,13 @@ export default function AccordingCard({
       <h1>{tile}</h1>
 
       <p className="text-sm text-muted-foreground">
-        {format(new Date(startTime), 'd MMMM yyyy', {
+        {startTime ? format(new Date(startTime), 'd MMMM yyyy', {
           locale: currentLocale,
-        })}{' '}
+        }) : ''}{' '}
         —{' '}
-        {format(new Date(endTime), 'd MMMM yyyy', {
+        {endTime ? format(new Date(endTime), 'd MMMM yyyy', {
           locale: currentLocale,
-        })}{' '}
+        }) : ''}
       </p>
 
       {paymentStatus === 'partially_paid' && (
