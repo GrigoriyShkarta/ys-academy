@@ -83,15 +83,15 @@ export default function LessonItem({
         <>
           {/* День недели + полная дата */}
           <p className="text-sm font-medium">
-            {format(new Date(lesson.scheduledAt), 'd MMMM yyyy', {
+            {lesson.scheduledAt ? format(new Date(lesson.scheduledAt), 'd MMMM yyyy', {
               locale: currentLocale,
-            })}
+            }) : ''}
           </p>
 
           <p className="text-sm">
-            {format(new Date(lesson.scheduledAt), 'EEEE HH:mm', {
+            {lesson.scheduledAt ? format(new Date(lesson.scheduledAt), 'EEEE HH:mm', {
               locale: currentLocale,
-            })}
+            }) : ''}
           </p>
         </>
       )}
