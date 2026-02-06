@@ -24,6 +24,8 @@ export const getLastLessonDate = (student: Student): Date | null => {
     (a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()
   );
 
+  if (!sortedLessons[0].scheduledAt) return null;
+
   return new Date(sortedLessons[0].scheduledAt);
 };
 
