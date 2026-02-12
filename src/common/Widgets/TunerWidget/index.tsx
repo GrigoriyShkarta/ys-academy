@@ -49,7 +49,7 @@ export default function TunerWidget() {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed z-1000 left-0 right-0 z-[60] bg-card/95 backdrop-blur-md border-t border-border shadow-lg transition-all duration-300"
+        className="fixed z-1001 left-0 right-0 z-60 bg-card/95 backdrop-blur-md border-t border-border shadow-lg transition-all duration-300"
         style={{
           bottom: `${(isPianoVisible ? 144 : 0) + (isMetronomeVisible ? 64 : 0)}px`
         }}

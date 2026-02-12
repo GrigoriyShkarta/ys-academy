@@ -8,7 +8,8 @@ export const createLesson = async (
   cover?: string,
   coverPublicId?: string,
   categoryIds?: string[],
-  moduleIds?: string[]
+  moduleIds?: string[],
+  courseIds?: string[]
 ) => {
   const formatedLesson = {
     title: lessonTitle,
@@ -17,6 +18,7 @@ export const createLesson = async (
     publicImgId: coverPublicId,
     categoryIds,
     moduleIds,
+    courseIds,
   };
 
   const { data } = await axiosInstance.post('/lesson/create', formatedLesson);
@@ -31,7 +33,8 @@ export const updateLesson = async (
   cover?: string,
   coverPublicId?: string,
   categoryIds?: string[],
-  moduleIds?: string[]
+  moduleIds?: string[],
+  courseIds?: string[]
 ) => {
   const formatedLesson = {
     title: lessonTitle,
@@ -40,6 +43,7 @@ export const updateLesson = async (
     publicImgId: coverPublicId,
     categoryIds,
     moduleIds,
+    courseIds,
   };
 
   const { data } = await axiosInstance.post(`/lesson/update/${id}`, formatedLesson);

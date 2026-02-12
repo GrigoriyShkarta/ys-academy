@@ -102,12 +102,22 @@ export function useReportColumns({
     { 
       key: 'lastLessonDate', 
       label: rfT('payment_date') || 'Дата оплати',
-      render: (s: ForecastStudent) => (
-        <div className="flex items-center gap-2 text-sm">
-          <Calendar className="w-4 h-4 text-muted-foreground" />
-          <span>{new Date(s.paymentDate || s.lastLessonDate).toLocaleDateString()}</span>
-        </div>
-      )
+      render: (s: ForecastStudent) => {
+        const pDate = new Date(s.paymentDate || s.lastLessonDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const isOverdue = pDate < today;
+
+        return (
+          <div className={cn(
+            "flex items-center gap-2 text-sm",
+            isOverdue && "text-rose-600 dark:text-rose-500 font-medium"
+          )}>
+            <Calendar className={cn("w-4 h-4 text-muted-foreground", isOverdue && "text-rose-600 dark:text-rose-500")} />
+            <span>{pDate.toLocaleDateString()}</span>
+          </div>
+        );
+      }
     },
     { 
       key: 'expectedAmount', 

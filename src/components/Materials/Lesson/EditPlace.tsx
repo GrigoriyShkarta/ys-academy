@@ -39,6 +39,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
   const [loading, setLoading] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [openSaveModal, setOpenSaveModal] = useState(false);
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
   const t = useTranslations('Materials');
@@ -105,7 +106,7 @@ export default function EditPlace({ setIsEditPlace }: Props) {
         coverPublicId = res.publicId;
       }
 
-      await createLesson(lessonDoc, lessonTitle, coverUrl, coverPublicId, selectedCategories, selectedModules);
+      await createLesson(lessonDoc, lessonTitle, coverUrl, coverPublicId, selectedCategories, selectedModules, selectedCourses);
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch (error) {
       console.error('Error saving lesson:', error);
@@ -193,6 +194,8 @@ export default function EditPlace({ setIsEditPlace }: Props) {
         setSelectedCategories={setSelectedCategories}
         selectedModules={selectedModules}
         setSelectedModules={setSelectedModules}
+        selectedCourses={selectedCourses}
+        setSelectedCourses={setSelectedCourses}
         isLoading={loading}
       />
     </div>

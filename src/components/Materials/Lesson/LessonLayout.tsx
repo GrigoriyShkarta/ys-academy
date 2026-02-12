@@ -48,6 +48,7 @@ export default function LessonLayout({ lessonId }: { lessonId: number }) {
   const [cover, setCover] = useState<File | string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [openSaveModal, setOpenSaveModal] = useState(false);
   const [lessonDoc, setLessonDoc] = useState<LessonDocItem[]>([]);
@@ -142,6 +143,7 @@ export default function LessonLayout({ lessonId }: { lessonId: number }) {
       setCover(lesson.cover);
       setSelectedCategories(lesson?.categories?.map((c: IFile) => String(c.id)) ?? []);
       setSelectedModules(lesson?.modules?.map((c: IFile) => String(c.id)) ?? []);
+      setSelectedCourses(lesson?.courses?.map((c: any) => String(c.id)) ?? []);
       const doc = (lesson.content || []).map((item: any) => ({
         blockId: item.blockId,
         content: item.content ?? [],
@@ -177,7 +179,8 @@ export default function LessonLayout({ lessonId }: { lessonId: number }) {
         coverUrl,
         coverPublicId,
         selectedCategories,
-        selectedModules
+        selectedModules,
+        selectedCourses
       );
       await queryClient.invalidateQueries({ queryKey: ['lesson', lessonId] });
       await queryClient.invalidateQueries({ queryKey: ['lessons'] });
@@ -401,6 +404,8 @@ export default function LessonLayout({ lessonId }: { lessonId: number }) {
         setSelectedCategories={setSelectedCategories}
         selectedModules={selectedModules}
         setSelectedModules={setSelectedModules}
+        selectedCourses={selectedCourses}
+        setSelectedCourses={setSelectedCourses}
         isLoading={loading}
       />
     </div>

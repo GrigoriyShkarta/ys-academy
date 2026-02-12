@@ -37,6 +37,7 @@ interface Props {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   course?: Course | null;
+  selectCourse?: (id: number) => void;
 }
 
 function dataURLtoFile(dataurl: string, filename: string) {
@@ -51,7 +52,7 @@ function dataURLtoFile(dataurl: string, filename: string) {
   return new File([u8arr], filename, { type: mime });
 }
 
-export default function CourseModal({ open, setOpen, course }: Props) {
+export default function CourseModal({ open, setOpen, course, selectCourse }: Props) {
   const t = useTranslations('Materials');
   const queryClient = useQueryClient();
   const { user } = useUser();
@@ -139,15 +140,18 @@ export default function CourseModal({ open, setOpen, course }: Props) {
   const mutation = useMutation({
     mutationFn: async (form: ModuleDTO) => {
       if (course) {
-        await updateCourse(form, +course.id);
+        return await updateCourse(form, +course.id);
       } else {
-        await createCourse(form);
+        return await createCourse(form);
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
       if (course?.id) {
         queryClient.invalidateQueries({ queryKey: ['course', course.id] });
+      }
+      if (!course && data?.id && selectCourse) {
+        selectCourse(data.id);
       }
       setOpen(false);
     },

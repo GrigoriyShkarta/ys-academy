@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/components/Materials/Categories/action';
 import { getModules } from '@/components/Materials/Modules/action';
+import { getCourses } from '@/components/Materials/Course/action';
 import { IFile } from '@/components/Materials/utils/interfaces';
 import {
   Dialog,
@@ -19,6 +20,7 @@ import CategoryModal from '@/components/Materials/Categories/CategoryModal';
 import { FormFooter } from '@/common/ModalFooter';
 import { useUser } from '@/providers/UserContext';
 import ModuleModal from '../../Modules/ModuleModal';
+import CourseModal from '../../Course/CourseModal';
 
 interface Props {
   open: boolean;
@@ -28,6 +30,8 @@ interface Props {
   setSelectedCategories: Dispatch<SetStateAction<string[]>>;
   selectedModules: string[];
   setSelectedModules: Dispatch<SetStateAction<string[]>>;
+  selectedCourses: string[];
+  setSelectedCourses: Dispatch<SetStateAction<string[]>>;
   isLoading: boolean;
 }
 
@@ -37,12 +41,15 @@ export default function LessonSaveModal({
   open,
   selectedCategories,
   selectedModules,
+  selectedCourses,
   setSelectedCategories,
   setSelectedModules,
+  setSelectedCourses,
   isLoading,
 }: Props) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const { user } = useUser();
 
   const t = useTranslations('Materials');
@@ -58,6 +65,13 @@ export default function LessonSaveModal({
     queryFn: () => getModules({ search: '' }),
   });
 
+  const { data: courses } = useQuery({
+    queryKey: ['courses'],
+    queryFn: () => getCourses({ search: '' }),
+  });
+
+  console.log('courses', courses)
+
   const categoryOptions = (categories?.data ?? []).map((c: IFile) => ({
     value: String(c.id),
     label: c.title,
@@ -65,6 +79,11 @@ export default function LessonSaveModal({
   }));
 
   const moduleOptions = (modules ?? []).map((c: IFile) => ({
+    value: String(c.id),
+    label: c.title,
+  }));
+
+  const courseOptions = (courses ?? []).map((c: any) => ({
     value: String(c.id),
     label: c.title,
   }));
@@ -77,8 +96,8 @@ export default function LessonSaveModal({
         </DialogHeader>
 
         {/*<div className="flex flex-col justify-between h-full"></div>*/}
-        <div>
-          <div className="mb-6">
+        <div className="space-y-6">
+          <div>
             <div className="flex items-center justify-between mb-1.5">
               <Label className="text-xs font-medium">{t('categories')}</Label>
               <Button
@@ -103,7 +122,7 @@ export default function LessonSaveModal({
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <Label className="mb-3">{t('add_to_module')}</Label>
+              <Label className="text-xs font-medium">{t('add_to_module')}</Label>
               <Button
                 type="button"
                 variant="ghost"
@@ -120,6 +139,30 @@ export default function LessonSaveModal({
               options={moduleOptions}
               selected={selectedModules}
               onChange={next => setSelectedModules(next)}
+              placeholder={t('select_categories')}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <Label className="text-xs font-medium">{t('add_to_course') || 'Add to course'}</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs text-primary hover:text-primary"
+                onClick={() => setIsCourseModalOpen(true)}
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                {t('create_course') || 'Create course'}
+              </Button>
+            </div>
+            
+            <MultiSelect
+              options={courseOptions}
+              selected={selectedCourses}
+              onChange={next => setSelectedCourses(next)}
               placeholder={t('select_categories')}
               className="w-full"
             />
@@ -154,7 +197,13 @@ export default function LessonSaveModal({
         setOpen={() => {
           setIsModuleModalOpen(false);
         }}
-        selectModule={next => setSelectedModules(prev =>[...prev, String(next)])}
+        selectModule={next => setSelectedModules(prev => [...prev, String(next)])}
+      />
+
+      <CourseModal
+        open={isCourseModalOpen}
+        setOpen={setIsCourseModalOpen}
+        selectCourse={next => setSelectedCourses(prev => [...prev, String(next)])}
       />
     </Dialog>
   );
