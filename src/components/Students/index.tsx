@@ -146,7 +146,10 @@ export default function StudentsLayout() {
           return <span className="text-gray-400">-</span>;
         }
 
-        const shouldHighlight = shouldHighlightLesson(student, dateToShow) && student.isActive;
+        const isPaid = lastSubscription?.paymentStatus === 'paid';
+        const dateToHighlight = paymentDate && !isPaid ? paymentDate : lastLessonDate;
+
+        const shouldHighlight = shouldHighlightLesson(student, dateToHighlight) && student.isActive;
 
         return (
           <span className={shouldHighlight ? 'text-red-500 font-semibold' : ''}>
