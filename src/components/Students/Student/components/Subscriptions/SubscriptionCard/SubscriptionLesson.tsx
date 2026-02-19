@@ -1,7 +1,7 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { format, Locale } from 'date-fns';
-import { Loader } from 'lucide-react';
+import { format, isValid, Locale } from 'date-fns';
+import { Loader, Pencil } from 'lucide-react';
 import { useUser } from '@/providers/UserContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +22,7 @@ interface LessonItemProps {
   editingDateTime: Date | null;
   setEditingDateTime: Dispatch<SetStateAction<Date | null>>;
   editingLessonId?: number;
+  setEditingLessonId: Dispatch<SetStateAction<number | undefined>>;
   isLoadingChangeLessonDate?: boolean;
   currentLocale: Locale;
 }
@@ -34,12 +35,30 @@ export default function LessonItem({
   editingDateTime,
   setEditingDateTime,
   editingLessonId,
+  setEditingLessonId,
   isLoadingChangeLessonDate = false,
   currentLocale,
 }: LessonItemProps) {
   const t = useTranslations('Students');
   const { user } = useUser();
   const lessonStatuses = ['completed', 'expired', 'transfer', 'pending'];
+
+  const displayDate = useMemo(() => {
+    if (editingDateTime && isValid(editingDateTime)) return editingDateTime;
+    if (lesson?.scheduledAt) {
+      const d = new Date(lesson.scheduledAt);
+      if (isValid(d)) return d;
+    }
+    return null;
+  }, [editingDateTime, lesson?.scheduledAt]);
+
+  const dateValue = useMemo(() => {
+    return displayDate ? format(displayDate, 'yyyy-MM-dd') : '';
+  }, [displayDate]);
+
+  const timeValue = useMemo(() => {
+    return displayDate ? format(displayDate, 'HH:mm') : '';
+  }, [displayDate]);
 
   return (
     <div
@@ -53,26 +72,34 @@ export default function LessonItem({
         <>
           <Input
             type="date"
-            value={format(editingDateTime! || lesson?.scheduledAt, 'yyyy-MM-dd')}
+            value={dateValue}
             onChange={e => {
               const date = e.target.value;
-              const time = format(editingDateTime!, 'HH:mm');
-              setEditingDateTime(new Date(`${date}T${time}`));
+              if (!date) return;
+              const time = timeValue || '12:00';
+              const newDate = new Date(`${date}T${time}`);
+              if (isValid(newDate)) {
+                setEditingDateTime(newDate);
+              }
             }}
           />
 
           <Input
             type="time"
-            value={format(editingDateTime! || lesson?.scheduledAt, 'HH:mm')}
+            value={timeValue}
             onChange={e => {
               const time = e.target.value;
-              const date = format(editingDateTime!, 'yyyy-MM-dd');
-              setEditingDateTime(new Date(`${date}T${time}`));
+              if (!time) return;
+              const date = dateValue || format(new Date(), 'yyyy-MM-dd');
+              const newDate = new Date(`${date}T${time}`);
+              if (isValid(newDate)) {
+                setEditingDateTime(newDate);
+              }
             }}
           />
 
           <Button
-            disabled={!editingDateTime}
+            disabled={!editingDateTime || !isValid(editingDateTime)}
             variant="outline"
             onClick={() => saveLessonDate(lesson.id)}
           >
@@ -80,20 +107,33 @@ export default function LessonItem({
           </Button>
         </>
       ) : (
-        <>
-          {/* День недели + полная дата */}
-          <p className="text-sm font-medium">
-            {lesson.scheduledAt ? format(new Date(lesson?.scheduledAt), 'd MMMM yyyy', {
-              locale: currentLocale,
-            }) : ''}
-          </p>
+        <div className="flex justify-between items-start">
+          <div>
+            {/* День недели + полная дата */}
+            <p className="text-sm font-medium">
+              {lesson.scheduledAt ? format(new Date(lesson?.scheduledAt), 'd MMMM yyyy', {
+                locale: currentLocale,
+              }) : ''}
+            </p>
 
-          <p className="text-sm">
-            {lesson.scheduledAt ? format(new Date(lesson?.scheduledAt), 'EEEE HH:mm', {
-              locale: currentLocale,
-            }) : ''}
-          </p>
-        </>
+            <p className="text-sm">
+              {lesson.scheduledAt ? format(new Date(lesson?.scheduledAt), 'EEEE HH:mm', {
+                locale: currentLocale,
+              }) : ''}
+            </p>
+          </div>
+          {lesson.status === 'transfer' && user?.role === 'super_admin' && (
+            <button
+              onClick={() => {
+                setEditingLessonId(lesson.id);
+                setEditingDateTime(new Date(lesson.scheduledAt));
+              }}
+              className="p-1 hover:bg-white/20 rounded transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       )}
 
       {user?.role === 'super_admin' ? (

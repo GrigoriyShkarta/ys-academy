@@ -132,19 +132,25 @@ export default function StudentsLayout() {
     },
     {
       key: 'last_lesson',
-      label: 'Останній урок',
+      label: 'Дата оплати',
       render: (student: Student) => {
+        const lastSubscription = getLastSubscription(student);
         const lastLessonDate = getLastLessonDate(student);
 
-        if (!lastLessonDate) {
+        const paymentDate = lastSubscription?.paymentDate
+          ? new Date(lastSubscription.paymentDate)
+          : null;
+        const dateToShow = paymentDate || lastLessonDate;
+
+        if (!dateToShow) {
           return <span className="text-gray-400">-</span>;
         }
 
-        const shouldHighlight = shouldHighlightLesson(student, lastLessonDate) && student.isActive;
+        const shouldHighlight = shouldHighlightLesson(student, dateToShow) && student.isActive;
 
         return (
           <span className={shouldHighlight ? 'text-red-500 font-semibold' : ''}>
-            {formatDateTime(lastLessonDate, true)}
+            {formatDateTime(dateToShow, true)}
           </span>
         );
       },

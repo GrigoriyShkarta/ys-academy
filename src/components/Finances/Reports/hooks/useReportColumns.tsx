@@ -103,10 +103,20 @@ export function useReportColumns({
       key: 'lastLessonDate', 
       label: rfT('payment_date') || 'Дата оплати',
       render: (s: ForecastStudent) => {
-        const pDate = new Date(s.paymentDate || s.lastLessonDate);
+        const paymentDate = s.paymentDate ? new Date(s.paymentDate) : null;
+        const lastLessonDate = s.lastLessonDate ? new Date(s.lastLessonDate) : null;
+        
+        const dateToShow = (paymentDate && !isNaN(paymentDate.getTime())) 
+          ? paymentDate 
+          : lastLessonDate;
+
+        if (!dateToShow || isNaN(dateToShow.getTime())) {
+          return <span className="text-gray-400">-</span>;
+        }
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const isOverdue = pDate < today;
+        const isOverdue = dateToShow < today;
 
         return (
           <div className={cn(
@@ -114,7 +124,7 @@ export function useReportColumns({
             isOverdue && "text-rose-600 dark:text-rose-500 font-medium"
           )}>
             <Calendar className={cn("w-4 h-4 text-muted-foreground", isOverdue && "text-rose-600 dark:text-rose-500")} />
-            <span>{pDate.toLocaleDateString()}</span>
+            <span>{dateToShow.toLocaleDateString()}</span>
           </div>
         );
       }

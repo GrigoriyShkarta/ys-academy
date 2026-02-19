@@ -24,6 +24,7 @@ export default function Subscriptions({ student }: { student: Student }) {
     partialAmount,
     partialPaymentDate,
     editingLessonId,
+    setEditingLessonId,
     currentLocale,
     changeLessonStatus,
     changePaymentStatus,
@@ -85,6 +86,7 @@ export default function Subscriptions({ student }: { student: Student }) {
             editingDateTime={editingDateTime}
             setEditingDateTime={setEditingDateTime}
             editingLessonId={editingLessonId}
+            setEditingLessonId={setEditingLessonId}
           />
         ))}
       </div>

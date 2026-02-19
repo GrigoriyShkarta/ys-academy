@@ -31,6 +31,7 @@ interface Props {
   editingDateTime: Date | null;
   setEditingDateTime: Dispatch<SetStateAction<Date | null>>;
   editingLessonId?: number;
+  setEditingLessonId: Dispatch<SetStateAction<number | undefined>>;
   isLoadingChangeLessonDate?: boolean;
 }
 
@@ -57,6 +58,7 @@ export default function SubscriptionCard({
   editingDateTime,
   setEditingDateTime,
   editingLessonId,
+  setEditingLessonId,
   isLoadingChangeLessonDate,
 }: Props) {
   const { user } = useUser();
@@ -121,6 +123,7 @@ export default function SubscriptionCard({
                 editingDateTime={editingDateTime}
                 subscriptionId={subscription.id}
                 editingLessonId={editingLessonId}
+                setEditingLessonId={setEditingLessonId}
                 isLoadingChangeLessonDate={isLoadingChangeLessonDate}
                 currentLocale={currentLocale}
               />
