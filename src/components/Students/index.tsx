@@ -137,8 +137,8 @@ export default function StudentsLayout() {
         const lastSubscription = getLastSubscription(student);
         const lastLessonDate = getLastLessonDate(student);
 
-        const paymentDate = lastSubscription?.paymentDate
-          ? new Date(lastSubscription.paymentDate)
+        const paymentDate = lastSubscription?.nextPaymentDate
+          ? new Date(lastSubscription.nextPaymentDate)
           : null;
         const dateToShow = paymentDate || lastLessonDate;
 

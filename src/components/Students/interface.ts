@@ -64,6 +64,7 @@ export interface StudentSubscription {
   paymentStatus: string;
   amount: number;
   paymentDate?: string;
+  nextPaymentDate?: string;
   lessonDays?: string[];
   createdAt: string;
   subscription: {
