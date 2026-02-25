@@ -102,14 +102,17 @@ export function useReportAnalytics({
         }
       });
 
-      subs.forEach((sub: any) => {
+      if (student.isActive && (student as any).status !== 'inactive') {
+        subs.forEach((sub: any) => {
         const lastLessonDateOfSub = sub.lessons && sub.lessons.length > 0
           ? new Date(Math.max(...sub.lessons.map((l: any) => new Date(l.scheduledAt).getTime())))
           : null;
         
-        const subDate = sub.paymentDate 
-          ? new Date(sub.paymentDate) 
-          : (lastLessonDateOfSub || (sub.createdAt ? new Date(sub.createdAt) : null));
+        const subDate = sub.nextPaymentDate
+          ? new Date(sub.nextPaymentDate)
+          : (sub.paymentDate 
+            ? new Date(sub.paymentDate) 
+            : (lastLessonDateOfSub || (sub.createdAt ? new Date(sub.createdAt) : null)));
         
         if (subDate && subDate >= startDate && subDate <= endDate) {
           const price = sub.subscription?.price || 0;
@@ -125,9 +128,10 @@ export function useReportAnalytics({
                 photo: typeof student.photo === 'string' ? student.photo : undefined,
                 expectedAmount: debt,
                 lastLessonDate: subDate.toISOString(),
-                paymentDate: sub.paymentDate,
+                paymentDate: sub.nextPaymentDate || sub.paymentDate,
                 subscriptionTitle: sub.subscription?.title || 'Unknown',
-                type: 'extra'
+                type: 'extra',
+                studentId: student.id
               });
             }
           }
@@ -151,7 +155,11 @@ export function useReportAnalytics({
            }
         });
 
-        if (maxDate >= startDate && maxDate <= endDate) {
+        const renewalDate = latestSub.nextPaymentDate
+          ? new Date(latestSub.nextPaymentDate)
+          : maxDate;
+
+        if (renewalDate >= startDate && renewalDate <= endDate) {
           const hasFutureSub = subs.some((s: any) => {
             const startStr = s.createdAt || s.lessons?.[0]?.scheduledAt;
             if (!startStr) return false;
@@ -168,14 +176,16 @@ export function useReportAnalytics({
                 name: student.name,
                 photo: typeof student.photo === 'string' ? student.photo : undefined,
                 expectedAmount: latestSub.subscription?.price || 0,
-                lastLessonDate: maxDate.toISOString(),
-                paymentDate: latestSub.paymentDate,
+                lastLessonDate: renewalDate.toISOString(),
+                paymentDate: latestSub.nextPaymentDate || latestSub.paymentDate,
                 subscriptionTitle: latestSub.subscription?.title || 'Unknown',
-                type: 'renewal'
+                type: 'renewal',
+                studentId: student.id
               });
             }
           }
         }
+      }
       }
     });
 

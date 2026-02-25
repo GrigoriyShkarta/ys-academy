@@ -24,6 +24,7 @@ export interface ForecastStudent {
   paymentDate?: string;
   subscriptionTitle: string;
   type: 'extra' | 'renewal';
+  studentId: number;
 }
 
 export const MONTHS_UA = [

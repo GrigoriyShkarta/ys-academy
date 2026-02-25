@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Package, Calendar, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StudentRevenue, ForecastStudent } from '../types';
@@ -23,14 +24,14 @@ export function useReportColumns({
       key: 'name', 
       label: st('name') || 'Name', 
       render: (s: StudentRevenue) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shadow-inner">
-            {s.photo ? <Image src={s.photo} alt={s.name} width={40} height={40} className='rounded-full'/> : s.name.charAt(0)}
+        <Link href={`/students/${s.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shadow-inner overflow-hidden">
+            {s.photo ? <Image src={s.photo} alt={s.name} width={40} height={40} className='rounded-full h-full w-full object-cover'/> : s.name.charAt(0)}
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col text-left">
             <span className="font-semibold">{s.name}</span>
           </div>
-        </div>
+        </Link>
       )
     },
     { 
@@ -78,11 +79,11 @@ export function useReportColumns({
       key: 'name', 
       label: st('name') || 'Name', 
       render: (s: ForecastStudent) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shadow-inner">
-            {s.photo ? <Image src={s.photo} alt={s.name} width={40} height={40} className='rounded-full'/> : s.name.charAt(0)}
+        <Link href={`/students/${s.studentId}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shadow-inner overflow-hidden">
+            {s.photo ? <Image src={s.photo} alt={s.name} width={40} height={40} className='rounded-full h-full w-full object-cover'/> : s.name.charAt(0)}
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col text-left">
             <div className="flex items-center gap-2">
               <span className="font-semibold">{s.name}</span>
               <span className={cn(
@@ -96,7 +97,7 @@ export function useReportColumns({
             </div>
             <span className="text-[10px] text-muted-foreground">{s.subscriptionTitle}</span>
           </div>
-        </div>
+        </Link>
       )
     },
     { 
