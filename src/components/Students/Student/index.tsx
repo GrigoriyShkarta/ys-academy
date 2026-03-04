@@ -7,6 +7,7 @@ import StudentCourses from '@/components/Students/Student/components/StudentCour
 import { Pencil } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import InfoUserModal from '@/components/Students/Student/components/InfoUserModal';
@@ -20,7 +21,10 @@ import LessonRecordings from '@/components/LessonRecordings';
 export default function Student({ id }: { id: number }) {
   const [open, setOpen] = useState(false);
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState<'profile' | 'courses' | 'subscriptions'>('profile');
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<
+    'profile' | 'courses' | 'subscriptions' | 'tracker' | 'lesson-recordings' | 'boards'
+  >('profile');
   const t = useTranslations('Students');
 
   const { data: student, isLoading } = useQuery({
@@ -84,6 +88,15 @@ export default function Student({ id }: { id: number }) {
             {user?.role === 'super_admin' && (
               <TabsTrigger value="lesson-recordings" className="px-4 py-2 rounded-t-lg shadow-sm">
                 {t('lesson-recordings')}
+              </TabsTrigger>
+            )}
+            {user?.role === 'super_admin' && (
+              <TabsTrigger
+                value="boards"
+                className="px-4 py-2 rounded-t-lg shadow-sm"
+                onClick={() => router.push(`/main/boards/${id}`)}
+              >
+                {t('boards')}
               </TabsTrigger>
             )}
           </TabsList>
