@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { getVideos } from '@/components/Materials/Video/action';
 import { keepPreviousData } from '@tanstack/query-core';
@@ -24,7 +25,16 @@ export default function ChooseVideoModal({ open, closeModal, handleAdd }: Props)
   const [openModal, setOpenModal] = useState(false);
   const [addFiles, setAddFiles] = useState<File[] | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const t = useTranslations('Materials');
   const { user } = useUser();
+
+  useEffect(() => {
+    if (open) {
+      setSearch('');
+      setSelectedCategories([]);
+    }
+  }, [open]);
+
   const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
     accept: ['video/*'],
     onFiles: files => setAddFiles(files),

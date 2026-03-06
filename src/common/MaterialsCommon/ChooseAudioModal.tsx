@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAudios } from '@/components/Materials/Audio/action';
 import { keepPreviousData } from '@tanstack/query-core';
@@ -35,6 +35,14 @@ export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props)
     accept: ['audio/*'],
     onFiles: files => setAddFiles(files),
   });
+
+  useEffect(() => {
+    if (open) {
+      setSearch('');
+      setSelectedCategories([]);
+    }
+  }, [open]);
+
   const t = useTranslations('Materials');
   const { user } = useUser();
 

@@ -21,21 +21,21 @@ import { getCategories } from '@/components/Materials/Categories/action';
 
 interface Props {
   openModal?: boolean;
-  closeModal?: Dispatch<SetStateAction<boolean>>;
   hideTrigger?: boolean;
   photo?: IFile | null;
-  setSelectedFile?: Dispatch<SetStateAction<IFile | null>>;
   uploadedFiles: File[] | null;
+  closeModal?: Dispatch<SetStateAction<boolean>>;
+  setSelectedFile?: Dispatch<SetStateAction<IFile | null>>;
   setUploadedFiles: Dispatch<SetStateAction<File[] | null>>;
 }
 
 export default function PhotoModal({
   photo,
-  setSelectedFile,
   openModal,
-  closeModal,
   hideTrigger,
   uploadedFiles,
+  setSelectedFile,
+  closeModal,
   setUploadedFiles,
 }: Props) {
   const [open, setOpen] = useState(false);

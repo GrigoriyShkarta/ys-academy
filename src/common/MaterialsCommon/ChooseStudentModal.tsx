@@ -34,8 +34,11 @@ export default function ChooseStudentModal({
   const { user } = useUser();
 
   useEffect(() => {
-    setSelectedIds(acceptedLessons ?? []);
-  }, [acceptedLessons]);
+    if (open) {
+      setSearch('');
+      setSelectedIds(acceptedLessons ?? []);
+    }
+  }, [acceptedLessons, open]);
 
   const { data: students, isLoading } = useQuery({
     queryKey: ['students', search],

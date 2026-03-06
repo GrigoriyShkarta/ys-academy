@@ -44,8 +44,12 @@ export default function ChooseListModal({
   const { user } = useUser();
 
   useEffect(() => {
-    if (array) {
-      setSelectedLessons(array);
+    if (open) {
+      if (array) {
+        setSelectedLessons(array);
+      }
+      setSearch('');
+      setSelectedCategories([]);
     }
   }, [array, open]);
 

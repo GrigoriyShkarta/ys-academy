@@ -201,6 +201,64 @@ export default function LessonBlock({
   // Обновляем родителя при любом изменении
   const handleEditorChange = () => {
     const content = editor.document;
+
+    // Автоматическое превращение ссылок в медиа-блоки
+    content.forEach(block => {
+      if (block.type === 'paragraph' && block.content.length === 1) {
+        let text = '';
+        const node = block.content[0];
+        if (node.type === 'text') {
+          text = node.text.trim();
+        } else if (node.type === 'link') {
+          text = node.href.trim();
+        }
+
+        const isUrl = /^https?:\/\/\S+$/.test(text);
+
+        if (isUrl) {
+          const isImage = /\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i.test(text);
+          const isVideo = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(text);
+          const isAudio = /\.(mp3|wav|ogg|m4a)(\?.*)?$/i.test(text);
+          const youtubeMatch = text.match(
+            /(?:youtube\.com\/(?:.*v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+          );
+
+          let newBlock: any = null;
+
+          if (youtubeMatch) {
+            newBlock = {
+              type: 'youtube',
+              props: { url: text, videoId: youtubeMatch[1], name: '' },
+            };
+          } else if (isImage) {
+            newBlock = {
+              type: 'image',
+              props: { url: text, previewWidth: '100%', caption: '' },
+            };
+          } else if (isVideo) {
+            newBlock = {
+              type: 'video',
+              props: { url: text, previewWidth: '100%', caption: '' },
+            };
+          } else if (isAudio) {
+            newBlock = {
+              type: 'audio',
+              props: { url: text, name: '' },
+            };
+          }
+
+          if (newBlock) {
+            setTimeout(() => {
+              const currentBlock = editor.getBlock(block.id);
+              if (currentBlock && currentBlock.type === 'paragraph') {
+                editor.replaceBlocks([block.id], [newBlock]);
+              }
+            }, 0);
+          }
+        }
+      }
+    });
+
     if (!onUpdate) return;
     onUpdate(blockId, content);
   };

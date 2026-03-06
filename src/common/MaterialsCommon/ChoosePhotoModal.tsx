@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { getPhotos } from '@/components/Materials/Photo/action';
 import { keepPreviousData } from '@tanstack/query-core';
@@ -26,7 +27,16 @@ export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props)
   const [categoryList, seCategoryList] = useState<Category[] | undefined>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [addFiles, setAddFiles] = useState<File[] | null>(null);
+  const t = useTranslations('Materials');
   const { user } = useUser();
+
+  useEffect(() => {
+    if (open) {
+      setSearch('');
+      setSelectedCategories([]);
+    }
+  }, [open]);
+
   const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
     accept: 'image/*',
     onFiles: files => setAddFiles(files),

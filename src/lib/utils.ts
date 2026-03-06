@@ -138,6 +138,9 @@ export const compressImage = async (
   file: File,
   options: { maxSizeKB?: number; maxWidth?: number } = {}
 ): Promise<File> => {
+  if (file.type === 'image/gif') {
+    return file;
+  }
   const { maxSizeKB = 500, maxWidth = 800 } = options;
 
   return new Promise((resolve, reject) => {

@@ -156,11 +156,6 @@ export default function Sidebar() {
       href: '/main/students',
     },
     {
-      name: 'boards',
-      href: '/main/boards',
-      icon: <SquareKanban className="w-5 h-5" />,
-    },
-    {
       name: 'calendar',
       href: '/main/calendar',
       icon: <Calendar className="w-5 h-5" />,

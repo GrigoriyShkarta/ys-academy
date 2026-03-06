@@ -7,7 +7,7 @@ import { compressImage } from '@/lib/utils';
 export const uploadPhoto = async (form: ContentFormValues) => {
   const formData = new FormData();
   let finalFile: File | string = form.content;
-  if (form.content instanceof File) {
+  if (form.content instanceof File && form.content.type !== 'image/gif') {
     try {
       finalFile = await compressImage(form.content, {
         maxSizeKB: 500,
