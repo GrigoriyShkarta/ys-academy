@@ -29,7 +29,17 @@ export const useDropzone = ({
     if (fileList.length === 0) return;
 
     const filtered = accept
-      ? fileList.filter(f => accept.some(type => f.type.startsWith(type)))
+      ? fileList.filter(f =>
+          accept.some(type => {
+            if (type.endsWith('*')) {
+              return f.type.startsWith(type.replace('*', ''));
+            }
+            if (type.startsWith('.')) {
+              return f.name.toLowerCase().endsWith(type.toLowerCase());
+            }
+            return f.type === type || f.type.startsWith(type);
+          })
+        )
       : fileList;
 
     if (filtered.length === 0) {

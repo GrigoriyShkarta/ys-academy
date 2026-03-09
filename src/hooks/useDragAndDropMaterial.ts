@@ -7,12 +7,18 @@ type Options = {
   accept?: string | string[]; // например 'audio', 'image/*', 'image/jpeg' или ['image/*', 'audio/*']
 };
 
-function matchesAccept(fileType: string, acceptEntry: string): boolean {
+function matchesAccept(file: File, acceptEntry: string): boolean {
   if (!acceptEntry) return true;
-  const a = acceptEntry.trim();
+  const a = acceptEntry.trim().toLowerCase();
+  const fileType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+
   if (a.endsWith('/*')) {
-    const prefix = a.split('/')[0];
+    const prefix = a.replace('/*', '');
     return fileType.startsWith(prefix + '/');
+  }
+  if (a.startsWith('.')) {
+    return fileName.endsWith(a);
   }
   if (a.includes('/')) {
     return fileType === a;
@@ -48,7 +54,7 @@ export default function useDragAndDropMaterial(options?: Options) {
 
       const accepts = Array.isArray(accept) ? accept : [accept];
       const filesArray = Array.from(filesList).filter(f =>
-        accepts.some(a => matchesAccept(f.type, a))
+        accepts.some(a => matchesAccept(f, a))
       );
       if (filesArray.length === 0) return;
 
