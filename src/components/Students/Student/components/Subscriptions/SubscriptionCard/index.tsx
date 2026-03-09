@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { Card } from '@/components/ui/card';
+import { useTranslations } from 'next-intl';
 import { StudentSubscription } from '@/components/Students/interface';
 import SubscriptionButtons from '@/components/Students/Student/components/Subscriptions/SubscriptionCard/SubscriptionButtons';
 import { useUser } from '@/providers/UserContext';
@@ -62,6 +63,7 @@ export default function SubscriptionCard({
   isLoadingChangeLessonDate,
 }: Props) {
   const { user } = useUser();
+  const t = useTranslations('Students');
   const [showMore, setShowMore] = useState<number[]>([]);
 
   const handleClickShowMore = (idx: number) => {
@@ -127,6 +129,16 @@ export default function SubscriptionCard({
                 isLoadingChangeLessonDate={isLoadingChangeLessonDate}
                 currentLocale={currentLocale}
               />
+            ))}
+            {Array.from({
+              length: Math.max(0, (subscription.subscription.lessons_count || 0) - subscription.lessons.length),
+            }).map((_, i) => (
+              <div
+                key={`empty-${i}`}
+                className="flex flex-col gap-1 p-2 rounded-[8px] border border-dashed text-muted-foreground opacity-60 w-[150px] min-h-[100px] justify-center items-center text-center"
+              >
+                <p className="text-xs font-medium">{t('date_not_scheduled')}</p>
+              </div>
             ))}
           </div>
         </>

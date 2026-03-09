@@ -138,6 +138,7 @@
     "friday": "П’ятниця",
     "saturday": "Субота",
     "sunday": "Неділя",
+    "date_not_scheduled": "Дата не запланована",
 
     "validation": {
       "required_field": "Обов’язкове поле",

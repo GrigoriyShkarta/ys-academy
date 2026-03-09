@@ -136,7 +136,8 @@
     "thursday": "Thursday",
     "friday": "Friday",
     "saturday": "Saturday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "date_not_scheduled": "Date not scheduled"
   },
 
   "Materials": {

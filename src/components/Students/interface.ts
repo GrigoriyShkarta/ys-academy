@@ -71,6 +71,7 @@ export interface StudentSubscription {
     id: number;
     title: string;
     price: number;
+    lessons_count: number;
   };
   lessons: StudentSubscriptionLesson[];
 }
