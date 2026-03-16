@@ -170,7 +170,7 @@ export default function PhotoModal({
                 values={photoFiles}
                 onChangeMany={files => appendFiles(files)}
                 dragLabel={t('dragOrClick')}
-                accept={['image/*']}
+                accept={['image/jpeg', 'image/png', 'image/gif', 'image/*']}
                 label={t('jpeg_or_png')}
                 maxFiles={9}
                 disabled={photoFiles?.length >= 9}

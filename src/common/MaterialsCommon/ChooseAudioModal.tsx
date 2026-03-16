@@ -32,7 +32,7 @@ export default function ChooseAudioModal({ open, closeModal, handleAdd }: Props)
   const [categoryList, setCategoryList] = useState<Category[] | undefined>([]);
   const [lessonsList, setLessonsList] = useState<Lesson[] | undefined>([]);
   const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
-    accept: ['audio/*'],
+    accept: ['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/*'],
     onFiles: files => setAddFiles(files),
   });
 

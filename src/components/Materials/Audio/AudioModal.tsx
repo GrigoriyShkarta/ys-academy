@@ -172,7 +172,7 @@ export default function AudioModal({
                 onChangeMany={files => appendFiles(files)}
                 maxFiles={9}
                 dragLabel={t('dragOrClick')}
-                accept={['audio/', 'audio/*']}
+                accept={['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/*']}
                 label={t('mp3_or_wav')}
                 disabled={audioFiles?.length >= 9}
               />

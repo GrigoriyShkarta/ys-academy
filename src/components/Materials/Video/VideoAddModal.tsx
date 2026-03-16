@@ -250,7 +250,7 @@ export default function VideoAddModal({
 
             <Dropzone
               multiple
-              accept={['video/*']}
+              accept={['video/mp4', 'video/webm', 'video/ogg', 'video/*']}
               label={t('video_file')}
               dragLabel={t('dragOrClick')}
               maxFiles={MAX_FILES}

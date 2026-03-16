@@ -38,7 +38,7 @@ export default function ChoosePhotoModal({ open, closeModal, handleAdd }: Props)
   }, [open]);
 
   const { dragActive, onDragOver, onDragLeave, onDrop } = useDragAndDropMaterial({
-    accept: 'image/*',
+    accept: ['image/jpeg', 'image/png', 'image/gif', 'image/*'],
     onFiles: files => setAddFiles(files),
   });
 
